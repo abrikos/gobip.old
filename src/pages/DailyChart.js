@@ -9,8 +9,8 @@ export default function DailyChart(props) {
     const [coin, setCoin] = useState('BIP')
 
     function init(){
-        console.log(coin)
-        props.store.api(`/daily/${coin}/${days}`)            .then(setData)
+        props.store.api(`/daily/${coin}/${days}`).then(setData)
+        console.log(coins)
         props.store.api(`/coins`)            .then(setCoins)
     }
 
@@ -57,8 +57,6 @@ export default function DailyChart(props) {
             }
         }]
     };
-
-    console.log(options.series)
 
     function changeCoin(e){
         setCoin(e.target.value);
