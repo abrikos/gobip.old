@@ -1,0 +1,30 @@
+@import "src/themes/params"
+body
+  a
+    color: $color1
+.theme-main
+  margin: auto
+  background-color: white
+  @media screen and (min-width: $width-main)
+    width: $width-main
+  @media screen and (max-width: $width-main)
+    width: 100%
+  .header
+    font-weight: bold
+    text-align: center
+    background-color: $color1
+    //background-image: url("wallpapper.jpg")
+    //text-shadow: 10px 10px 20px white, 0 0 1em white
+    //-webkit-text-stroke-color: black
+    //-webkit-text-stroke-width: 1px
+    color: white
+  footer
+    padding: 20px
+    background-color: #3c3c3c
+    div
+      display: inline
+      a
+        margin: 10px
+        color: white
+    img
+      max-height: 50px

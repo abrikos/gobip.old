@@ -1,0 +1,248 @@
+[
+  {
+    "label": "Главная",
+    "path": "/",
+    "menu": true
+  },
+  {
+    "label": "Новости",
+    "path": "/news",
+    "menu": true
+  },
+  {
+    "label": "Структура",
+    "items": [
+      {
+        "label": "Аппарат",
+        "path": "/apparatus"
+      },
+      {
+        "label": "Группа по подготовке научных журналов",
+        "path": "/journal"
+      },
+      {
+        "label": "Западно-Якутский научный центр АН РС (Я)",
+        "path": "/division/5e80f5ba7549ce5472a10ddc/Zapadno-Yakutskii-nauchnii-tsentr-aN-RS--Ya-"
+      },
+      {
+        "label": "Научно-образовательный центр АН РС(Я)",
+        "path": "/division/5e80f5ba7549ce5472a10dde/Nauchno-obrazovatelnii-tsentr-aN-RS-Ya-"
+      },
+      {
+        "label": "Научный экспертно-аналитический центр АН РС(Я)",
+        "path": "/division/5e80f5ba7549ce5472a10de0/Nauchnii-ekspertno-analiticheskii-tsentr-aN-RS-Ya-"
+      },
+      {
+        "label": "Отдел изучения мамонтовой фауны АН РС(Я)",
+        "path": "/division/5e80f5ba7549ce5472a10de2/Otdel-izucheniya-mamontovoi-fauni-aN-RS-Ya-"
+      },
+      {
+        "label": "Отдел энциклопедистики АН РС(Я)",
+        "path": "/division/5e80f5ba7549ce5472a10de4/Otdel-entsiklopedistiki-aN-RS-Ya-"
+      },
+      {
+        "label": "Отдел этносоциальных и этноэкономических исследований геосистем АН РС(Я)",
+        "path": "/division/5e80f5ba7549ce5472a10de6/Otdel-etnosotsialnih-i-etnoekonomicheskih-issledovanii-geosistem-aN-RS-Ya-"
+      },
+      {
+        "label": "Центр интеллектуальной собственности РС(Я)",
+        "path": "/division/5e80f5ba7549ce5472a10de8/Tsentr-intellektualnoi-sobstvennosti-RS-Ya-"
+      },
+      {
+        "label": "Южно-Якутский научный центр АН РС (Я)",
+        "path": "/division/5e80f5ba7549ce5472a10dea/Yuzhno-Yakutskii-nauchnii-tsentr-aN-RS--Ya-"
+      },
+      {
+        "label": "Административно-хозяйственный отдел",
+        "path": "/division/5e80f5ba7549ce5472a10dec/administrativno-hozyaistvennii-otdel"
+      }
+    ],
+    "menu": true
+  },
+  {
+    "label": "Ученые советы",
+    "items": [
+      {
+        "label": "Ученый совет Президиума АН РС(Я)",
+        "path": "/presidium/council"
+      },
+      {
+        "label": "------"
+      },
+      {
+        "label": "Объединенные ученые советы",
+        "path": "/council-about"
+      },
+      {
+        "label": "ОУС по гуманитарным наукам АН РС(Я)",
+        "path": "/council/5e816b9bd23a153b6e11e0f0/OUS-po-gumanitarnim-naukam-aN-RS-Ya-"
+      },
+      {
+        "label": "ОУС по медико-биологическим и химическим наукам АН РС(Я)",
+        "path": "/council/5e816b9bd23a153b6e11e105/OUS-po-mediko-biologicheskim-i-himicheskim-naukam-aN-RS-Ya-"
+      },
+      {
+        "label": "ОУС по наукам о Земле АН РС(Я)",
+        "path": "/council/5e816b9bd23a153b6e11e11a/OUS-po-naukam-o-Zemle-aN-RS-Ya-"
+      },
+      {
+        "label": "ОУС по сельскохозяйственным наукам АН РС(Я)",
+        "path": "/council/5e816b9bd23a153b6e11e131/OUS-po-selskohozyaistvennim-naukam-aN-RS-Ya-"
+      },
+      {
+        "label": "ОУС по физико-техническим наукам АН РС(Я)",
+        "path": "/council/5e816b9cd23a153b6e11e147/OUS-po-fiziko-tehnicheskim-naukam-aN-RS-Ya-"
+      }
+    ],
+    "menu": true
+  },
+  {
+    "label": "Члены академии  АН РС(Я)",
+    "menu": true,
+    "items": [
+      {
+        "label": "Действительные члены АН РС(Я)",
+        "path": "/people/0/members"
+      },
+      {
+        "label": "Почетные члены АН РС(Я)",
+        "path": "/people/1/members"
+      },
+      {
+        "label": "Иностранные члены АН РС(Я)",
+        "path": "/people/2/members"
+      }
+    ]
+  },
+  {
+    "label": "Президиум",
+    "menu": true,
+    "items": [
+      {
+        "label": "Руководство",
+        "path": "/people/supervisors/all"
+      },
+      {
+        "label": "И.о. Президента",
+        "path": "/presidium/president",
+        "className": "level2"
+      },
+      {
+        "label": "Вице-президенты",
+        "path": "/presidium/vice",
+        "className": "level2"
+      },
+      {
+        "label": "Главный ученый секретарь",
+        "path": "/presidium/scsecretary",
+        "className": "level2"
+      },
+      {
+        "label": "Секретариат",
+        "path": "/division/5e80f5ba7549ce5472a10e13/secretariat"
+      },
+      {
+        "label": "Документы",
+        "path": "/documents/presidium"
+      }
+    ]
+  },
+  {
+    "label": "Проекты",
+    "items": [
+      {
+        "label": "Издания",
+        "path": "/edition",
+        "menu": true
+      },
+      {
+        "label": "------"
+      },
+      {
+        "label": "История якутии",
+        "path": "/project/sakha-history"
+      },
+      {
+        "label": "История якутии. Том 1",
+        "path": "/project/sakha-history/1"
+      },
+      {
+        "label": "История якутии. Том 2",
+        "path": "/project/sakha-history/2"
+      },
+      {
+        "label": "История якутии. Том 3",
+        "path": "/project/sakha-history/3"
+      },
+      {
+        "label": "------"
+      },
+      {
+        "label": "Переработка мусора",
+        "path": "/project/recycle"
+      },
+      {
+        "label": "------"
+      },
+      {
+        "label": "Компилятор FORTRAN",
+        "path": "/fortran"
+      }
+    ],
+    "menu": true
+  },
+  {
+    "label": "Информация",
+    "items": [
+      {
+        "label": "Выборы",
+        "path": "/election",
+        "className": "text-danger"
+      },
+      {
+        "label": "Об Академии",
+        "path": "/about"
+      },
+      {
+        "label": "Веб-ресурсы академии",
+        "path": "/web-resources"
+      },
+      {
+        "label": "Научные учереждения",
+        "path": "/science-org"
+      },
+      {
+        "label": "Документы",
+        "path": "/documents/all"
+      },
+      {
+        "label": "Партнёры",
+        "path": "/partners"
+      },
+      {
+        "label": "СМИ о нас",
+        "path": "/mass-media"
+      },
+      {
+        "label": "О Республике",
+        "path": "/about-republic"
+      },
+      {
+        "label": "Правительство Республики Саха (Якутия)",
+        "path": "/gov"
+      },
+      {
+        "label": "------"
+      },
+      {
+        "label": "Контакты",
+        "path": "/contacts"
+      },
+      {
+        "label": "Телефонный справочник",
+        "path": "/phone-book"
+      }
+    ],
+    "menu": true
+  }
+]

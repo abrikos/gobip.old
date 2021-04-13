@@ -1,0 +1,30 @@
+.image-modal
+  .image-preview
+    max-width: 200px
+    max-height: 200px
+    cursor: pointer
+
+  .full-image-background
+    //display: none /* Hidden by default */
+    position: fixed
+    /* Stay in place */
+    z-index: 1
+    /* Sit on top */
+    top: 0
+    left: 0
+    width: 100%
+    /* Full width */
+    height: 100%
+    /* Full height */
+    overflow: auto
+    /* Enable scroll if needed */
+    background-color: rgb(0, 0, 0)
+    /* Fallback color */
+    background-color: rgba(0, 0, 0, 0.4)
+
+    img
+      border: 10px solid white
+      position: fixed
+      top: 50%
+      left: 50%
+      transform: translate(-50%, -50%)
