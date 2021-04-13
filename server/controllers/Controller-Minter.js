@@ -15,7 +15,7 @@ module.exports.controller = function (app) {
                     txFromBlock(res.data.latest_block_height)
                 }
             )
-            .catch(r => console.log(r))
+            .catch(r => console.log(r.response.status, r.response.statusText))
     }, null, true, 'America/Los_Angeles');
 
     function txFromBlock(bh) {
