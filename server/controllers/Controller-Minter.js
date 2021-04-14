@@ -64,47 +64,18 @@ module.exports.controller = function (app) {
     app.post('/api/coins', async (req, res) => {
         const aggregateCoin = [
             {$group: {_id: {coin: '$coin'}, coin: {$first: "$coin"}}},
-            {$match: {coin: {$ne: null}}}
+            {$match: {coin: {$ne: null}}},
+            {$sort: {coin: 1}},
             //{$addFields: {coin: "$coin"}},
             //{$project: {coin: 1}}
         ];
         Mongoose.transaction.aggregate(aggregateCoin)
             .then(txs => {
+                console.log(txs)
                 res.send(txs)
             })
     });
 
-
-    const aggr = [
-        {
-            $group: {
-                _id: {
-                    month: {$month: "$date"},
-                    day: {$dayOfMonth: "$date"},
-                    year: {$year: "$date"},
-                    coin: "$coin"
-                },
-                first: {$min: "$date"},
-                values: {$sum: "$value"},
-                coin: {$first: "$coin"}
-
-            },
-
-        },
-        {$sort: {first: 1}},
-        {
-            $project: {
-                date: {$dateToString: {format: "%Y-%m-%d", date: "$first", timezone: "UTC"}},
-                values: {$round: [{$divide: ["$values", 1e18]}, 1]},
-                createdAt: 1,
-                coin: 1
-            }
-        },
-
-    ]
-    aggr.push({$limit: 1})
-    aggr.push({$match: {coin: 'BIP'}})
-    Mongoose.transaction.aggregate(aggr).then(console.log)
 }
 
 
