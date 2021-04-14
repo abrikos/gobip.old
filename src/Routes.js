@@ -7,11 +7,12 @@ import AdminIndex from "pages/admin/AdminIndex";
 import Login from "components/login/login";
 import Cabinet from "pages/cabinet/cabinet";
 import PostView from "pages/post/PostView";
+import UnboundCharts from "pages/UnboundCharts";
 
 export default function Routes(store) {
     const routes = {
         "/": () => <Home store={store}/>,
-        "/graphs": () => <PostList key={'news'} title="Новости" modelName="post" filter={{order: {createdAt: -1}}} store={store}/>,
+        "/unbound": () => <UnboundCharts store={store}/>,
         "/post/:id/:head": (params) => <PostView store={store} {...params}/>,
         "/login": () => <Login store={store}/>,
 

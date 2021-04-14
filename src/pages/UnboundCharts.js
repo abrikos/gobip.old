@@ -2,7 +2,7 @@ import {useEffect, useState} from "react";
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
-export default function DailyChart(props) {
+export default function UnboundCharts(props) {
     const [data, setData] = useState([])
     const [coins, setCoins] = useState([])
     const [days, setDays] = useState(30)

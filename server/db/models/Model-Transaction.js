@@ -13,7 +13,7 @@ const modelSchema = new Schema({
         //toMain: {type: Boolean, default: false},
         value: {type: Number},
         //chainId: {type: Number, required: true},
-        //date: {type: Number, required: true},
+        date: {type: Date},
         //data: {type: Object},
         //wallet: {type: mongoose.Schema.Types.ObjectId, ref: 'Wallet'},
     },
@@ -25,7 +25,7 @@ const modelSchema = new Schema({
         toJSON: {virtuals: true}
     });
 
-modelSchema.virtual('date')
+modelSchema.virtual('dateHuman')
     .get(function () {
         return moment(this.createdAt).format('YYYY-MM-DD HH:mm:ss')
     });

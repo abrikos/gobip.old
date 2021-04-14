@@ -1,10 +1,12 @@
 import React from 'react';
 import "./home.sass";
-import DailyChart from "pages/DailyChart";
+import UnboundCharts from "pages/UnboundCharts";
+import {A} from "hookrouter"
 
 export default function Home(props) {
     return <div className="home">
-        <DailyChart {...props}/>
+        <A href="/unbound">Unbound charts</A>
+
     </div>
 }
 

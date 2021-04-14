@@ -1,49 +1,18 @@
 import axios from "axios";
-//import {Minter, TX_TYPE} from "minter-js-sdk";
+import {Minter, TX_TYPE, decodeTx} from "minter-js-sdk";
+import MinterApi from "server/lib/MinterApi";
 import Mongoose from "server/db/Mongoose";
 
 const CronJob = require('cron').CronJob;
-let blockHeight = 0;
-
 
 module.exports.controller = function (app) {
-
     //1e-18
-    const jobs = new CronJob('* * * * * *', async function () {
-        axios.get('https://api.minter.one/v2/status')
-            .then(res => {
-                    txFromBlock(res.data.latest_block_height)
-                }
-            )
-            .catch(r => console.log(r.response.status, r.response.statusText))
-    }, null, true, 'America/Los_Angeles');
+    const jobs = new CronJob('*/2 * * * * *', async function () {
+        await MinterApi.getUnboundTxs(1);
 
-    function txFromBlock(bh) {
-        if (blockHeight !== bh) {
-            blockHeight = bh;
-            axios.get(`https://api.minter.one/v2/block/${bh}`)
-                .then(res => {
-                    //console.log(bh, res.data.result.transactions)
-                    for (const tx of res.data.transactions) {
+        }, null, true, 'America/Los_Angeles'
+    )
 
-                        if (tx.type * 1 === 8) {
-                            console.log(tx.data)
-                            tx.value = tx.data.value;
-                            tx.coin = tx.data.coin.symbol;
-
-                            Mongoose.transaction.create(tx)
-                                .then()
-                                .catch()
-                            //fs.writeFile("tx.log", JSON.stringify(tx),()=>{})
-                        }
-                    }
-                })
-                .catch(console.log)
-
-        }
-    }
-
-    //for(let i = 3273115; i< 3273127; i++){        txFromBlock(i)    }
 
     app.post('/api/tx/list/all', async (req, res) => {
         Mongoose.transaction.find()
@@ -53,20 +22,17 @@ module.exports.controller = function (app) {
             })
     });
 
-
-
-
     app.post('/api/daily/:coin/:limit', async (req, res) => {
         const aggregateDaily = [
             {
                 $group: {
                     _id: {
-                        month: {$month: "$createdAt"},
-                        day: {$dayOfMonth: "$createdAt"},
-                        year: {$year: "$createdAt"},
+                        month: {$month: "$date"},
+                        day: {$dayOfMonth: "$date"},
+                        year: {$year: "$date"},
                         coin: "$coin"
                     },
-                    first: {$min: "$createdAt"},
+                    first: {$min: "$date"},
                     values: {$sum: "$value"},
                     coin: {$first: "$coin"}
 
@@ -86,7 +52,7 @@ module.exports.controller = function (app) {
 
         ]
         aggregateDaily.push({$limit: req.params.limit * 1 || 30})
-        aggregateDaily.push({$match: {coin:req.params.coin}})
+        aggregateDaily.push({$match: {coin: req.params.coin}})
         Mongoose.transaction.aggregate(aggregateDaily)
             .then(txs => {
                 res.send(txs)
@@ -94,12 +60,11 @@ module.exports.controller = function (app) {
     });
 
 
-
-    //Mongoose.transaction.aggregate(aggregateCoin).then(console.log)
+//Mongoose.transaction.aggregate(aggregateCoin).then(console.log)
     app.post('/api/coins', async (req, res) => {
         const aggregateCoin = [
             {$group: {_id: {coin: '$coin'}, coin: {$first: "$coin"}}},
-            {$match:{coin:{$ne:null}}}
+            {$match: {coin: {$ne: null}}}
             //{$addFields: {coin: "$coin"}},
             //{$project: {coin: 1}}
         ];
@@ -114,12 +79,12 @@ module.exports.controller = function (app) {
         {
             $group: {
                 _id: {
-                    month: {$month: "$createdAt"},
-                    day: {$dayOfMonth: "$createdAt"},
-                    year: {$year: "$createdAt"},
+                    month: {$month: "$date"},
+                    day: {$dayOfMonth: "$date"},
+                    year: {$year: "$date"},
                     coin: "$coin"
                 },
-                first: {$min: "$createdAt"},
+                first: {$min: "$date"},
                 values: {$sum: "$value"},
                 coin: {$first: "$coin"}
 
@@ -138,7 +103,7 @@ module.exports.controller = function (app) {
 
     ]
     aggr.push({$limit: 1})
-    aggr.push({$match: {coin:'BIP'}})
+    aggr.push({$match: {coin: 'BIP'}})
     Mongoose.transaction.aggregate(aggr).then(console.log)
 }
 
