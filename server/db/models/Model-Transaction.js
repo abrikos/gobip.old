@@ -26,7 +26,7 @@ const modelSchema = new Schema({
 
 modelSchema.virtual('dateHuman')
     .get(function () {
-        return moment(this.createdAt).format('YYYY-MM-DD HH:mm:ss')
+        return moment(this.date).format('YYYY-MM-DD HH:mm:ss')
     });
 
 
