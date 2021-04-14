@@ -8,17 +8,17 @@ export default function UnboundCharts(props) {
     const [days, setDays] = useState(30)
     const [coin, setCoin] = useState('BIP')
 
-    function init(){
+    function init() {
         props.store.api(`/daily/${coin}/${days}`).then(setData)
-        console.log(coins)
-        props.store.api(`/coins`)            .then(setCoins)
+
     }
 
     useEffect(() => {
+        props.store.api(`/coins`).then(setCoins)
         init();
         const timer = setInterval(init, 10000)
         return () => clearInterval(timer);
-    }, [coin,days])
+    }, [coin, days])
 
 
     const options = {
@@ -26,7 +26,7 @@ export default function UnboundCharts(props) {
             type: 'column'
         },
         title: {
-            text: `Unbound  volumes in ${days} days`
+            text: `Unbound  volumes in ${days} days (${data.length > 0 && data.map(d => d.values).reduce((a, b) => a + b).toLocaleString()} ${coin})`
         },
         legend: {
             enabled: true
@@ -49,26 +49,31 @@ export default function UnboundCharts(props) {
             }
         },
         series: [{
-            name:`volume of ${coin}`,
-            color:'orange',
-            data: data.map(d=>d.values),
+            name: `volume of ${coin}`,
+            color: 'orange',
+            data: data.map(d => d.values),
             marker: {
                 enabled: true
             }
         }]
     };
 
-    function changeCoin(e){
+    function changeCoin(e) {
         setCoin(e.target.value);
     }
 
-    function changeDays(e){
-        setDays(e.target.value*1||30);
+    function changeDays(e) {
+        setDays(e.target.value * 1 || 30);
     }
 
-    return <div className="border bg-light  m-1">
-        Coin: <select value={coin} onChange={changeCoin}>{coins.map(c=><option value={c.coin} key={c.coin}>{c.coin}</option>)}</select>
-        Days: <input value={days} onChange={changeDays} type="number"/>
+    console.log(data)
+    return <div className="m-1">
+        {/*Coin: <select value={coin} onChange={changeCoin}>{coins.map(c=><option value={c.coin} key={c.coin}>{c.coin}</option>)}</select>*/}
+
+        {coins.map(c => <span onClick={() => setCoin(c.coin)} key={c.coin} className={`badge ${c.coin === coin ? '' : 'badge-info'} m-2 pointer`}>{c.coin}</span>)}
+        <hr/>
+
         <HighchartsReact highcharts={Highcharts} options={options}/>
+        {/*Days: <input value={days} onChange={changeDays} type="number"/>*/}
     </div>
 }

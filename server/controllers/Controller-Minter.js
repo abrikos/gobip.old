@@ -71,7 +71,6 @@ module.exports.controller = function (app) {
         ];
         Mongoose.transaction.aggregate(aggregateCoin)
             .then(txs => {
-                console.log(txs)
                 res.send(txs)
             })
     });
