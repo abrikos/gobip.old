@@ -1,4 +1,5 @@
 import transaction from "server/db/models/Model-Transaction";
+import ethereum from "server/db/models/Model-Eth";
 
 const mongoose = require("mongoose");
 require('dotenv').config();
@@ -27,7 +28,7 @@ const Mongoose = {
     isValidId: function (id) {
         return mongoose.Types.ObjectId.isValid(id)
     },
-    transaction
+    transaction, ethereum
 
 };
 export default Mongoose;

@@ -15,6 +15,7 @@
     "connect-mongo": "^3.2.0",
     "cookie-parser": "^1.4.5",
     "cron": "^1.8.2",
+    "csv-parse": "^4.15.3",
     "customize-cra": "^1.0.0",
     "dotenv": "^8.2.0",
     "dotenv-expand": "^5.1.0",
@@ -54,7 +55,8 @@
     "start": "BROWSER=none react-scripts start",
     "server": "NODE_PATH=. nodemon -r esm server/server.js",
     "build": "react-scripts build",
-    "init": "NODE_PATH=. node -r esm tools/initTxs.js",
+    "minter": "NODE_PATH=. node -r esm tools/minter-init.js",
+    "eth": "NODE_PATH=. node -r esm tools/eth-init.js",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "eslint": "eslint"
