@@ -18,7 +18,6 @@ export default {
             tx.date = bData.time
             try {
                 await Mongoose.transaction.create(tx)
-                console.log(tx.hash)
             }catch {
                 console.log('Double', tx.hash)
             }

@@ -1,6 +1,7 @@
 import {useEffect, useState} from "react";
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
+import PageContainer from "components/pager/pageContainer";
 
 export default function UnboundCharts(props) {
     const [data, setData] = useState([])
@@ -75,5 +76,7 @@ export default function UnboundCharts(props) {
 
         <HighchartsReact highcharts={Highcharts} options={options}/>
         {/*Days: <input value={days} onChange={changeDays} type="number"/>*/}
+
+        <PageContainer model={'transaction'} fields={['hash', 'value', 'coin']} link={`https`} {...props}/>
     </div>
 }

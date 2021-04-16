@@ -11,6 +11,7 @@
     "@testing-library/user-event": "^12.1.10",
     "axios": "^0.21.0",
     "bootstrap": "^4.5.3",
+    "brain.js": "^2.0.0-beta.2",
     "centrifuge": "^2.7.3",
     "connect-mongo": "^3.2.0",
     "cookie-parser": "^1.4.5",
@@ -55,8 +56,8 @@
     "start": "BROWSER=none react-scripts start",
     "server": "NODE_PATH=. nodemon -r esm server/server.js",
     "build": "react-scripts build",
-    "minter": "NODE_PATH=. node -r esm tools/minter-init.js",
-    "eth": "NODE_PATH=. node -r esm tools/eth-init.js",
+    "minter": "NODE_PATH=. nodemon -r esm tools/minter-init.js",
+    "eth": "NODE_PATH=. node -r esm neuro/ethereum.js",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "eslint": "eslint"

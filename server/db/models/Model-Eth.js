@@ -12,12 +12,8 @@ const modelSchema = new Schema({
         volCrypto: {type: Number},
         volUsd: {type: Number},
         trades: {type: Number},
-        kClose: {type: Number},
-        kVolCrypto: {type: Number},
-        kVolUsd: {type: Number},
-        kTrades: {type: Number},
-        date: {type: Date},
-
+        closeNext: {type: Number, default:0},
+        date: {type: Date, unique:true},
     },
     {
         toObject: {virtuals: true},

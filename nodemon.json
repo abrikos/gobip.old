@@ -6,7 +6,8 @@
     "server/controllers",
     "server/db",
     "server/bot",
-    "tools"
+    "tools",
+    "neuro"
   ],
   "ext": "js, css"
 }
