@@ -1,4 +1,5 @@
 import moment from "moment";
+
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const name = 'ethereum';
@@ -26,7 +27,6 @@ modelSchema.virtual('dateHuman')
     .get(function () {
         return moment(this.date).format('YYYY-MM-DD HH:mm:ss')
     });
-
 
 export default mongoose.model(name, modelSchema)
 

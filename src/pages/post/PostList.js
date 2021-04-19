@@ -2,7 +2,6 @@ import React, {useEffect, useState} from 'react';
 import Pager from "components/Pager";
 import Loader from "components/Loader";
 import "./post.sass"
-import DateFormat from "components/DateFormat";
 import {A} from "hookrouter"
 
 export default function PostLIst(props) {

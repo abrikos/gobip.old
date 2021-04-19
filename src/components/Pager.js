@@ -39,7 +39,7 @@ export default function Pager(props) {
         setPages(pgs)
     }
 
-    if (pages.length < 2) return <div></div>;
+    if (pages.length < 2) return <div>{JSON.stringify(pages)}</div>;
     return <div className="d-flex justify-content-center">
         <Pagination>
             {page >= paginationLength && <Pagination.Item key={0} onClick={() => setCurrentPage(0)}>

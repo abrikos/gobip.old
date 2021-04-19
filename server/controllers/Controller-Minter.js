@@ -1,5 +1,3 @@
-import axios from "axios";
-import {Minter, TX_TYPE, decodeTx} from "minter-js-sdk";
 import MinterApi from "server/lib/MinterApi";
 import Mongoose from "server/db/Mongoose";
 
@@ -23,6 +21,16 @@ module.exports.controller = function (app) {
     });
 
     app.post('/api/daily/:coin/:limit', async (req, res) => {
+        daily(req.params.limit * 1 || 30, {coin: req.params.coin})
+            .then(txs => {
+                res.send(txs)
+            })
+    });
+
+    //Mongoose.transaction.findOne().sort({date:-1}).then(console.log)
+
+
+    async function daily(limit,match){
         const aggregateDaily = [
             {
                 $group: {
@@ -32,32 +40,29 @@ module.exports.controller = function (app) {
                         year: {$year: "$date"},
                         coin: "$coin"
                     },
-                    first: {$min: "$date"},
+                    date: {$min: "$date"},
                     values: {$sum: "$value"},
                     coin: {$first: "$coin"}
 
                 },
 
             },
+
             {$addFields: {coin: "$coin"}},
-            {$sort: {first: 1}},
+            {$sort: {date: 1, _id:1}},
             {
                 $project: {
-                    date: {$dateToString: {format: "%Y-%m-%d", date: "$first", timezone: "UTC"}},
+                    date: {$dateToString: {format: "%Y-%m-%d", date: "$date", timezone: "UTC"}},
                     values: {$round: [{$divide: ["$values", 1e18]}, 1]},
-                    createdAt: 1,
                     coin: 1
                 }
             },
 
         ]
-        aggregateDaily.push({$limit: req.params.limit * 1 || 30})
-        aggregateDaily.push({$match: {coin: req.params.coin}})
-        Mongoose.transaction.aggregate(aggregateDaily)
-            .then(txs => {
-                res.send(txs)
-            })
-    });
+        aggregateDaily.push({$match:match})
+        return Mongoose.transaction.aggregate(aggregateDaily).limit(limit)
+    }
+
 
 
 //Mongoose.transaction.aggregate(aggregateCoin).then(console.log)

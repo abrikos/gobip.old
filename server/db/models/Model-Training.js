@@ -1,4 +1,5 @@
 import moment from "moment";
+
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const name = 'training';

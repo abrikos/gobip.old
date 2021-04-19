@@ -17,7 +17,7 @@ export default function LoginFormGoogle(props) {
         {process.env.REACT_APP_GOOGLE_ID && <GoogleLogin
             clientId={process.env.REACT_APP_GOOGLE_ID}
             render={renderProps => (
-                <a href={'#'} onClick={renderProps.onClick} disabled={renderProps.disabled}>Вход</a>
+                <span className="pointer" onClick={renderProps.onClick} disabled={renderProps.disabled}>Вход</span>
             )}
             buttonText="Вход"
             onSuccess={responseGoogle}

@@ -1,4 +1,5 @@
 import moment from "moment";
+
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const name = 'transaction';
@@ -27,6 +28,11 @@ const modelSchema = new Schema({
 modelSchema.virtual('dateHuman')
     .get(function () {
         return moment(this.date).format('YYYY-MM-DD HH:mm:ss')
+    });
+
+modelSchema.virtual('valueHuman')
+    .get(function () {
+        return this.value * 1e-18;
     });
 
 

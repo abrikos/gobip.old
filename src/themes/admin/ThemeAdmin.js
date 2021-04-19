@@ -2,7 +2,7 @@ import React from "react";
 import MenuTop from "themes/main/MenuTop";
 import "./theme-admin.sass"
 
-export default function (props) {
+export default function ThemeAdmin(props) {
     return <div className="container-fluid bg-light">
         <MenuTop store={props.store}/>
         {/*<div className="m-auto bg-light p-3">

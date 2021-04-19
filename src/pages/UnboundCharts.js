@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-import PageContainer from "components/pager/pageContainer";
+import TransactionsList from "components/pager/TransactionsList";
 
 export default function UnboundCharts(props) {
     const [data, setData] = useState([])
@@ -59,15 +59,6 @@ export default function UnboundCharts(props) {
         }]
     };
 
-    function changeCoin(e) {
-        setCoin(e.target.value);
-    }
-
-    function changeDays(e) {
-        setDays(e.target.value * 1 || 30);
-    }
-
-    console.log(data)
     return <div className="m-1">
         {/*Coin: <select value={coin} onChange={changeCoin}>{coins.map(c=><option value={c.coin} key={c.coin}>{c.coin}</option>)}</select>*/}
 
@@ -77,6 +68,6 @@ export default function UnboundCharts(props) {
         <HighchartsReact highcharts={Highcharts} options={options}/>
         {/*Days: <input value={days} onChange={changeDays} type="number"/>*/}
 
-        <PageContainer model={'transaction'} fields={['hash', 'value', 'coin']} link={`https`} {...props}/>
+        <TransactionsList model={'transaction'} fields={['hash', 'value', 'coin']} link={`https`} {...props}/>
     </div>
 }

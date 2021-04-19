@@ -1,6 +1,5 @@
 import React from "react";
 import Home from "pages/home/home";
-import PostList from "pages/post/PostList";
 import Logout from "components/login/Logout";
 import ErrorPage from "components/service/ErrorPage";
 import AdminIndex from "pages/admin/AdminIndex";
@@ -15,9 +14,6 @@ export default function Routes(store) {
         "/unbound": () => <UnboundCharts store={store}/>,
         "/post/:id/:head": (params) => <PostView store={store} {...params}/>,
         "/login": () => <Login store={store}/>,
-
-        //"/persons/:type": (params) => <PersonListLarge {...params} store={store}/>,
-
     };
 
     const routesLogged = {

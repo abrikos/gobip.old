@@ -4,7 +4,6 @@ import {A} from "hookrouter"
 import {Navbar} from "react-bootstrap";
 import Nav from "react-bootstrap/Nav";
 import NavDropdown from "react-bootstrap/NavDropdown";
-import LoginFormGoogle from "components/login/LoginFormGoogle";
 
 export default function MenuTop(props) {
     const items = [

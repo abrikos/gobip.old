@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import {Dropdown} from "react-bootstrap";
 import {A} from "hookrouter"
 
-export default function (props) {
+export default function InputHasMany(props) {
     const [value, setValue] = useState(props.value)
     //const [selected, setSelected] = useState([])
     const [dropdownOpen, setDropdownOpen] = useState(false);

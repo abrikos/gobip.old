@@ -128,7 +128,10 @@ module.exports.controller = function (app) {
     app.post('/api/:model/list', (req, res) => {
         const filter = bodyToWhere(req.body);
         list(req, filter, false)
-            .then(d => res.send(d))
+            .then(d => {
+                console.log(d)
+                res.send(d)
+            })
     });
 
     app.post('/api/:model/method/:name', (req, res) => {

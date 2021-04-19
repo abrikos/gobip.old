@@ -1,7 +1,7 @@
 import React, {useRef, useState} from "react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCopy} from "@fortawesome/free-solid-svg-icons";
-import {Overlay, Popover, PopoverHeader} from "react-bootstrap";
+import {Overlay} from "react-bootstrap";
 import md5 from 'md5';
 
 export default function CopyButton(props) {

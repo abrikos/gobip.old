@@ -1,10 +1,10 @@
-import DatePicker, { registerLocale, setDefaultLocale } from "react-datepicker";
+import DatePicker, {registerLocale} from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import React, {useState} from "react";
-//import ru from 'date-fns/locale/ru';
+import ru from 'date-fns/locale/ru';
 import moment from "moment";
-import {Button} from "react-bootstrap";
-//registerLocale('ru', ru)
+
+registerLocale('ru', ru)
 
 export default function InputDatePicker(props){
     const [date, setDate] = useState(props.value)
