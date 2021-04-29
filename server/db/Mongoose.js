@@ -1,6 +1,7 @@
 import transaction from "server/db/models/Model-Transaction";
 import ethereum from "server/db/models/Model-Eth";
 import training from "server/db/models/Model-Training";
+import mixer from "server/db/models/Model-Mixer";
 
 const mongoose = require("mongoose");
 require('dotenv').config();
@@ -29,7 +30,7 @@ const Mongoose = {
     isValidId: function (id) {
         return mongoose.Types.ObjectId.isValid(id)
     },
-    transaction, ethereum, training
+    transaction, ethereum, training, mixer
 
 };
 export default Mongoose;
