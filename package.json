@@ -30,7 +30,6 @@
     "hookrouter": "^1.2.3",
     "md5": "^2.3.0",
     "minter-js-sdk": "^0.38.0",
-    "minterjs-wallet": "^6.1.0",
     "moment": "^2.29.1",
     "mongoose": "^5.10.11",
     "node-sass": "^4.14.1",
