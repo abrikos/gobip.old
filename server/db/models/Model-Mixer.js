@@ -7,12 +7,13 @@ const name = 'mixer';
 
 const modelSchema = new Schema({
         address: {type: String, unique:true},
-        mnemonic: {type: String},
-        target: {type: String},
-        txIn: {type: String, unique:true},
-        txOut: {type: String, unique:true},
+        seedPhrase: {type: String},
+        to: {type: String},
+        txIn: {type: String},
+        txOut: {type: String},
         value: {type: Number, default:0},
-        empty: {type: Boolean, default:true},
+        owned: {type: Boolean},
+        sending: {type: Boolean},
         //chainId: {type: Number, required: true},
         date: {type: Date},
         //data: {type: Object},
