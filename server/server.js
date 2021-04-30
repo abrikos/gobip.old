@@ -1,4 +1,4 @@
-'use strict';
+
 require('dotenv').config();
 //const mailer = require('express-mailer');
 const fs = require('fs');
@@ -6,8 +6,8 @@ const session = require('express-session');
 const express = require('express');
 const http = require('http');
 const passport = require('passport');
-const MongoStore = require('connect-mongo')(session);
-const mongoose = require("mongoose");
+//const MongoStore = require('connect-mongo')(session);
+//const mongoose = require("mongoose");
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const fileUpload = require('express-fileupload');
@@ -21,7 +21,7 @@ const sessionParser = session({
     saveUninitialized: false,
     secret: '$eCuRiTy',
     resave: false,
-    store: new MongoStore({mongooseConnection: mongoose.connection})
+    //store: new MongoStore({mongooseConnection: mongoose.connection})
 });
 
 app.set('view engine', 'pug');
