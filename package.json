@@ -26,7 +26,6 @@
     "form-to-object": "^6.0.0",
     "highcharts": "^9.0.1",
     "highcharts-react-official": "^3.0.0",
-    "hookrouter": "^1.2.3",
     "md5": "^2.3.0",
     "minter-js-sdk": "^0.38.0",
     "minterjs-wallet": "^6.1.0",
