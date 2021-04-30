@@ -1,9 +1,16 @@
 import axios from "axios";
 import Mongoose from "server/db/Mongoose";
+import {Minter, TX_TYPE} from "minter-js-sdk";
+import {generateWallet} from 'minterjs-wallet';
+
+const urlMain = 'https://api.minter.one';
+const urlTest = 'https://node-api.testnet.minter.network';
+const URL = urlMain;
+const minter = new Minter({apiType: 'node', baseURL: `${URL}/v2/`});
 
 export default {
     async get(action,query){
-        const url = `https://api.minter.one/v2/${action}?${query}`;
+        const url = `${URL}/v2/${action}?${query}`;
         const res = await axios.get(url)
         return res.data;
     },
@@ -26,5 +33,39 @@ export default {
             }
 
         }
+    },
+
+    async newMixerWallet(target){
+        const wallet = generateWallet();
+        const mixer = {
+            address: wallet.getAddressString(),
+            mnemonic: wallet.getMnemonic(),
+            target,
+        }
+        const check = await this.get(`/address/${mixer.address}`)
+        if(check.balance.length){
+            mixer.empty = false;
+            await Mongoose.mixer.create(mixer)
+            return this.newMixerWallet(target)
+        }
+        await Mongoose.mixer.create(mixer)
+        console.log(check)
+    },
+
+    async getMixerTxs(){
+        const res = await this.get(`transactions`, `query=tags.tx.type='01'&page=1`)
+        for (const tx of res.transactions) {
+            const wallet = await Mongoose.mixer.findOne({address:tx.data.to});
+            if(!wallet) continue;
+            const top2wallets = await this.getMixerTopWallets();
+            const bData = await this.get(`block/${tx.height}`);
+
+
+        }
+    },
+
+    async getMixerTopWallets(){
+        return Mongoose.mixer.find({empty:true}).sort({value:-1}).limit(2)
     }
+
 }

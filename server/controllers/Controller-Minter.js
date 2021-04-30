@@ -11,6 +11,8 @@ module.exports.controller = function (app) {
         }, null, true, 'America/Los_Angeles'
     )
 
+    //MinterApi.newMixerWallet('Mx470a6aa7110e799cf3978930fef25569d162babc');
+    Mongoose.mixer.find().then(console.log)
 
     app.post('/api/tx/list/all', async (req, res) => {
         Mongoose.transaction.find()
