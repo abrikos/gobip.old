@@ -12,6 +12,7 @@ module.exports.controller = function (app) {
     )
 
     //MinterApi.newMixerWallet('Mx470a6aa7110e799cf3978930fef25569d162babc');
+    MinterApi.getMixerTxs().then(console.log)
     Mongoose.mixer.find().then(console.log)
 
     app.post('/api/tx/list/all', async (req, res) => {

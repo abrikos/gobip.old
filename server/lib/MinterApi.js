@@ -49,7 +49,6 @@ export default {
             return this.newMixerWallet(target)
         }
         await Mongoose.mixer.create(mixer)
-        console.log(check)
     },
 
     async getMixerTxs(){
