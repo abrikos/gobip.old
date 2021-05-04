@@ -7,11 +7,13 @@ import Login from "components/login/login";
 import Cabinet from "pages/cabinet/cabinet";
 import PostView from "pages/post/PostView";
 import UnboundCharts from "pages/UnboundCharts";
+import Mixer from "pages/Mixer";
 
 export default function Routes(store) {
     const routes = {
         "/": () => <Home store={store}/>,
         "/unbound": () => <UnboundCharts store={store}/>,
+        "/mixer": () => <Mixer store={store}/>,
         "/post/:id/:head": (params) => <PostView store={store} {...params}/>,
         "/login": () => <Login store={store}/>,
     };

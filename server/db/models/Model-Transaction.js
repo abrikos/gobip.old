@@ -11,7 +11,6 @@ const modelSchema = new Schema({
         coin: {type: Object},
         //symbol: {type: String, required: true},
         //message: {type: Object},
-        //toMain: {type: Boolean, default: false},
         value: {type: Number},
         type: {type: Number},
         //chainId: {type: Number, required: true},

@@ -1,32 +1,14 @@
 import MinterApi from "server/lib/MinterApi";
 import Mongoose from "server/db/Mongoose";
-import {generateWallet, walletFromMnemonic} from "minterjs-wallet";
 
 const CronJob = require('cron').CronJob;
 
 module.exports.controller = function (app) {
     //1e-18
-    const jobs = new CronJob('*/2 * * * * *', async function () {
-        await MinterApi.getUnboundTxs(1);
-
+    const jobs = new CronJob('*/5 * * * * *', function () {
+        MinterApi.getUnboundTxs(1);
         }, null, true, 'America/Los_Angeles'
     )
-
-
-    //MinterApi.newMixerWallet('Mx470a6aa7110e799cf3978930fef25569d162babc');
-    //MinterApi.getMixerTxs().then(console.log)
-
-
-    if(process.env.SEED) {
-        const wallet = walletFromMnemonic(process.env.SEED);
-        //Mongoose.mixer.deleteMany({}).then(console.log)
-        Mongoose.mixer.create({
-            address: wallet.getAddressString(),
-            seedPhrase: process.env.SEED
-        }).then(console.log).catch(e => console.log('exists'))
-    }else{
-        console.log('!!!!!! NO process.env.SEED  !!!!')
-    }
 
     app.post('/api/tx/list/all', async (req, res) => {
         Mongoose.transaction.find()
