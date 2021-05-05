@@ -6,22 +6,21 @@ const session = require('express-session');
 const express = require('express');
 const http = require('http');
 const passport = require('passport');
-//const MongoStore = require('connect-mongo')(session);
-//const mongoose = require("mongoose");
+const MongoStore = require('connect-mongo');
+const mongoose = require("mongoose");
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const fileUpload = require('express-fileupload');
 const app = express();
 const bot = require('server/bot');
 const CronJob = require('cron').CronJob;
-
 //mailer.extend(app, JSON.parse(process.env.mailer));
 
 const sessionParser = session({
     saveUninitialized: false,
     secret: '$eCuRiTy',
     resave: false,
-    //store: new MongoStore({mongooseConnection: mongoose.connection})
+    store:  MongoStore.create({mongoUrl: mongoose.connection._connectionString})
 });
 
 app.set('view engine', 'pug');

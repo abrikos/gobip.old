@@ -30,6 +30,11 @@ const obj = {
         return v.bip_value / this.divider;
     },
 
+    async getCommission() {
+        const v = await this.get(`/price_commissions`)
+        return v.send / this.divider;
+    },
+
     async updateBalances() {
         const wallets = await Mongoose.wallet.find();
         for (const wallet of wallets) {
@@ -49,12 +54,13 @@ const obj = {
     },
 
     async getBlockTxs() {
-        let current = await Mongoose.status.findOne().sort({latest_block_height: -1})
+
+        let current = await Mongoose.status.findOne().sort({createdAt: -1})
         const last = await this.get(`/status`)
         if (!last) {
             current = await Mongoose.status.create(last)
         }
-        for (let block = current.latest_block_height; block <= last.latest_block_height * 1; block++) {
+        for (let block = current.latest_block_height * 1; block <= last.latest_block_height * 1; block++) {
             const res = await this.get(`block/${block}`)
             for (const tx of res.transactions) {
                 const found = await Mongoose.transaction.findOne({hash: tx.hash})
@@ -88,32 +94,69 @@ const obj = {
     },
 
     async checkTransactionForMixer(tx) {
-        const wallet = await Mongoose.wallet.findOne({to: {$ne: null},address: tx.data.to});
+        const wallet = await Mongoose.wallet.findOne({to: {$ne: null}, address: tx.data.to});
         if (!wallet) return;
         const transaction = await Mongoose.transaction.createNew(tx);
         wallet.balance = await this.walletBalance(wallet.address);
         console.log('TX for wallet', tx.hash, wallet.address, wallet.balance);
         wallet.save();
         const params = await this.prepareTxParamsForPayments(wallet, transaction);
+        const refunds = await this.shareProfit();
         for (const p of params) {
             const np = await Mongoose.payment.create(p)
-            console.log('PAYMENT Created', np.value)
+            if (p.from.user) {
+                //return of spent funds from user's wallets
+                refunds.push({to: p.from.address, value: p.list[0].value})
+                console.log('DEBT REPAYMENT', {to: p.from.address, value: p.list[0].value})
+            }
+            //console.log('PAYMENT Created', np.list)
         }
+        await Mongoose.payment.create({from: wallet, list: refunds});
+    },
+
+    async shareProfit() {
+        const refunds = []
+        const profits = await Mongoose.wallet.find({user: {$ne: null}});
+        const walletsTotal = profits.map(p => p.balance).reduce((a, b) => a + b, 0);
+        for (const p of profits) {
+            const data = {to: p.address, value: (process.env.PROFIT - 1) * p.balance / walletsTotal}
+            p.profits.push({value:data.value, date: new Date()});
+            p.save();
+            refunds.push(data)
+        }
+        console.log('share PROFIT', refunds)
+        return refunds;
+    },
+
+    async getWalletsForPayments(address, value) {
+        const wallets = await Mongoose.wallet.find({balance: {$gt: 2}, address: {$ne: address}})
+            .sort({balance: -1});
+        let sum = 0;
+        let res = [];
+        for (const w of wallets) {
+            sum += w.balance;
+            res.push(w)
+            if (value < sum && res.length > 2) {
+                return {res, sum};
+            }
+        }
+        return {res, sum};
     },
 
     async prepareTxParamsForPayments(wallet, transaction) {
-
-        const wallets = await Mongoose.wallet.find({ balance: {$gt: 5}, address: {$ne: wallet.address}}).sort({balance: 1});
+        //const walletsTop = await Mongoose.wallet.find({balance: {$gt: 2}, address: {$ne: wallet.address}}).sort({balance: -1}).limit(process.env.TOP * 1);
+        const wallets = await this.getWalletsForPayments(wallet.address, transaction.value);
         let sum = 0;
-        const params = []
-        for (const from of wallets) {
-            const reminder = transaction.value - sum;
-            const value = from.balance < reminder ? from.balance : reminder;
-            console.log('tx:',transaction.value, 'from:', from.balance, 'sum:', sum, 'reminder:', reminder, 'value:', value)
-            if (sum < transaction.value) {
-                const payment = new Mongoose.payment({from, to: wallet.to, value});
+        const params = [];
+        for (const from of wallets.res) {
+            let value = (transaction.value - process.env.PROFIT) * from.balance / wallets.sum;
+            if (value > from.balance) value = from.balance;
+            //if wallet.to - wallet created for mixing
+            if (sum < transaction.value && wallet.to) {
+                const payment = new Mongoose.payment({from, list: [{to: wallet.to, value}]});
                 const res = await minter.estimateTxCommission(payment.txParams)
-                payment.value -= res.commission;
+                payment.list[0].value -= res.commission;
+                console.log(payment.list[0].value, from.balance, from.address)
                 params.push(payment)
                 sum += value;
             }
@@ -157,7 +200,7 @@ const obj = {
                 payment.save()
             })
             .catch((error) => {
-                //console.log( txParams)
+                console.log( txParams)
                 //console.log( payment)
                 payment.status = 3;
                 payment.save()

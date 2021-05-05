@@ -1,7 +1,7 @@
 import Mongoose from "server/db/Mongoose";
 import striptags from "striptags";
 
-const passportLib = require('server/lib/passport');
+import passportLib from 'server/lib/passport';
 const removeMd = require('remove-markdown');
 
 module.exports.controller = function (app) {

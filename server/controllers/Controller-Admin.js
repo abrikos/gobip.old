@@ -1,6 +1,5 @@
 import Mongoose from "server/db/Mongoose";
-
-const passportLib = require('server/lib/passport');
+import passportLib from 'server/lib/passport';
 //const passport = require('passport');
 
 //Mongoose.Meeting.find({}).then(console.log)

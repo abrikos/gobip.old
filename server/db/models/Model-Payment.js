@@ -5,13 +5,16 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const name = 'payment';
 
+const dataSchema = new Schema({
+    to: "String",
+    value: {type: "Number", default: 0},
+    coin: {type: "Number", default: 0}
+})
 
 const modelSchema = new Schema({
         from: {type: mongoose.Schema.Types.ObjectId, ref: 'wallet'},
-        hash: {type:String},
-        to: {type:String},
-        status: {type:Number, default:0},
-        value: {type:Number, default:0},
+        list: [dataSchema],
+        status: {type: Number, default: 0},
         //data: {type: Object},
         //wallet: {type: mongoose.Schema.Types.ObjectId, ref: 'Wallet'},
     },
@@ -32,11 +35,10 @@ modelSchema.virtual('txParams')
     .get(function () {
         return {
             chainId: process.env.CHAIN_ID,
-            type: TX_TYPE.SEND,
+            type: TX_TYPE.MULTISEND,
+            //type: TX_TYPE.SEND,
             data: {
-                to: this.to,
-                value: this.value,
-                coin: 0, // coin id
+                list: this.list
             },
             gasCoin: 0, // coin id
             gasPrice: 1

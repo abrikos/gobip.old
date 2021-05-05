@@ -4,6 +4,7 @@ import {A} from "hookrouter"
 import {Navbar} from "react-bootstrap";
 import Nav from "react-bootstrap/Nav";
 import NavDropdown from "react-bootstrap/NavDropdown";
+import LoginFormGoogle from "components/login/LoginFormGoogle";
 
 export default function MenuTop(props) {
     const items = [
@@ -13,7 +14,7 @@ export default function MenuTop(props) {
         {label: "Unbound", href: "/unbound"},
         //{label: "Видео", items: [{label: "Level 1", href: "/zzz"}, {label: "Level 2", href: "/zzz"}]},
         {label: "АДМИН", href: "/admin", hidden: !(props.store.authenticatedUser && props.store.authenticatedUser.admin)},
-        {label: "Кабинет", href: "/cabinet", hidden: !(props.store.authenticatedUser)},
+        {label: "Cabinet", href: "/cabinet", hidden: !(props.store.authenticatedUser)},
 
     ];
     return <Navbar bg="dark" expand="lg">
@@ -27,9 +28,9 @@ export default function MenuTop(props) {
                     </NavDropdown>
                     :
                     <Nav.Link as={"span"} key={i}><A href={item.href} className="text-light">{item.label}</A></Nav.Link>)}
-                {/*<Nav.Item>
-                    {props.store.authenticatedUser ? <A href="/logout" className={'nav-link'}>Выход</A> : <LoginFormGoogle store={props.store}/>}
-                </Nav.Item>*/}
+                <Nav.Item className="nav-link">
+                    {props.store.authenticatedUser ? <A href="/logout" className={'text-light'}>Logout</A> : <LoginFormGoogle className="text-light" store={props.store}/>}
+                </Nav.Item>
             </Nav>
             {/*<Form inline>
                 <FormControl type="text" placeholder="Search" className="mr-sm-2" />

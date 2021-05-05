@@ -1,6 +1,5 @@
 import Mongoose from "server/db/Mongoose";
-
-const passportLib = require('../lib/passport');
+import passportLib from 'server/lib/passport';
 
 //Mongoose.User.find().then(console.log)
 //Mongoose.User.updateMany({},{group:null}).then(console.log).catch(console.error)

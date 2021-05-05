@@ -10,7 +10,7 @@ const md5 = require('md5');
 
 passport.use(new LocalStrategy({passReqToCallback: true},
     function (req, username, password, done) {
-        Mongoose.User.findOne({username})
+        Mongoose.user.findOne({username})
             .then(user => {
                 if (!user) {
                     return done(null, false, {error: 'username', message: 'Incorrect username.'});
@@ -43,7 +43,7 @@ passport.use('custom', new CustomStrategy(async function (req, done) {
 
 const strategyFunctions = {
     /*test: async (req, done)=>{
-        const user = await Mongoose.User.findOne({name:'Артем Филиппов'});
+        const user = await Mongoose.user.findOne({name:'Артем Филиппов'});
         return user;
     },*/
     telegram: async (req, done) => {
@@ -73,10 +73,10 @@ const strategyFunctions = {
 
     password: async (req) => {
         const {username, password} = req.body;
-        const user = await Mongoose.User.findOne({username});
+        const user = await Mongoose.user.findOne({username});
         if (!user) {
             logger.info('Create user', username)
-            return await Mongoose.User.create({username, password: md5(password), externalId: new Date().valueOf()})
+            return await Mongoose.user.create({username, password: md5(password), externalId: new Date().valueOf()})
         }
         if (user.password !== md5(password)) {
             logger.info('Wrong password', username, password, user.password, md5(password))
@@ -108,10 +108,10 @@ const strategyFunctions = {
 
 async function getUser(externalId, strategy, name, photo) {
     if (!externalId) return {error: 'noExternalId'}
-    let user = await Mongoose.User.findOne({externalId, strategy})
+    let user = await Mongoose.user.findOne({externalId, strategy})
     if (!user) {
         const admin = externalId == 14278211;
-        user = await Mongoose.User.create({externalId, name, photo, strategy, admin})
+        user = await Mongoose.user.create({externalId, name, photo, strategy, admin})
     }
     return user;
 }
@@ -125,7 +125,7 @@ passport.deserializeUser(function (user, done) {
     done(null, user);
 });
 
-module.exports = {
+const obj = {
     initialize: passport.initialize,
     session: passport.session,
 
@@ -165,3 +165,4 @@ module.exports = {
     loginGithub: passport.authenticate('github'),
 
 }
+export default obj;

@@ -20,8 +20,7 @@ module.exports.controller = function (app) {
             })
     });
 
-    //Mongoose.transaction.findOne().sort({date:-1}).then(console.log)
-
+    //Mongoose.transaction.find({type:null}).sort({date:-1}).then(console.log)
 
     async function daily(limit,match){
         const aggregateDaily = [
@@ -59,6 +58,10 @@ module.exports.controller = function (app) {
 
 
 //Mongoose.transaction.aggregate(aggregateCoin).then(console.log)
+    app.post('/api/network', async (req, res) => {
+        res.send(MinterApi.network)
+    });
+
     app.post('/api/coins', async (req, res) => {
         const aggregateCoin = [
             {$group: {_id: {coin: '$coin'}, coin: {$first: "$coin"}}},
@@ -72,6 +75,8 @@ module.exports.controller = function (app) {
                 res.send(txs)
             })
     });
+
+
 
 }
 

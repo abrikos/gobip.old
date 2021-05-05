@@ -1,30 +1,32 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect} from 'react';
 import MyBreadCrumb from "components/MyBreadCrumb";
-import ErrorPage from "components/service/ErrorPage";
+import {A} from "hookrouter";
 import "./cabinet.sass"
+import CabinetMixer from "pages/cabinet/CabinetMixer";
+import CabinetBanner from "pages/cabinet/CabinetBanner";
 
 export default function Cabinet(props) {
-    const [user, setUser] = useState();
-
-    useEffect(loadUser, []);
-
-    function loadUser() {
-        props.store.api('/post/999/view')
-            .then(d => {
-                console.log('zzzzzzzzzzzz', d)
-                setUser(d)
-            })
-        //.catch(console.warn)
+    const pages = {
+        mixer: {label: 'Mixer'},
+        banner: {label: 'Banner'},
     }
 
-    if (!props.store.authenticatedUser) return <ErrorPage {...{error: 403, message: 'Доступ запрещен'}}/>;
+    useEffect(() => {
+    }, [props.control])
+
     return <div>
         <MyBreadCrumb items={[
-            {label: 'Кабинет'},
-            {label: 'Буфет', href: '/zzzzz'},
+            {label: 'Cabinet', href: '/cabinet'},
+            {label: pages[props.control] && pages[props.control].label}
         ]}/>
-        Gogo9999
-        {JSON.stringify(user)}
+        <div className="row">
+            <div className="col-sm-2">{Object.keys(pages).map(p => <div key={p}  className={p===props.control ? 'border-bottom':''}><A href={`/cabinet/${p}`}>{pages[p].label}</A></div>)}</div>
+            <div className="col-sm-10">
+                {props.control === 'mixer' && <CabinetMixer {...props}/>}
+                {props.control === 'banner' && <CabinetBanner {...props}/>}
+            </div>
+        </div>
+
 
     </div>
 

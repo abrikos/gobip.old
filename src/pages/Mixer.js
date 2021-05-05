@@ -2,6 +2,7 @@ import {useState} from "react";
 import {Button, Form, InputGroup} from "react-bootstrap";
 import Loader from "components/Loader";
 import CopyButton from "components/copy-button/CopyButton";
+import MinterLink from "components/MinterLink";
 
 export default function Mixer(props) {
     const [data, setData] = useState({});
@@ -42,7 +43,7 @@ export default function Mixer(props) {
 
 
         {loading.address && <Loader/>}
-        {loading.address || data.address && <div className="alert alert-info">Send up to {data.amount} {data.network.coin} to the address <a href={data.network.explorer + '/' + data.address}>{data.address}</a> <CopyButton text={data.address}/></div>}
+        {loading.address || data.address && <div className="alert alert-info">Send up to <strong>{data.amount.toFixed(0)} {data.network.coin}</strong> to the address <MinterLink explorer={data.network.explorer} address={data.address}/></div>}
         {data.error && <div className="alert alert-error">{data.error.message}</div>}
 
 
@@ -50,7 +51,7 @@ export default function Mixer(props) {
             <InputGroup>
                 <InputGroup.Prepend>
                     <InputGroup.Text>
-                        Enter sum
+                        Enter amount
                     </InputGroup.Text>
                 </InputGroup.Prepend>
                 <Form.Control name="value" type="number"/>
@@ -60,6 +61,7 @@ export default function Mixer(props) {
             </InputGroup>
         </Form>
         {loading.balance && <Loader/>}
-        {loading.balance || calc.balance && <div className="alert alert-info">an approximate amount will be received: {calc.balance} {calc.network.coin} in {calc.count} txs</div>}
+        {loading.balance || calc.balance && <div className="alert alert-info">an approximate amount will be received: <strong>{calc.balance.toFixed(2)}</strong>{calc.network.coin}&nbsp;
+            {calc.exceed ? <span className="text-danger">Amount exceed mixer's limit</span> : <span>= {calc.value}{calc.network.coin} - {calc.profit}{calc.network.coin}  -  {calc.commission}{calc.network.coin} * {calc.count} <span className="badge badge-info">(&lt;VALUE&gt; = &lt;mixer's commission&gt; - &lt;fee of {calc.count} txs&gt;)</span></span>}</div>}
     </div>
 }

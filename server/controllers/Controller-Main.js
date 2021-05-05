@@ -3,7 +3,7 @@ import Mongoose from "server/db/Mongoose";
 const nodemailer = require('nodemailer');
 const mailer = JSON.parse(process.env.mailer);
 const transport = nodemailer.createTransport(mailer)
-const passportLib = require('server/lib/passport');
+import passportLib from 'server/lib/passport';
 const passport = require('passport');
 //let Parser = require('rss-parser');
 //let parser = new Parser();
@@ -110,10 +110,9 @@ module.exports.controller = function (app) {
 
 
     app.post('/api/user/authenticated', passportLib.isLogged, async (req, res) => {
-        Mongoose.User.findById(req.session.userId)
+        Mongoose.user.findById(req.session.userId)
             .then(user => res.send(user))
             .catch(error => {
-                logger.error(error.message)
                 res.send({error: 500, message: error.message})
             })
     });

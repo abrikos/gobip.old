@@ -19,7 +19,8 @@ export default function Routes(store) {
     };
 
     const routesLogged = {
-        "/cabinet": () => <Cabinet store={store}/>,
+        "/cabinet": (params) => <Cabinet store={store} {...params}/>,
+        "/cabinet/:control": (params) => <Cabinet store={store} {...params}/>,
         "/logout": () => <Logout store={store}/>,
     }
 
@@ -37,14 +38,14 @@ export default function Routes(store) {
     }
     for (const path of Object.keys(routesEditor)) {
         routes[path] = store.authenticatedUser ?
-            store.authenticatedUser.editor || store.authenticatedUser.admin ? routesEditor[path] : () => <ErrorPage error={403} store={store} message={'Доступ разрешен только редакторам'}/>
+            store.authenticatedUser.editor || store.authenticatedUser.admin ? routesEditor[path] : () => <ErrorPage error={403} store={store} message={'Access for editors only'}/>
             :
             () => <ErrorPage error={401} store={store}/>
         ;
     }
     for (const path of Object.keys(routesAdmin)) {
         routes[path] = store.authenticatedUser ?
-            store.authenticatedUser.admin ? routesAdmin[path] : () => <ErrorPage error={403} store={store} message={'Доступ разрешен только администраторам'}/>
+            store.authenticatedUser.admin ? routesAdmin[path] : () => <ErrorPage error={403} store={store} message={'Access for administrators only'}/>
             :
             () => <ErrorPage error={401} store={store}/>
         ;

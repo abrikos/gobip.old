@@ -2,7 +2,7 @@ import Mongoose from "server/db/Mongoose";
 
 const fs = require('fs')
 
-const passportLib = require('server/lib/passport');
+import passportLib from 'server/lib/passport';
 //Mongoose.Post.findOne({_id:'5e6b377260ee8707805367b6'})    .populate('token')    .then(console.log)
 
 module.exports.controller = function (app) {

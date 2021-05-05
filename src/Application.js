@@ -4,6 +4,7 @@ import ThemeMain from "themes/main/ThemeMain";
 import ThemeAdmin from "themes/admin/ThemeAdmin";
 import React, {useEffect, useState} from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
+import "themes/common.sass"
 import axios from "axios";
 import f2o from "form-to-object"
 
