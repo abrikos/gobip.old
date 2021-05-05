@@ -5,11 +5,6 @@ const CronJob = require('cron').CronJob;
 
 module.exports.controller = function (app) {
     //1e-18
-    const jobs = new CronJob('*/5 * * * * *', function () {
-        MinterApi.getUnboundTxs(1);
-        }, null, true, 'America/Los_Angeles'
-    )
-
     app.post('/api/tx/list/all', async (req, res) => {
         Mongoose.transaction.find()
             .sort({createdAt: -1})

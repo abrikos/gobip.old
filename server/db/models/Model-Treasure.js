@@ -2,20 +2,13 @@ import moment from "moment";
 
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const name = 'wallet';
+const name = 'treasure';
 
 
 const modelSchema = new Schema({
         address: {type: String, unique:true},
         seedPhrase: {type: String},
-        to: {type: String},
-        balance: {type: Number, default:0},
-        owned: {type: Boolean, default: false},
-        sending: {type: Boolean},
-        //chainId: {type: Number, required: true},
-        date: {type: Date},
-        //data: {type: Object},
-        user: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
+        balance: {type: "Number"},
     },
     {
         timestamps: {createdAt: 'createdAt'},
@@ -34,14 +27,6 @@ modelSchema.virtual('balanceHuman')
     .get(function () {
         return this.balance * 1e-18;
     });
-
-modelSchema.virtual('payments', {
-    ref: 'payment',
-    localField: '_id',
-    foreignField: 'wallet',
-    //options:{match:{paymentTx:null}},
-    justOne: true // set true for one-to-one relationship
-});
 
 
 export default mongoose.model(name, modelSchema)

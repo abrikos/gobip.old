@@ -24,7 +24,7 @@ export default function CopyButton(props) {
     const id = 'cpbtn' + md5(props.text)
     return <><span style={{cursor: 'pointer', color: '#555'}} ref={target} id={id} onClick={() => copyToClipboard(props.text)}
                  title={`Press to copy: ${props.text}`}>
-            <FontAwesomeIcon size="sm" icon={faCopy}/> Копировать
+            <FontAwesomeIcon size="lg" icon={faCopy}/>
 
         </span>
         <Overlay target={target.current}
@@ -42,7 +42,7 @@ export default function CopyButton(props) {
                         ...props.style,
                     }}
                 >
-                    Скопировано
+                    Copied
                 </div>
             )}
         </Overlay>

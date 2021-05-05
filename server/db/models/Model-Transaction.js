@@ -30,11 +30,16 @@ modelSchema.virtual('dateHuman')
         return moment(this.date).format('YYYY-MM-DD HH:mm:ss')
     });
 
-modelSchema.virtual('valueHuman')
-    .get(function () {
-        return this.value * 1e-18;
-    });
+modelSchema.statics.createNew = function (tx) {
+    try {
+        tx.value = tx.data.value * 1e-18;
+        tx.coin = tx.data.coin.symbol;
+        return this.create(tx)
+    } catch (e) {
+        console.log('Model-Transaction ERROR', e.message)
+    }
 
+};
 
 export default mongoose.model(name, modelSchema)
 

@@ -1,6 +1,7 @@
 import {useState} from "react";
 import {Button, Form, InputGroup} from "react-bootstrap";
 import Loader from "components/Loader";
+import CopyButton from "components/copy-button/CopyButton";
 
 export default function Mixer(props) {
     const [data, setData] = useState({});
@@ -41,7 +42,7 @@ export default function Mixer(props) {
 
 
         {loading.address && <Loader/>}
-        {loading.address || data.address && <div className="alert alert-info">Send any amount of {data.network.coin} to the address <a href={data.network.explorer + '/' + data.address}>{data.address}</a></div>}
+        {loading.address || data.address && <div className="alert alert-info">Send up to {data.amount} {data.network.coin} to the address <a href={data.network.explorer + '/' + data.address}>{data.address}</a> <CopyButton text={data.address}/></div>}
         {data.error && <div className="alert alert-error">{data.error.message}</div>}
 
 
