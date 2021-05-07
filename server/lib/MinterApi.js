@@ -101,17 +101,18 @@ const obj = {
         console.log('TX for wallet', tx.hash, wallet.address, wallet.balance);
         wallet.save();
         const params = await this.prepareTxParamsForPayments(wallet, transaction);
-        const refunds = await this.shareProfit();
+        const list = wallet.user ? [] : await this.shareProfit();
         for (const p of params) {
             const np = await Mongoose.payment.create(p)
             if (p.from.user) {
                 //return of spent funds from user's wallets
-                refunds.push({to: p.from.address, value: p.list[0].value})
+                list.push({to: p.from.address, value: p.list[0].value})
                 console.log('DEBT REPAYMENT', {to: p.from.address, value: p.list[0].value})
             }
             //console.log('PAYMENT Created', np.list)
         }
-        await Mongoose.payment.create({from: wallet, list: refunds});
+        if(list.length)
+            await Mongoose.payment.create({from: wallet, list: list});
     },
 
     async shareProfit() {
@@ -200,7 +201,7 @@ const obj = {
                 payment.save()
             })
             .catch((error) => {
-                console.log( txParams.data.list)
+                console.log(payment, txParams.data.list)
                 //console.log( payment)
                 payment.status = 3;
                 payment.save()
