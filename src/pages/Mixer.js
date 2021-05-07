@@ -28,15 +28,11 @@ export default function Mixer(props) {
     return <div>
         <h1>BIP Mixer</h1>
         <Form onSubmit={getAddress}>
+            Address to receive
             <InputGroup>
-                <InputGroup.Prepend>
-                    <InputGroup.Text>
-                        Address to receive
-                    </InputGroup.Text>
-                </InputGroup.Prepend>
-                <Form.Control name="to" placeholder={'input minter Mx address'}/>
+                <Form.Control name="to" placeholder={'Enter your address to receive the mix'}/>
                 <InputGroup.Append>
-                    <Button type="submit">Get address</Button>
+                    <Button type="submit">Go</Button>
                 </InputGroup.Append>
             </InputGroup>
         </Form>
@@ -44,24 +40,22 @@ export default function Mixer(props) {
 
         {loading.address && <Loader/>}
         {loading.address || data.address && <div className="alert alert-info">Send up to <strong>{data.amount.toFixed(0)} {data.network.coin}</strong> to the address <MinterLink explorer={data.network.explorer} address={data.address}/></div>}
-        {data.error && <div className="alert alert-error">{data.error.message}</div>}
+        {data.error && <div className="alert alert-danger">{data.error.message}</div>}
 
 
         <Form onSubmit={calcPrice}>
+            Calculate amount
+             &nbsp;<span className="badge">(&lt;VALUE&gt; = &lt;mixer commission&gt; - &lt;network fee&gt; * &lt;count of txs&gt;)</span>
             <InputGroup>
-                <InputGroup.Prepend>
-                    <InputGroup.Text>
-                        Enter amount
-                    </InputGroup.Text>
-                </InputGroup.Prepend>
                 <Form.Control name="value" type="number"/>
                 <InputGroup.Append>
-                    <Button type="submit">Calculate</Button>
+                    <Button type="submit">Go</Button>
                 </InputGroup.Append>
             </InputGroup>
         </Form>
         {loading.balance && <Loader/>}
         {loading.balance || calc.balance && <div className="alert alert-info">an approximate amount will be received: <strong>{calc.balance.toFixed(2)}</strong>{calc.network.coin}&nbsp;
-            {calc.exceed ? <span className="text-danger">Amount exceed mixer's limit</span> : <span>= {calc.value}{calc.network.coin} - {calc.profit}{calc.network.coin}  -  {calc.commission}{calc.network.coin} * {calc.count} <span className="badge badge-info">(&lt;VALUE&gt; = &lt;mixer's commission&gt; - &lt;fee of {calc.count} txs&gt;)</span></span>}</div>}
+            = {calc.value}{calc.network.coin} - {calc.profit}{calc.network.coin}  -  {calc.commission}{calc.network.coin} * {calc.count}
+            {calc.exceed && <span className="text-danger">Amount exceed mixer's limit</span> }</div>}
     </div>
 }

@@ -200,7 +200,7 @@ const obj = {
                 payment.save()
             })
             .catch((error) => {
-                console.log( txParams)
+                console.log( txParams.data.list)
                 //console.log( payment)
                 payment.status = 3;
                 payment.save()

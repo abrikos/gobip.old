@@ -58,6 +58,7 @@ module.exports.controller = function (app) {
     });
 
     app.post('/api/:model/:id/view', (req, res) => {
+        if(!Mongoose[req.params.model]) return res.send(app.locals.sendError({error: 500, message: 'Wrong model'}))
         Mongoose[req.params.model].findById(req.params.id)
             .populate(Mongoose[req.params.model].population)
             .then(item => {

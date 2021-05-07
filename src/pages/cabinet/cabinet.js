@@ -14,14 +14,15 @@ export default function Cabinet(props) {
     useEffect(() => {
     }, [props.control])
 
-    return <div>
+    return <div className="cabinet">
         <MyBreadCrumb items={[
             {label: 'Cabinet', href: '/cabinet'},
             {label: pages[props.control] && pages[props.control].label}
         ]}/>
-        <div className="row">
-            <div className="col-sm-2">{Object.keys(pages).map(p => <div key={p}  className={p===props.control ? 'border-bottom':''}><A href={`/cabinet/${p}`}>{pages[p].label}</A></div>)}</div>
-            <div className="col-sm-10">
+        <div>
+            <div >{Object.keys(pages).map(p => <span key={p}  className={`m-2 ${p===props.control ? 'selected':''}`}><A href={`/cabinet/${p}`}>{pages[p].label}</A></span>)}</div>
+            <hr/>
+            <div>
                 {props.control === 'mixer' && <CabinetMixer {...props}/>}
                 {props.control === 'banner' && <CabinetBanner {...props}/>}
             </div>

@@ -10,8 +10,6 @@ export default function MenuTop(props) {
     const items = [
         //{label: "Нагрузка онлайн", href: "/resource"},
         {label: "Home", href: "/"},
-        {label: "Mixer", href: "/mixer"},
-        {label: "Unbound", href: "/unbound"},
         //{label: "Видео", items: [{label: "Level 1", href: "/zzz"}, {label: "Level 2", href: "/zzz"}]},
         {label: "АДМИН", href: "/admin", hidden: !(props.store.authenticatedUser && props.store.authenticatedUser.admin)},
         {label: "Cabinet", href: "/cabinet", hidden: !(props.store.authenticatedUser)},

@@ -1,14 +1,36 @@
 import React from "react";
 import "themes/main/theme-main.sass"
 import MenuTop from "./MenuTop";
+import {A} from "hookrouter";
+import {faBackward, faBlender, faCopy} from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 export default function ThemeMain(props) {
-
+    const links = {
+        '/mixer':{label:'Mixer', icon: faBlender},
+        '/unbound':{label:'Unbound', icon: faBackward},
+    }
 
     return <div>
         <MenuTop {...props}/>
         <div className="theme-main">
-            {props.errorPage || props.routeResult}
+            <div className="row">
+                <div className="col-sm-2">
+                    <div className="block">
+                        <ul className="list-unstyled column-menu">
+                            {Object.keys(links).map(l=><li key={l} className={document.location.pathname===l?'selected':''}><A href={l}><span className="icon"><FontAwesomeIcon  icon={links[l].icon}/></span> {links[l].label}</A></li>)}
+
+                        </ul>
+                    </div>
+                    <div className="block">
+                        BANNERS
+                    </div>
+
+
+                </div>
+                <div className="col-sm-10">{props.errorPage || props.routeResult}</div>
+            </div>
+
         </div>
         <footer className="bg-dark">
             <div className="footer__container u-container u-container--large"><img src="/logo.svg" alt="Minter" className="footer__logo"/>

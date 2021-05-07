@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-import TransactionsList from "components/pager/TransactionsList";
+import TransactionsList from "TransactionsList";
 
 export default function UnboundCharts(props) {
     const [data, setData] = useState([])

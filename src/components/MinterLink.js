@@ -8,5 +8,5 @@ MinterLink.propTypes = {
 
 
 export default function MinterLink(props){
-    return <span><a href={props.explorer+'address/'+props.address} target="_blank">{props.address}</a><CopyButton text={props.address}/></span>
+    return <span><CopyButton text={props.address}/> <a href={props.explorer+'address/'+props.address} target="_blank" style={{fontFamily:'monospace'}}>{props.address}</a></span>
 }

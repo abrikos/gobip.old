@@ -3,13 +3,14 @@ import "./cabinet.sass"
 import {Button} from "react-bootstrap";
 import MinterLink from "components/MinterLink";
 import Loader from "components/Loader";
+import Mixer from "pages/Mixer";
 
 export default function CabinetMixer(props) {
     const [wallets, setWallets] = useState([]);
     const [network, setNetwork] = useState({});
     const [loading, setLoading] = useState(false);
 
-    useEffect(()=> {
+    useEffect(() => {
         props.store.api('/network').then(setNetwork)
         loadWallets();
         const timer = setInterval(loadWallets, 5000)
@@ -24,7 +25,7 @@ export default function CabinetMixer(props) {
         //.catch(console.warn)
     }
 
-    function createWallet(){
+    function createWallet() {
         setLoading(true)
         props.store.api('/cabinet/mixer/wallet/create')
             .then(d => {
@@ -34,13 +35,27 @@ export default function CabinetMixer(props) {
             })
     }
 
-    return <div>
-        <h1>Mixer</h1>
-        <Button onClick={createWallet}>Add wallet</Button>
-        {wallets.map(d=><div key={d.id}>
-            <strong>{d.balance.toFixed(2)} {network.coin}</strong> <MinterLink address={d.address} explorer={network.explorer}/> {JSON.stringify(d.profits)}
-        </div>)}
-        {loading && <Loader/>}
+    return <div className="row">
+        <div className="col-sm-8">
+            <h1>Earn income as a member of the mixer reserve</h1>
+            <div className="alert alert-info">Create an address, send funds to it and get a proportional percentage of each mix in the system</div>
+            <Button onClick={createWallet}>Add wallet</Button>
+            <table className="table">
+                <tbody>
+                {wallets.map(d => <tr key={d.id}>
+                    <td className="text-right">{d.balance.toFixed(2)} {network.coin}</td>
+                    <td><MinterLink address={d.address} explorer={network.explorer}/></td>
+                    {/*<div>
+                {d.profits.map(p=><div key={p.date}><small>{p.date}</small> {p.value.toFixed(1)}</div>)}
+            </div>*/}
+
+                </tr>)}
+                </tbody>
+            </table>
+            {loading && <Loader/>}
+        </div>
+        <div className="col-sm-4"><Mixer {...props}/></div>
+
     </div>
 
 }
