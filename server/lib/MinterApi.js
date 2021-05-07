@@ -105,25 +105,44 @@ const obj = {
         return Mongoose.wallet.create(newWallet)
     },
 
+    async walletMoveFunds(wallet, to){
+        const txParams = {
+            type: TX_TYPE.SEND,
+            data: {
+                to,
+                value: wallet.balance,
+                coin: 0, // coin id
+            },
+        }
+        const res = await this.getTxParamsCommission(txParams)
+        //if (mixer.value > res.commission)
+        txParams.data.value -= res.commission;
+        wallet.txParams = txParams;
+        return this.sendTx(wallet);
+    },
 
-    async sendTx(txParams, address, seedPhrase) {
+    async sendTx({txParams, address, seedPhrase}) {
+        if(txParams.data.list){
+            txParams.type =  TX_TYPE.MULTISEND;
+            for(const l of txParams.data.list){
+                l.coin = 0;
+            }
+        }else{
+            txParams.type =  TX_TYPE.SEND;
+            txParams.data.coin = 0;
+        }
+        txParams.chainId = this.params.network.chainId;
         txParams.nonce = await minter.getNonce(address);
-        minter.postTx(txParams, {seedPhrase})
-            .then((txHash) => {
-                // WARNING
-                // If you use minter-node api, successful response would mean that tx just got in mempool but is not on the blockchain yet
-                // You have to wait for it to be included in the upcoming block
-                // You can use gate api instead, which returns successful response only after tx has appeared on the blockchain
-                // WARNING #2
-                // If tx has been included in the block, it may still have failed status
-                // Verify that tx.code is `0` to ensure its success
-                console.log(`=================Tx created: ======================`);
-                console.log(txHash)
-            })
-            .catch((error) => {
-                //console.log( payment)
-                console.log('POST TX ERROR', error.message);
-            });
+        return new Promise((resolve, reject) => {
+            minter.postTx(txParams, {seedPhrase})
+                .then(resolve)
+                .catch(e=>{
+                    console.log(e.response.data)
+                    reject(e)
+                })
+        });
+
+
     },
 
 

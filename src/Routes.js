@@ -8,14 +8,14 @@ import Cabinet from "pages/cabinet/cabinet";
 import PostView from "pages/post/PostView";
 import UnboundCharts from "pages/UnboundCharts";
 import Mixer from "pages/Mixer";
-import Banners from "pages/banner/Banners";
+import {Banners} from "pages/banner/Banners";
 
 export default function Routes(store) {
     const routes = {
         "/": () => <Home store={store}/>,
         "/unbound": () => <UnboundCharts store={store}/>,
         "/mixer": () => <Mixer store={store}/>,
-        "/banners": () => <Banners limit={100} store={store}/>,
+        "/banners/:type": (params) => <Banners limit={100} store={store}  {...params}/>,
         "/post/:id/:head": (params) => <PostView store={store} {...params}/>,
         "/login": () => <Login store={store}/>,
     };

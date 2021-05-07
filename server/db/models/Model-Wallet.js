@@ -30,8 +30,8 @@ modelSchema.virtual('dateHuman')
         return moment(this.createdAt).format('YYYY-MM-DD HH:mm:ss')
     });
 
-modelSchema.virtual('payments', {
-    ref: 'payment',
+modelSchema.virtual('banner', {
+    ref: 'banner',
     localField: '_id',
     foreignField: 'wallet',
     //options:{match:{paymentTx:null}},

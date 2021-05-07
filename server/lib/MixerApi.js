@@ -13,13 +13,30 @@ const obj = {
         if (!fromMultiSend) return;
         fromMultiSend.balance = await MinterApi.walletBalance(fromMultiSend.address);
         fromMultiSend.save();
-        await this.prepareMixers(fromMultiSend, tx);
+        const mixers = await this.prepareMixers(fromMultiSend, tx);
+        const payment = {
+            tx: tx.hash,
+            fromMultiSend,
+            mixers,
+            refunds: [],
+            profits: await this.getProfits()
+        }
+        for (const m of mixers) {
+            if (m.from.user) {
+                //return of spent funds from user's wallets
+                const dd = {to: m.from.address, value: m.value};
+                payment.refunds.push(dd)
+            }
+        }
+        Mongoose.payment.create(payment).catch(e => {
+            console.log('ERROR: checkTransactions 1', e.message)
+        });
 
 
     },
 
     async totalAmount() {
-        const res = await Mongoose.wallet.aggregate([{$group: {_id: "", amount: {$sum: "$balance"}}}])
+        const res = await Mongoose.wallet.aggregate([{$group: {_id: "$type", amount: {$sum: "$balance"}}}, {$match: {"_id": "mixer"}}])
         return res[0].amount
     },
 
@@ -53,7 +70,7 @@ const obj = {
     },
 
     async prepareMixers(fromMultiSend, transaction) {
-        if(transaction.value < MinterApi.params.mixerFee) return [];
+        if (transaction.value < MinterApi.params.mixerFee) return [];
         //const walletsTop = await Mongoose.wallet.find({balance: {$gt: 2}, address: {$ne: wallet.address}}).sort({balance: -1}).limit(process.env.TOP * 1);
         const wallets = await this.getWalletsForPayments(fromMultiSend.address, transaction.value);
         let sum = 0;
@@ -77,39 +94,43 @@ const obj = {
                 sum += value;
             }
         }
-        const payment = {
-            tx: transaction.hash,
-            fromMultiSend,
-            mixers,
-            refunds: [],
-            profits: await this.getProfits()
-        }
-        for (const m of mixers) {
-            if (m.from.user) {
-                //return of spent funds from user's wallets
-                const dd = {to: m.from.address, value: m.value};
-                payment.refunds.push(dd)
-                console.log('REFUND', dd)
-            }
-        }
-        const found = await Mongoose.payment.findOne({tx:transaction.hash});
-        if(!found) {
-            Mongoose.payment.create(payment).catch(e => {
-                console.log('ERROR: checkTransactions 1', e.message)
-            });
-        }
         return mixers;
     },
 
     async sendPayments() {
         const payments = await Mongoose.payment.find({status: 0}).populate('fromMultiSend');
+        if(!payments.length) return;
+        const txs = []
         for (const payment of payments) {
+            // create txParams from wallet to address who request mix
             for (const m of payment.mixers) {
-                console.log('send MIXER', m.value)
-                payment.status = 1;
-                await payment.save()
+                const txParams = {
+                    data: {to: m.to, value: m.value},
+                }
+                txs.push({txParams, address: m.fromAddress, seedPhrase: m.fromSeed})
             }
-            //await MinterApi.sendTx(txParam)
+            const txParams = {data:{list:[]}}
+            //Prepare multisend profits (proportional bonus for investors)
+            for (const m of payment.profits) {
+                txParams.data.list.push(m)
+            }
+            //Prepare multisend refunds (return back spent funds to investor wallets)
+            for (const m of payment.refunds) {
+                txParams.data.list.push(m)
+            }
+            txs.push({txParams, address:payment.fromMultiSend.address, seedPhrase:payment.fromMultiSend.seedPhrase})
+            payment.status = 1;
+            await payment.save()
+        }
+
+        for (const tx of txs) {
+            MinterApi.sendTx(tx)
+                .then(t => {
+                    console.log('send MIXER', t)
+                })
+                .catch(e => {
+                    console.log(e.response.data, tx)
+                })
         }
     },
 

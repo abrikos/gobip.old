@@ -28,7 +28,7 @@ module.exports.controller = function (app) {
         console.log('!!!!!! NO process.env.SEED  !!!!')
     }*/
 
-    Mongoose.wallet.aggregate([{$group: {_id: "", amount: {$sum: "$balance"}}}]).then(console.log)
+   // Mongoose.wallet.aggregate([{$group: {_id: "", amount: {$sum: "$balance"}}}]).then(console.log)
 
     app.post('/api/mixer/address', async (req, res) => {
         const {to} = req.body;
@@ -54,7 +54,7 @@ module.exports.controller = function (app) {
     });
 
     app.post('/api/cabinet/mixer/wallets', passport.isLogged, (req, res) => {
-        Mongoose.wallet.find({user: req.session.userId, banner: null})
+        Mongoose.wallet.find({user: req.session.userId, type:'mixer'})
             .then(r => res.send(r))
     });
 

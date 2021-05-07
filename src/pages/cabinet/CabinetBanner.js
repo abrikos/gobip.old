@@ -93,7 +93,7 @@ export default function CabinetBanner(props) {
             {error && <div className="alert alert-danger">{error}</div>}
         </div>}
 
-        {banners.map(b => <div key={b.id} className="row mb-2">
+        {banners.map(b => <div key={b.id} className={`row mb-2 ${b.payDate ? '' : 'border border-danger'}`}>
             <div className="col-sm-1   text-right">{b.wallet.balance}{props.store.network.coin}</div>
             <div className="col-sm-7  ">
                 <MinterLink address={b.wallet.address} {...props}/>

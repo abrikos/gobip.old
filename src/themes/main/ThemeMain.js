@@ -2,14 +2,14 @@ import React from "react";
 import "themes/main/theme-main.sass"
 import MenuTop from "./MenuTop";
 import {A} from "hookrouter";
-import {faBackward, faBlender, faCopy, faUndo} from "@fortawesome/free-solid-svg-icons";
+import {faBlender, faImages} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import Banners from "pages/banner/Banners";
+import {Banners} from "pages/banner/Banners";
 
 export default function ThemeMain(props) {
     const links = {
         '/mixer':{label:'Mixer', icon: faBlender},
-        '/banners':{label:'Banners', icon: faUndo},
+        '/banners/lottery':{label:'Banners', icon: faImages},
     }
 
     return <div>
@@ -24,7 +24,7 @@ export default function ThemeMain(props) {
                         </ul>
                     </div>
                     <div className="d-sm-block d-none">
-                        <Banners limit={10} {...props}/>
+                        <Banners type={'payed'} limit={10} {...props}/>
                     </div>
 
 

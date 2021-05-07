@@ -80,12 +80,22 @@ module.exports.controller = function (app) {
     //Mongoose.banner.deleteMany({}).then(console.log);
     //Mongoose.wallet.findOne().then(console.log)
 
-    app.post('/api/banners', (req, res) => {
-        Mongoose.banner.find()
-            .populate({path: 'wallet', select: ['balance', 'updatedAt']})
+    app.post('/api/banner/:type', (req, res) => {
+        const filter = {};
+        switch (req.params.type) {
+            case 'lottery':
+                filter.winTx = {$ne: null}
+                break;
+            default:
+                filter.payDate = {$ne: null};
+                break;
+        }
+        Mongoose.banner.find(filter)
+            //.populate({path: 'wallet', select: ['balance', 'updatedAt']})
             .limit(req.body.limit * 1 || 10)
+            .sort({payDate: -1})
             .then(r => {
-                res.send(r.filter(d => d.wallet.balance >= MinterApi.params.bannerPrice))
+                res.send(r)
             })
     });
 
