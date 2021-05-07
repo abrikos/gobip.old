@@ -8,7 +8,7 @@ import CabinetBanner from "pages/cabinet/CabinetBanner";
 export default function Cabinet(props) {
     const pages = {
         mixer: {label: 'Mixer'},
-        banner: {label: 'Banner'},
+        banners: {label: 'Banners'},
     }
 
     useEffect(() => {
@@ -24,7 +24,7 @@ export default function Cabinet(props) {
             <hr/>
             <div>
                 {props.control === 'mixer' && <CabinetMixer {...props}/>}
-                {props.control === 'banner' && <CabinetBanner {...props}/>}
+                {props.control === 'banners' && <CabinetBanner {...props}/>}
             </div>
         </div>
 

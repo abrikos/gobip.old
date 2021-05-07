@@ -1,13 +1,15 @@
 import {useEffect, useState} from "react";
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-import TransactionsList from "TransactionsList";
+import TransactionsList from "pages/TransactionsList";
+import {Button} from "react-bootstrap";
 
 export default function UnboundCharts(props) {
     const [data, setData] = useState([])
     const [coins, setCoins] = useState([])
     const [days, setDays] = useState(30)
     const [coin, setCoin] = useState('BIP')
+    const [txView, setTxView] = useState(false)
 
     function init() {
         props.store.api(`/daily/${coin}/${days}`).then(setData)
@@ -59,15 +61,21 @@ export default function UnboundCharts(props) {
         }]
     };
 
-    return <div className="m-1">
-        {/*Coin: <select value={coin} onChange={changeCoin}>{coins.map(c=><option value={c.coin} key={c.coin}>{c.coin}</option>)}</select>*/}
+    function changeCoin(e) {
+        setCoin(e.target.value)
+    }
 
-        {coins.map(c => <span onClick={() => setCoin(c.coin)} key={c.coin} className={`badge ${c.coin === coin ? '' : 'badge-info'} m-2 pointer`}>{c.coin}</span>)}
+    return <div className="m-1">
+        Coin: <select value={coin} onChange={changeCoin}>{coins.map(c=><option value={c.coin} key={c.coin}>{c.coin}</option>)}</select>
+
+        {/*{coins.map(c => <span onClick={() => setCoin(c.coin)} key={c.coin} className={`badge ${c.coin === coin ? '' : 'badge-info'} m-2 pointer`}>{c.coin}</span>)}*/}
         <hr/>
 
         <HighchartsReact highcharts={Highcharts} options={options}/>
         {/*Days: <input value={days} onChange={changeDays} type="number"/>*/}
+        <Button size="sm" variant={!txView ? 'primary' : 'warning'} onClick={() => setTxView(!txView)}>{txView ? 'Hide' : 'Show'} transactions</Button>
 
-        <TransactionsList model={'transaction'} fields={['hash', 'value', 'coin']} link={`https`} {...props}/>
+        {txView && <TransactionsList model={'unbound'} fields={['hash', 'value', 'coin']} link={`https`} {...props}/>}
+
     </div>
 }

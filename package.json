@@ -22,6 +22,7 @@
     "dotenv-expand": "^5.1.0",
     "eslint": "^7.13.0",
     "esm": "^3.2.25",
+    "express": "^4.17.1",
     "express-fileupload": "^1.2.0",
     "express-session": "^1.17.1",
     "form-to-object": "^6.0.0",

@@ -18,7 +18,7 @@ export default function TransactionsList(props) {
 
     if (!list.count) return <div></div>
     console.log(list)
-    return <div>zzz44
+    return <div>
         <table className="table">
             <tbody>
             {list.list.map(l => <tr key={l.hash}>
@@ -28,7 +28,8 @@ export default function TransactionsList(props) {
                 <td>{l.value.toFixed(2)}</td>
             </tr>)}
             </tbody>
-            <Pager count={list.count} filter={filter} onPageChange={pageClick}/>
+
         </table>
+        <Pager count={list.count} filter={filter} onPageChange={pageClick}/>
     </div>
 }

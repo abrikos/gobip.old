@@ -10,8 +10,7 @@ const modelSchema = new Schema({
         seedPhrase: {type: String},
         to: {type: String},
         balance: {type: Number, default:0},
-        owned: {type: Boolean, default: false},
-        sending: {type: Boolean},
+        type: {type: String},
         profits:[Object],
         //chainId: {type: Number, required: true},
         date: {type: Date},
@@ -29,11 +28,6 @@ const modelSchema = new Schema({
 modelSchema.virtual('dateHuman')
     .get(function () {
         return moment(this.createdAt).format('YYYY-MM-DD HH:mm:ss')
-    });
-
-modelSchema.virtual('balanceHuman')
-    .get(function () {
-        return this.balance * 1e-18;
     });
 
 modelSchema.virtual('payments', {

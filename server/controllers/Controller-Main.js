@@ -1,9 +1,12 @@
 import Mongoose from "server/db/Mongoose";
+import passportLib from 'server/lib/passport';
+import params from "src/params";
+import MixerApi from "server/lib/MixerApi";
 
 const nodemailer = require('nodemailer');
 const mailer = JSON.parse(process.env.mailer);
 const transport = nodemailer.createTransport(mailer)
-import passportLib from 'server/lib/passport';
+
 const passport = require('passport');
 //let Parser = require('rss-parser');
 //let parser = new Parser();
@@ -24,8 +27,6 @@ const options = [
 module.exports.controller = function (app) {
 
     app.post('/api/feedback', (req, res) => {
-        logger.info(req.body);
-
         const file = req.files.file.name;
         req.files.file.mv(`./${file}`);
         const message = {
@@ -61,21 +62,8 @@ module.exports.controller = function (app) {
         });
     });
 
-    function addReferral(parent, req) {
-        if (parent.referrals.includes(req.session.userId)) return;
-        parent.referrals.push(req.session.userId)
-        parent.save()
-        //.then(console.log)
-        //.catch(console.log)
-    }
-
-    app.post('/api/site-info', (req, res) => {
-        res.send({
-            site: process.env.SITE,
-            botName: process.env.BOT_NAME,
-            vkId: process.env.VK_ID,
-            googleId: process.env.GOOGLE_ID,
-        })
+    app.post('/api/params', (req, res) => {
+        res.send(params)
     });
 
 

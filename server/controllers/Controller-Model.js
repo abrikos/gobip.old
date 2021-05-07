@@ -130,7 +130,6 @@ module.exports.controller = function (app) {
         const filter = bodyToWhere(req.body);
         list(req, filter, false)
             .then(d => {
-                console.log(d)
                 res.send(d)
             })
     });

@@ -1,16 +1,14 @@
 import axios from "axios";
 import Mongoose from "server/db/Mongoose";
-import {Minter} from "minter-js-sdk";
+import {Minter,TX_TYPE} from "minter-js-sdk";
 import {generateWallet, walletFromMnemonic} from 'minterjs-wallet';
-
-const networks = ['', {url: 'https://api.minter.one', coin: 'BIP', explorer: 'https://explorer.minter.network/'}, {url: 'https://node-api.testnet.minter.network', coin: 'MNT', explorer: 'https://explorer.testnet.minter.network/'}]
-const network = networks[process.env.CHAIN_ID];
-const minter = new Minter({apiType: 'node', baseURL: `${network.url}/v2/`});
+import params from "src/params";
 
 
+const minter = new Minter({apiType: 'node', baseURL: `${params.network.url}/v2/`});
 const obj = {
     divider: 1e18,
-    network,
+    params,
     async walletFromMnemonic(seedPhrase) {
         return walletFromMnemonic(seedPhrase)
     },
@@ -20,7 +18,7 @@ const obj = {
     },
 
     async get(action, query) {
-        const url = `${network.url}/v2/${action}?${query}`;
+        const url = `${this.params.network.url}/v2/${action}?${query}`;
         const res = await axios.get(url)
         return res.data;
     },
@@ -43,148 +41,72 @@ const obj = {
         }
     },
 
-    async getUnboundTxs(tx) {
-        if (tx.type === 8)
-            await Mongoose.transaction.createNew(tx);
-    },
-
-    async totalAmount() {
-        const res = await Mongoose.wallet.aggregate([{$group: {_id: "", amount: {$sum: "$balance"}}}])
-        return res[0].amount
-    },
-
-    async getBlockTxs() {
-
+    async getTransactions() {
         let current = await Mongoose.status.findOne().sort({createdAt: -1})
-        const last = await this.get(`/status`)
-        if (!last) {
-            current = await Mongoose.status.create(last)
+        const last = await this.get(`/status`);
+        if (!last) return;
+        await Mongoose.status.create(last);
+        if (!current) {
+            current = last;
         }
+        const txs = [];
         for (let block = current.latest_block_height * 1; block <= last.latest_block_height * 1; block++) {
             const res = await this.get(`block/${block}`)
             for (const tx of res.transactions) {
-                const found = await Mongoose.transaction.findOne({hash: tx.hash})
-                if (found) continue;
                 tx.date = res.time;
-                await this.checkTransactionForMixer(tx);
-                await this.getUnboundTxs(tx);
-
+                if (!tx.data.list) {
+                    tx.value = tx.data.value * 1e-18;
+                    tx.coin = tx.data.coin ? tx.data.coin.symbol : '';
+                    txs.push(tx)
+                } else {
+                    const list = [];
+                    for (const l of tx.data.list) {
+                        const found = list.find(x => x.to === l.to);
+                        if (found) {
+                            found.value += l.value;
+                        } else {
+                            list.push(l)
+                        }
+                    }
+                    for (const v of list) {
+                        tx.to = v.to;
+                        tx.value = v.value * 1e-18;
+                        tx.coin = v.coin.symbol;
+                        txs.push(tx)
+                    }
+                }
             }
         }
-        //const res = await this.get(`transactions`, `query=tags.tx.type='01'&page=1`)
-        const v = await this.get(`/status`)
-        await Mongoose.status.create(v)
+        return txs;
     },
 
-    async newWallet(to, user) {
+
+    async getTxParamsCommission(txParams) {
+        txParams.type = txParams.data.list ? TX_TYPE.MULTISEND : TX_TYPE.SEND;
+        txParams.data.coin = 0;
+        txParams.chainId = params.network.chainId;
+        return minter.estimateTxCommission(txParams)
+    },
+
+    async newWallet(type, to, user) {
         const w = generateWallet();
         const exists = await Mongoose.wallet.findOne({address: w.getAddressString()});
         if (exists) {
-            return this.newWallet(to)
+            return this.newWallet(type, to, user)
         }
-        const newWallet = {address: w.getAddressString(), seedPhrase: w.getMnemonic(), to, user}
+        const newWallet = {address: w.getAddressString(), seedPhrase: w.getMnemonic(), to, user, type}
         const balance = await this.walletBalance(w.getAddressString())
         if (balance) {
             newWallet.balance = balance;
             Mongoose.treasure.create(newWallet)
                 .catch(e => console.log('TREASURE found', e.message))
-            return this.newWallet(to)
+            return this.newWallet(type, to, user)
         }
         return Mongoose.wallet.create(newWallet)
     },
 
-    async checkTransactionForMixer(tx) {
-        const wallet = await Mongoose.wallet.findOne({to: {$ne: null}, address: tx.data.to});
-        if (!wallet) return;
-        const transaction = await Mongoose.transaction.createNew(tx);
-        wallet.balance = await this.walletBalance(wallet.address);
-        console.log('TX for wallet', tx.hash, wallet.address, wallet.balance);
-        wallet.save();
-        const params = await this.prepareTxParamsForPayments(wallet, transaction);
-        const list = wallet.user ? [] : await this.shareProfit();
-        for (const p of params) {
-            const np = await Mongoose.payment.create(p)
-            if (p.from.user) {
-                //return of spent funds from user's wallets
-                list.push({to: p.from.address, value: p.list[0].value})
-                console.log('DEBT REPAYMENT', {to: p.from.address, value: p.list[0].value})
-            }
-            //console.log('PAYMENT Created', np.list)
-        }
-        if(list.length)
-            await Mongoose.payment.create({from: wallet, list: list});
-    },
 
-    async shareProfit() {
-        const refunds = []
-        const profits = await Mongoose.wallet.find({user: {$ne: null}});
-        const walletsTotal = profits.map(p => p.balance).reduce((a, b) => a + b, 0);
-        for (const p of profits) {
-            const data = {to: p.address, value: (process.env.PROFIT - 1) * p.balance / walletsTotal}
-            p.profits.push({value:data.value, date: new Date()});
-            p.save();
-            refunds.push(data)
-        }
-        console.log('share PROFIT', refunds)
-        return refunds;
-    },
-
-    async getWalletsForPayments(address, value) {
-        const wallets = await Mongoose.wallet.find({balance: {$gt: 2}, address: {$ne: address}})
-            .sort({balance: -1});
-        let sum = 0;
-        let res = [];
-        for (const w of wallets) {
-            sum += w.balance;
-            res.push(w)
-            if (value < sum && res.length > 2) {
-                return {res, sum};
-            }
-        }
-        return {res, sum};
-    },
-
-    async prepareTxParamsForPayments(wallet, transaction) {
-        //const walletsTop = await Mongoose.wallet.find({balance: {$gt: 2}, address: {$ne: wallet.address}}).sort({balance: -1}).limit(process.env.TOP * 1);
-        const wallets = await this.getWalletsForPayments(wallet.address, transaction.value);
-        let sum = 0;
-        const params = [];
-        for (const from of wallets.res) {
-            let value = (transaction.value - process.env.PROFIT) * from.balance / wallets.sum;
-            if (value > from.balance) value = from.balance;
-            //if wallet.to - wallet created for mixing
-            if (sum < transaction.value && wallet.to) {
-                const payment = new Mongoose.payment({from, list: [{to: wallet.to, value}]});
-                const res = await minter.estimateTxCommission(payment.txParams)
-                payment.list[0].value -= res.commission;
-                console.log(payment.list[0].value, from.balance, from.address)
-                params.push(payment)
-                sum += value;
-            }
-        }
-        return params;
-    },
-
-    async sendPayments() {
-        const txParams = await Mongoose.payment.find({status: 0}).populate('from');
-        for (const txParam of txParams) {
-            await this.sendTx(txParam)
-        }
-    },
-
-    async closePayments() {
-        const res = await this.get(`transactions`, `query=tags.tx.type='01'&page=1`)
-        for (const tx of res.transactions) {
-            const found = await Mongoose.payment.findOne({to: tx.data.to, status: 1, value: tx.data.value});
-            if (!found) continue;
-            found.status = 2;
-            found.save()
-        }
-    },
-
-    async sendTx(payment) {
-        const {seedPhrase, address} = payment.from
-        const txParams = payment.txParams;
+    async sendTx(txParams, address, seedPhrase) {
         txParams.nonce = await minter.getNonce(address);
         minter.postTx(txParams, {seedPhrase})
             .then((txHash) => {
@@ -197,14 +119,9 @@ const obj = {
                 // Verify that tx.code is `0` to ensure its success
                 console.log(`=================Tx created: ======================`);
                 console.log(txHash)
-                payment.status = 1;
-                payment.save()
             })
             .catch((error) => {
-                console.log(payment, txParams.data.list)
                 //console.log( payment)
-                payment.status = 3;
-                payment.save()
                 console.log('POST TX ERROR', error.message);
             });
     },

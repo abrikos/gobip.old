@@ -1,4 +1,4 @@
-import transaction from "server/db/models/Model-Transaction";
+import unbound from "server/db/models/Model-Unbound";
 import ethereum from "server/db/models/Model-Eth";
 import training from "server/db/models/Model-Training";
 import wallet from "server/db/models/Model-Wallet";
@@ -6,6 +6,7 @@ import payment from "server/db/models/Model-Payment";
 import status from "server/db/models/Model-Status";
 import treasure from "server/db/models/Model-Treasure";
 import user from "server/db/models/Model-User";
+import banner from "server/db/models/Model-Banner";
 
 const mongoose = require("mongoose");
 require('dotenv').config();
@@ -34,7 +35,7 @@ const Mongoose = {
     isValidId: function (id) {
         return mongoose.Types.ObjectId.isValid(id)
     },
-    user, transaction, ethereum, training, wallet, payment, status, treasure
+    user, unbound, ethereum, training, wallet, payment, status, treasure, banner
 
 };
 export default Mongoose;

@@ -1,19 +1,29 @@
 import moment from "moment";
-import {TX_TYPE} from "minter-js-sdk";
+import params from "src/params";
 
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const name = 'payment';
 
-const dataSchema = new Schema({
+const listSchema = new Schema({
     to: "String",
     value: {type: "Number", default: 0},
-    coin: {type: "Number", default: 0}
+})
+
+const mixerSchema = new Schema({
+    fromSeed: {type: 'String'},
+    fromAddress: {type: 'String'},
+    payload: {type: "String"},
+    to: "String",
+    value: {type: "Number", default: 0}
 })
 
 const modelSchema = new Schema({
-        from: {type: mongoose.Schema.Types.ObjectId, ref: 'wallet'},
-        list: [dataSchema],
+        fromMultiSend: {type: mongoose.Schema.Types.ObjectId, ref: 'wallet'},
+        tx: {type: "String", unique: true},
+        profits: [listSchema],
+        refunds: [listSchema],
+        mixers: [mixerSchema],
         status: {type: Number, default: 0},
         //data: {type: Object},
         //wallet: {type: mongoose.Schema.Types.ObjectId, ref: 'Wallet'},
@@ -34,11 +44,10 @@ modelSchema.virtual('dateHuman')
 modelSchema.virtual('txParams')
     .get(function () {
         return {
-            chainId: process.env.CHAIN_ID,
-            type: TX_TYPE.MULTISEND,
+            chainId: params.network.chain,
             //type: TX_TYPE.SEND,
             data: {
-                list: this.list
+                list: this.profits
             },
             gasCoin: 0, // coin id
             gasPrice: 1
@@ -54,6 +63,7 @@ modelSchema.virtual('transaction', {
 });
 
 
-export default mongoose.model(name, modelSchema)
+export default mongoose.model(name, modelSchema);
+
 
 
