@@ -3,11 +3,13 @@ import Mongoose from "server/db/Mongoose";
 import UnboundApi from "server/lib/UnboundApi";
 import BannerApi from "server/lib/BannerApi";
 import MixerApi from "server/lib/MixerApi";
+import CryptoApi from "../lib/CryptoApi";
 
 const CronJob = require('cron').CronJob;
 
 module.exports.controller = function (app) {
-    const jobs = new CronJob('*/4 * * * * *', async function () {
+
+    const c2 = new CronJob('*/4 * * * * *', async function () {
             MinterApi.updateBalances();
             BannerApi.cronJob();
             const txs = await MinterApi.getTransactions();
@@ -17,6 +19,12 @@ module.exports.controller = function (app) {
                 MixerApi.checkTransaction(tx);
             }
             MinterApi.sendPayments();
+        }, null, true, 'America/Los_Angeles'
+    )
+
+    const c3 = new CronJob('0 */10 * * * *', async function () {
+        CryptoApi.cryptoCompare('BTC','USD')
+        CryptoApi.minterBipUsd()
         }, null, true, 'America/Los_Angeles'
     )
     MinterApi.createMainWallet();
@@ -79,7 +87,6 @@ module.exports.controller = function (app) {
         aggregateDaily.push({$match: match})
         return Mongoose.unbound.aggregate(aggregateDaily).limit(limit)
     }
-
 
 
 //Mongoose.transaction.aggregate(aggregateCoin).then(console.log)

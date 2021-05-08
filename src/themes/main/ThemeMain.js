@@ -2,7 +2,7 @@ import React from "react";
 import "themes/main/theme-main.sass"
 import MenuTop from "./MenuTop";
 import {A} from "hookrouter";
-import {faBlender, faImages} from "@fortawesome/free-solid-svg-icons";
+import {faBlender, faCoins, faImages} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {Banners} from "pages/banner/Banners";
 
@@ -10,6 +10,7 @@ export default function ThemeMain(props) {
     const links = {
         '/mixer':{label: props.store.network.coin + ' Mixer', icon: faBlender},
         '/lottery/winners':{label:'Banner lottery', icon: faImages},
+        '/bet':{label:'Bet on crypto price', icon: faCoins},
     }
 
     return <div>

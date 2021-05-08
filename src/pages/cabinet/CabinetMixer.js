@@ -35,8 +35,8 @@ export default function CabinetMixer(props) {
     console.log(wallets);
     return <div>
 
-            <h1>Earn income as a member of the mixer reserve</h1>
-            <div className="alert alert-info">Create an address, send funds to it and get a proportional percentage of each mix in the system</div>
+            <h1>Mixer reserves</h1>
+            <div className="alert alert-info">Create an address, send funds to it and get a proportional percentage of mixer commission from each mix in the system</div>
             <Button onClick={createWallet}>Add wallet</Button>
             <table className="table">
                 <tbody>
