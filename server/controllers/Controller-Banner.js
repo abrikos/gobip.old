@@ -1,6 +1,7 @@
 import Mongoose from "server/db/Mongoose";
 import passport from "server/lib/passport";
 import MinterApi from "server/lib/MinterApi";
+import BannerApi from "../lib/BannerApi";
 
 const CronJob = require('cron').CronJob;
 
@@ -55,6 +56,13 @@ module.exports.controller = function (app) {
             })
     });
 
+    app.post('/api/banner/lottery/amounts', (req, res) => {
+        BannerApi.totalAmount()
+            .then(total=>{
+                res.send({total, prize: MinterApi.params.lotteryPrise})
+            })
+    });
+
     app.post('/api/cabinet/banner/create', passport.isLogged, async (req, res) => {
         if (req.files && Object.keys(req.files).length) {
             if (!req.files) return res.status(500).send('No files uploaded');
@@ -78,7 +86,7 @@ module.exports.controller = function (app) {
     });
 
     //Mongoose.banner.deleteMany({}).then(console.log);
-    //Mongoose.wallet.findOne().then(console.log)
+    //Mongoose.wallet.findOne({type:'banner'}).populate('banner').then(console.log)
 
     app.post('/api/banner/:type', (req, res) => {
         const filter = {};
@@ -99,9 +107,14 @@ module.exports.controller = function (app) {
             })
     });
 
-    app.post('/api/upload', passport.isLogged, (req, res) => {
-        MinterApi.newWallet('', req.session.userId)
-            .then(w => res.send(w))
+    app.post('/api/banner/lottery/winners', passport.isLogged, (req, res) => {
+        Mongoose.lottery.find({payment:{$ne:null}})
+            .populate('payment',['results'])
+            .populate('banner')
+            .sort({createdAt:-1})
+            .then(ls => {
+                res.send(ls)
+            })
     });
 
 }

@@ -8,15 +8,15 @@ import {Banners} from "pages/banner/Banners";
 
 export default function ThemeMain(props) {
     const links = {
-        '/mixer':{label:'Mixer', icon: faBlender},
-        '/banners/lottery':{label:'Banners', icon: faImages},
+        '/mixer':{label: props.store.network.coin + ' Mixer', icon: faBlender},
+        '/lottery/winners':{label:'Banner lottery', icon: faImages},
     }
 
     return <div>
         <MenuTop {...props}/>
         <div className="theme-main">
             <div className="row">
-                <div className="col-sm-2">
+                <div className="col-sm-3">
                     <div className="block">
                         <ul className="list-unstyled column-menu">
                             {Object.keys(links).map(l=><li key={l} className={document.location.pathname===l?'selected':''}><A href={l}><span className="icon"><FontAwesomeIcon  icon={links[l].icon}/></span> {links[l].label}</A></li>)}
@@ -29,7 +29,7 @@ export default function ThemeMain(props) {
 
 
                 </div>
-                <div className="col-sm-10">{props.errorPage || props.routeResult}</div>
+                <div className="col-sm-9">{props.errorPage || props.routeResult}</div>
             </div>
 
         </div>

@@ -2,7 +2,7 @@ import {useEffect, useState} from "react";
 import {Button, Form, InputGroup} from "react-bootstrap";
 import Loader from "components/Loader";
 import CopyButton from "components/copy-button/CopyButton";
-import MinterLink from "components/MinterLink";
+import {MinterAddressLink} from "components/MinterLink";
 
 export default function Mixer(props) {
     const [data, setData] = useState({});
@@ -49,7 +49,7 @@ export default function Mixer(props) {
 
 
         {loading.address ? <Loader/>:<div>
-            {data.address && <div className="alert alert-info">Send more than <strong>{min} {props.store.network.coin}</strong> and less than <strong>{totalAmount.toFixed(0)} {props.store.network.coin}</strong> to the address <MinterLink address={data.address} {...props}/></div>}
+            {data.address && <div className="alert alert-info">Send more than <strong>{min} {props.store.network.coin}</strong> and less than <strong>{totalAmount.toFixed(0)} {props.store.network.coin}</strong> to the address <MinterAddressLink address={data.address} {...props}/></div>}
             {data.error && <div className="alert alert-danger">{data.error.message}</div>}
         </div>}
 

@@ -13,19 +13,13 @@ const obj = {
         if (!fromMultiSend) return;
         fromMultiSend.balance = await MinterApi.walletBalance(fromMultiSend.address);
         fromMultiSend.save();
-        const mixers = await this.prepareMixers(fromMultiSend, tx);
-        const payment = {
-            tx: tx.hash,
-            fromMultiSend,
-            mixers,
-            refunds: [],
-            profits: await this.getProfits()
-        }
-        for (const m of mixers) {
+        const singleSends = await this.prepareSingleSends(fromMultiSend, tx);
+        const payment = new Mongoose.payment({tx:tx.hash, fromMultiSend, singleSends, multiSends: await this.getProfits()})
+        for (const m of singleSends) {
             if (m.from.user) {
                 //return of spent funds from user's wallets
                 const dd = {to: m.from.address, value: m.value};
-                payment.refunds.push(dd)
+                payment.multiSends.push(dd)
             }
         }
         Mongoose.payment.create(payment).catch(e => {
@@ -69,12 +63,12 @@ const obj = {
         return {res, sum};
     },
 
-    async prepareMixers(fromMultiSend, transaction) {
+    async prepareSingleSends(fromMultiSend, transaction) {
         if (transaction.value < MinterApi.params.mixerFee) return [];
         //const walletsTop = await Mongoose.wallet.find({balance: {$gt: 2}, address: {$ne: wallet.address}}).sort({balance: -1}).limit(process.env.TOP * 1);
         const wallets = await this.getWalletsForPayments(fromMultiSend.address, transaction.value);
         let sum = 0;
-        const mixers = [];
+        const singleSends = [];
         for (const from of wallets.res) {
             let value = (transaction.value - MinterApi.params.mixerFee) * from.balance / wallets.sum;
             if (value > from.balance) value = from.balance;
@@ -82,57 +76,17 @@ const obj = {
             if (sum < transaction.value && fromMultiSend.to) {
                 //const payment = new Mongoose.payment({from, list: [{to: wallet.to, value}]});
                 const mixer = {fromSeed: from.seedPhrase, fromAddress: from.address, to: fromMultiSend.to, value, from};
-                if (this.usePayload) mixer.payload = 'Mix part';
                 const txParams = {
                     data: {to: fromMultiSend.to, value}
                 }
-                const res = await MinterApi.getTxParamsCommission(txParams)
-                //if (mixer.value > res.commission)
-                mixer.value -= res.commission;
                 console.log(mixer.value, value, from.balance)
-                if (mixer.value > 0) mixers.push(mixer)
+                if (mixer.value > 0) singleSends.push(mixer)
                 sum += value;
             }
         }
-        return mixers;
+        return singleSends;
     },
 
-    async sendPayments() {
-        const payments = await Mongoose.payment.find({status: 0}).populate('fromMultiSend');
-        if(!payments.length) return;
-        const txs = []
-        for (const payment of payments) {
-            // create txParams from wallet to address who request mix
-            for (const m of payment.mixers) {
-                const txParams = {
-                    data: {to: m.to, value: m.value},
-                }
-                txs.push({txParams, address: m.fromAddress, seedPhrase: m.fromSeed})
-            }
-            const txParams = {data:{list:[]}}
-            //Prepare multisend profits (proportional bonus for investors)
-            for (const m of payment.profits) {
-                txParams.data.list.push(m)
-            }
-            //Prepare multisend refunds (return back spent funds to investor wallets)
-            for (const m of payment.refunds) {
-                txParams.data.list.push(m)
-            }
-            txs.push({txParams, address:payment.fromMultiSend.address, seedPhrase:payment.fromMultiSend.seedPhrase})
-            payment.status = 1;
-            await payment.save()
-        }
-
-        for (const tx of txs) {
-            MinterApi.sendTx(tx)
-                .then(t => {
-                    console.log('send MIXER', t)
-                })
-                .catch(e => {
-                    console.log(e.response.data, tx)
-                })
-        }
-    },
 
     /*async closePayments() {
         const res = await this.get(`transactions`, `query=tags.tx.type='01'&page=1`)

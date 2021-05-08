@@ -1,6 +1,6 @@
 import axios from "axios";
 import Mongoose from "server/db/Mongoose";
-import {Minter,TX_TYPE} from "minter-js-sdk";
+import {Minter, TX_TYPE} from "minter-js-sdk";
 import {generateWallet, walletFromMnemonic} from 'minterjs-wallet';
 import params from "src/params";
 
@@ -55,6 +55,7 @@ const obj = {
             for (const tx of res.transactions) {
                 tx.date = res.time;
                 if (!tx.data.list) {
+                    tx.to = tx.data.to;
                     tx.value = tx.data.value * 1e-18;
                     tx.coin = tx.data.coin ? tx.data.coin.symbol : '';
                     txs.push(tx)
@@ -105,7 +106,7 @@ const obj = {
         return Mongoose.wallet.create(newWallet)
     },
 
-    async walletMoveFunds(wallet, to){
+    async walletMoveFunds(wallet, to) {
         const txParams = {
             type: TX_TYPE.SEND,
             data: {
@@ -114,35 +115,90 @@ const obj = {
                 coin: 0, // coin id
             },
         }
-        const res = await this.getTxParamsCommission(txParams)
-        //if (mixer.value > res.commission)
-        txParams.data.value -= res.commission;
         wallet.txParams = txParams;
         return this.sendTx(wallet);
     },
 
     async sendTx({txParams, address, seedPhrase}) {
-        if(txParams.data.list){
-            txParams.type =  TX_TYPE.MULTISEND;
-            for(const l of txParams.data.list){
+        const balance = await this.walletBalance(address);
+        if (txParams.data.list) {
+            txParams.type = TX_TYPE.MULTISEND;
+            for (const l of txParams.data.list) {
                 l.coin = 0;
             }
-        }else{
-            txParams.type =  TX_TYPE.SEND;
+        } else {
+            txParams.type = TX_TYPE.SEND;
             txParams.data.coin = 0;
         }
+        const res = await this.getTxParamsCommission(txParams)
+        if (!txParams.data.list) {
+            if (balance <= txParams.data.value)
+                txParams.data.value -= res.commission;
+        }
+
         txParams.chainId = this.params.network.chainId;
         txParams.nonce = await minter.getNonce(address);
         return new Promise((resolve, reject) => {
+            if (txParams.data.value && txParams.data.value >= balance)
+                return reject({response: {data: `INSUFFICIENT ${txParams.data.value} >= ${balance}`}})
             minter.postTx(txParams, {seedPhrase})
                 .then(resolve)
-                .catch(e=>{
+                .catch(e => {
                     console.log(e.response.data)
                     reject(e)
                 })
         });
 
 
+    },
+
+    async createMainWallet() {
+        const d = {address: process.env.MAIN_WALLET}
+        const w = await Mongoose.wallet.findOne(d);
+        if (!w) {
+            d.seedPhrase = process.env.MAIN_SEED
+            Mongoose.wallet.create(d)
+        }
+    },
+
+    async sendPayments() {
+        const payments = await Mongoose.payment.find({status: 0}).populate('fromMultiSend');
+        if (!payments.length) return;
+        const txs = []
+        for (const payment of payments) {
+            // create txParams from wallet to address who request mix
+            for (const m of payment.singleSends) {
+                const txParams = {
+                    data: {to: m.to, value: m.value, saveResult: m.saveResult},
+                }
+                txs.push({txParams, address: m.fromAddress, seedPhrase: m.fromSeed, payment})
+            }
+            if (payment.fromMultiSend) {
+                const txParams = {data: {list: []}}
+                //Prepare multisend profits (proportional bonus for investors)
+                for (const m of payment.multiSends) {
+                    txParams.data.list.push(m)
+                }
+                txs.push({txParams, address: payment.fromMultiSend.address, seedPhrase: payment.fromMultiSend.seedPhrase, payment})
+            }
+        }
+
+        for (const tx of txs) {
+            this.sendTx(tx)
+                .then(t => {
+                    if (tx.txParams.data.saveResult) {
+                        tx.payment.results.push({data:tx.txParams.data, hash: t.hash})
+                    }
+                    tx.payment.status = 1;
+                    tx.payment.save()
+                    console.log('transaction complete', t)
+                })
+                .catch(e => {
+                    tx.payment.status = 2;
+                    tx.payment.save()
+                    console.log(e.response.data, tx)
+                })
+        }
     },
 
 

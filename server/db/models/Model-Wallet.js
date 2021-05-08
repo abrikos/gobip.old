@@ -12,6 +12,7 @@ const modelSchema = new Schema({
         balance: {type: Number, default:0},
         type: {type: String},
         profits:[Object],
+        addressPaymentFrom: String,
         //chainId: {type: Number, required: true},
         date: {type: Date},
         //data: {type: Object},

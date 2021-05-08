@@ -7,6 +7,7 @@ import status from "server/db/models/Model-Status";
 import treasure from "server/db/models/Model-Treasure";
 import user from "server/db/models/Model-User";
 import banner from "server/db/models/Model-Banner";
+import lottery from "server/db/models/Model-Lottery";
 
 const mongoose = require("mongoose");
 require('dotenv').config();
@@ -35,7 +36,7 @@ const Mongoose = {
     isValidId: function (id) {
         return mongoose.Types.ObjectId.isValid(id)
     },
-    user, unbound, ethereum, training, wallet, payment, status, treasure, banner
+    user, unbound, ethereum, training, wallet, payment, status, treasure, banner, lottery
 
 };
 export default Mongoose;

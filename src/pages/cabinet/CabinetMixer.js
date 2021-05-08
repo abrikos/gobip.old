@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import "./cabinet.sass"
 import {Button} from "react-bootstrap";
-import MinterLink from "components/MinterLink";
+import {MinterAddressLink} from "components/MinterLink";
 import Loader from "components/Loader";
 import Mixer from "pages/Mixer";
 
@@ -42,7 +42,7 @@ export default function CabinetMixer(props) {
                 <tbody>
                 {wallets.map(d => <tr key={d.id}>
                     <td className="text-right">{d.balance.toFixed(2)} {props.store.network.coin}</td>
-                    <td><MinterLink address={d.address} {...props}/></td>
+                    <td><MinterAddressLink address={d.address} {...props}/></td>
                     {/*<div>
                 {d.profits.map(p=><div key={p.date}><small>{p.date}</small> {p.value.toFixed(1)}</div>)}
             </div>*/}

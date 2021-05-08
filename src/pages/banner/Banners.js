@@ -5,8 +5,8 @@ import ErrorPage from "components/service/ErrorPage";
 export function Banners(props) {
     const [banners, setBanners] = useState([]);
     const types = {
-        payed: {label: ''},
-        lottery: {label: 'Winning banners'}
+        payed: {label: '', path:'/banner/payed', limit:{limit: props.limit}},
+        lottery: {label: 'Winning banners', path:'/banner/lottery/winners'}
     }
     const type = types[props.type];
 
@@ -18,14 +18,14 @@ export function Banners(props) {
     }, [])
 
     function loadBanners() {
-        props.store.api(`/banner/${props.type}`, {limit: props.limit})
+        props.store.api(type.path, type.limit)
             .then(setBanners)
     }
 
     if(!type) return <ErrorPage error={404}/>
     return <div>
         <h1>{type.label}</h1>
-        <div className="banners">
+        <div>
             {banners.map(b => <BannerContainer key={b.id} {...b}/>)}
         </div>
     </div>
