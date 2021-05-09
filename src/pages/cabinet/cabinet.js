@@ -2,13 +2,15 @@ import React, {useEffect} from 'react';
 import MyBreadCrumb from "components/MyBreadCrumb";
 import {A} from "hookrouter";
 import "./cabinet.sass"
-import CabinetMixer from "pages/cabinet/CabinetMixer";
-import CabinetBanner from "pages/cabinet/CabinetBanner";
+import MixerCabinet from "pages/mixer/MixerCabinet";
+import BannerCabinet from "pages/banner/BannerCabinet";
+import BetCabinet from "../bet/BetCabinet";
 
 export default function Cabinet(props) {
     const pages = {
-        mixer: {label: 'Mixer'},
+        mixer: {label: 'Mixer wallets'},
         banners: {label: 'Banners'},
+        bet: {label: 'Bets'},
     }
 
     useEffect(() => {
@@ -23,8 +25,9 @@ export default function Cabinet(props) {
             <div >{Object.keys(pages).map(p => <span key={p}  className={`m-2 ${p===props.control ? 'selected':''}`}><A href={`/cabinet/${p}`}>{pages[p].label}</A></span>)}</div>
             <hr/>
             <div>
-                {props.control === 'mixer' && <CabinetMixer {...props}/>}
-                {props.control === 'banners' && <CabinetBanner {...props}/>}
+                {props.control === 'mixer' && <MixerCabinet {...props}/>}
+                {props.control === 'banners' && <BannerCabinet {...props}/>}
+                {props.control === 'bet' && <BetCabinet {...props}/>}
             </div>
         </div>
 

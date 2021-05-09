@@ -24,7 +24,7 @@ export function Banners(props) {
 
     if(!type) return <ErrorPage error={404}/>
     return <div>
-        <h1>{type.label}</h1>
+        {/*<h1>{type.label}</h1>*/}
         <div>
             {banners.map(b => <BannerContainer key={b.id} {...b}/>)}
         </div>

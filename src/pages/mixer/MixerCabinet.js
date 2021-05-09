@@ -1,9 +1,10 @@
 import React, {useEffect, useState} from 'react';
 import {Button} from "react-bootstrap";
-import {MinterAddressLink} from "components/MinterLink";
+import {MinterAddressLink} from "components/minter/MinterLink";
 import Loader from "components/Loader";
 import Mixer from "pages/mixer/Mixer";
 import CopyButton from "../../components/copy-button/CopyButton";
+import MinterValue from "../../components/minter/MinterValue";
 
 export default function MixerCabinet(props) {
     const [wallets, setWallets] = useState();
@@ -48,7 +49,7 @@ export default function MixerCabinet(props) {
                 </thead>
                 <tbody>
                 {wallets.map(d => <tr key={d.id}>
-                    <td className="text-right">{d.balance.toFixed(2)} {props.store.network.coin}</td>
+                    <td className="text-right"><MinterValue value={d.balance} {...props}/></td>
                     <td><MinterAddressLink address={d.address} {...props}/></td>
                     {/*<div>
                 {d.profits.map(p=><div key={p.date}><small>{p.date}</small> {p.value.toFixed(1)}</div>)}

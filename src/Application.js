@@ -79,7 +79,7 @@ export default function Application() {
 
     let routeResult = useRoutes(routes(store));
     const admin = window.location.pathname.match(/^\/editor/);
-    if(!store.network) return <div>WWWW</div>
+    if(!store.network) return <div>Application</div>
     return (
         <div className="App">
             {!admin && <ThemeMain routeResult={routeResult} store={store}/>}

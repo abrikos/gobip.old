@@ -4,16 +4,18 @@ import UnboundApi from "server/lib/UnboundApi";
 import BannerApi from "server/lib/BannerApi";
 import MixerApi from "server/lib/MixerApi";
 import CryptoApi from "../lib/CryptoApi";
+import BetApi from "../lib/BetApi";
 
 const CronJob = require('cron').CronJob;
 
 module.exports.controller = function (app) {
 
     const c2 = new CronJob('*/4 * * * * *', async function () {
-            MinterApi.updateBalances();
+
             BannerApi.cronJob();
             const txs = await MinterApi.getTransactions();
             for (const tx of txs) {
+                BetApi.checkTransaction(tx);
                 BannerApi.checkTransaction(tx);
                 UnboundApi.checkTransaction(tx);
                 MixerApi.checkTransaction(tx);
@@ -22,11 +24,12 @@ module.exports.controller = function (app) {
         }, null, true, 'America/Los_Angeles'
     )
 
-    const c3 = new CronJob('0 */10 * * * *', async function () {
+    const c3 = new CronJob('0 */1 * * * *', async function () {
         CryptoApi.cryptoCompare('BTC','USD')
         CryptoApi.minterBipUsd()
         }, null, true, 'America/Los_Angeles'
     )
+
     MinterApi.createMainWallet();
     BannerApi.lotteryInit()
 //BannerApi.fundsBack()

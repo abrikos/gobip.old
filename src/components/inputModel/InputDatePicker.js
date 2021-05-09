@@ -3,11 +3,14 @@ import "react-datepicker/dist/react-datepicker.css";
 import React, {useState} from "react";
 import ru from 'date-fns/locale/ru';
 import moment from "moment";
+import {Button, Form, InputGroup} from "react-bootstrap";
+import {faCalendar} from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 registerLocale('ru', ru)
 
 export default function InputDatePicker(props){
-    const [date, setDate] = useState(props.value)
+    const [date, setDate] = useState(props.defaultValue)
     const [show, setShow] = useState(false)
 
     function adaptDate(date){
@@ -25,20 +28,29 @@ export default function InputDatePicker(props){
         if (tracker) {
             tracker.setValue(adaptDate(date));
         }
-        console.log(event)
+        props.onChange && props.onChange(adaptDate(date))
         element.dispatchEvent(event);
     }
-
 
     return <div>
 
         {show && <DatePicker
-            hidden
             inline
             withPortal
+            closeOnScroll
+            selected={new Date(moment(props.defaultValue).format('YYYY-MM-DD'))}
+            onKeyPress={console.log}
             onChange={changeDate}
         />}
-       <button onClick={setShow}> {adaptDate(date)}</button>
-        <input value={date}  name={props.name} readOnly hidden id={`picker-${props.name}`}/>
+        <InputGroup>
+            <InputGroup.Prepend>
+                <Button variant="secondary" onClick={setShow}><FontAwesomeIcon size="sm" icon={faCalendar}/></Button>
+            </InputGroup.Prepend>
+            <Form.Control value={date} readOnly  name={props.name} className="form-control" id={`picker-${props.name}`} onClick={setShow}/>
+
+        </InputGroup>
+
+
+
     </div>
 }

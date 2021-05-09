@@ -1,8 +1,9 @@
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Button, Form, InputGroup} from "react-bootstrap";
 import Loader from "components/Loader";
 import CopyButton from "components/copy-button/CopyButton";
-import {MinterAddressLink} from "components/MinterLink";
+import {MinterAddressLink} from "components/minter/MinterLink";
+import MinterValue from "../../components/minter/MinterValue";
 
 export default function Mixer(props) {
     const [data, setData] = useState({});
@@ -36,7 +37,7 @@ export default function Mixer(props) {
 
     return <div>
         <h1>BIP Mixer </h1>
-        <h3>Available amount: {totalAmount.toFixed(0)}{props.store.network.coin}</h3>
+        <h3>Available amount: <MinterValue value={totalAmount} {...props}/></h3>
         <Form onSubmit={getAddress}>
             Address to receive
             <InputGroup>
@@ -49,7 +50,7 @@ export default function Mixer(props) {
 
 
         {loading.address ? <Loader/>:<div>
-            {data.address && <div className="alert alert-info">Send more than <strong>{min} {props.store.network.coin}</strong> and less than <strong>{totalAmount.toFixed(0)} {props.store.network.coin}</strong> to the address <MinterAddressLink address={data.address} {...props}/></div>}
+            {data.address && <div className="alert alert-info">Send more than <strong><MinterValue value={min} {...props}/></strong> and less than <strong><MinterValue value={totalAmount} {...props}/></strong> to the address <MinterAddressLink address={data.address} {...props}/></div>}
             {data.error && <div className="alert alert-danger">{data.error.message}</div>}
         </div>}
 
@@ -66,8 +67,8 @@ export default function Mixer(props) {
             </InputGroup>
         </Form>
         {loading.balance ? <Loader/> : <div>
-            {!!calc.balance && <div className="alert alert-info">An approximate amount will be received: <strong>{calc.balance.toFixed(2)}</strong>{props.store.network.coin},&nbsp;
-                mixer commission: {props.store.params.mixerFee}{props.store.network.coin},  count of txs: {calc.count}
+            {!!calc.balance && <div className="alert alert-info">An approximate amount will be received: <strong><MinterValue value={calc.balance} {...props}/></strong>,&nbsp;
+                mixer commission: {}<MinterValue value={props.store.params.mixerFee} {...props}/>,  count of txs: {calc.count}
                 {calc.exceed && <span className="text-danger">Amount exceed mixer's limit</span> }</div>}
         </div>}
 

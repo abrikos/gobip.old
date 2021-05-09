@@ -9,7 +9,7 @@ const obj = {
         //if(tx.value <= MinterApi.params.mixerFee * 1 + 1) return console.log('DONATE', tx.hash, tx.value, MinterApi.params.mixerFee + 1);
         const found = await Mongoose.payment.findOne({tx: tx.hash});
         if (found) return;
-        const fromMultiSend = await Mongoose.wallet.findOne({type: 'mixer', to: {$ne: null}, address: tx.data.to});
+        const fromMultiSend = await Mongoose.wallet.findOne({type: 'mixer', to: {$ne: null}, address: tx.to});
         if (!fromMultiSend) return;
         fromMultiSend.balance = await MinterApi.walletBalance(fromMultiSend.address);
         fromMultiSend.save();

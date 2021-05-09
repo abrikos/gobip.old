@@ -2,6 +2,7 @@ import Mongoose from "server/db/Mongoose";
 import striptags from "striptags";
 
 import passportLib from 'server/lib/passport';
+
 const removeMd = require('remove-markdown');
 
 module.exports.controller = function (app) {
@@ -29,7 +30,7 @@ module.exports.controller = function (app) {
 
         }
 
-        ret.fields.push( {name:'date', options:{}, type:'String'});
+        ret.fields.push({name: 'date', options: {}, type: 'String'});
         if (schema.formOptions) {
             ret.fields = ret.fields.concat(schema.formOptions.virtualFields ? schema.formOptions.virtualFields.map(f => {
                 const ret = {
@@ -58,7 +59,7 @@ module.exports.controller = function (app) {
     });
 
     app.post('/api/:model/:id/view', (req, res) => {
-        if(!Mongoose[req.params.model]) return res.send(app.locals.sendError({error: 500, message: 'Wrong model'}))
+        if (!Mongoose[req.params.model]) return res.send(app.locals.sendError({error: 500, message: 'Wrong model'}))
         Mongoose[req.params.model].findById(req.params.id)
             .populate(Mongoose[req.params.model].population)
             .then(item => {
@@ -245,11 +246,11 @@ module.exports.controller = function (app) {
     app.get('/api/:model/share/:id', (req, res) => {
         Mongoose[req.params.model].findById(req.params.id)
             .populate(Mongoose[req.params.model].population)
-            .then(post => res.render('share', {
-                header: `${process.env.REACT_APP_SITE_TITLE} - ${removeMd(post.header || post.name)}`,
-                text: removeMd(striptags(post.text || post.description)),
-                image: req.protocol + '://' + req.get('host') + (post.photo ? post.photo.path : '/logo.svg'),
-                url: req.protocol + '://' + req.get('host') + post.link
+            .then(model => res.render('share', {
+                header: model.title,
+                text: model.text,
+                image: req.protocol + '://' + req.get('host') + (model.photo ? model.photo.path : '/logo.svg'),
+                url: req.protocol + '://' + req.get('host') + model.link
             }))
             .catch(e => res.send(app.locals.sendError(e)))
     });

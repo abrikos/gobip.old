@@ -10,27 +10,35 @@ export default function ThemeMain(props) {
     const links = {
         '/mixer':{label: props.store.network.coin + ' Mixer', icon: faBlender},
         '/lottery/winners':{label:'Banner lottery', icon: faImages},
-        '/bet':{label:'Bet on crypto price', icon: faCoins},
+        '/bet':{label:'Crypto bets', icon: faCoins},
     }
 
     return <div>
         <MenuTop {...props}/>
         <div className="theme-main">
             <div className="row">
-                <div className="col-sm-3">
+                <div className="col-sm-2">
                     <div className="block">
                         <ul className="list-unstyled column-menu">
-                            {Object.keys(links).map(l=><li key={l} className={document.location.pathname===l?'selected':''}><A href={l}><span className="icon"><FontAwesomeIcon  icon={links[l].icon}/></span> {links[l].label}</A></li>)}
+                            {Object.keys(links).map(l=><li key={l} className={document.location.pathname===l?'selected':''}>
+                                <A href={l} className="d-flex align-items-center">
+                                    <span className="icon">
+                                        <FontAwesomeIcon  icon={links[l].icon}/>
+                                    </span>
+                                    <span>{links[l].label}</span>
+                                </A>
+                            </li>)}
 
                         </ul>
                     </div>
                     <div className="d-sm-block d-none">
-                        <Banners type={'payed'} limit={10} {...props}/>
+
                     </div>
 
 
                 </div>
-                <div className="col-sm-9">{props.errorPage || props.routeResult}</div>
+                <div className="col-sm-8">{props.errorPage || props.routeResult}</div>
+                <div className="col-sm-2"><Banners type={'payed'} limit={10} {...props}/></div>
             </div>
 
         </div>

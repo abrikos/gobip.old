@@ -1,14 +1,15 @@
 import React, {useEffect, useRef, useState} from 'react';
-import "./cabinet.sass"
+import "../cabinet/cabinet.sass"
 import {Button, FormControl} from "react-bootstrap";
 import Loader from "components/Loader";
-import {MinterAddressLink} from "components/MinterLink";
+import {MinterAddressLink} from "components/minter/MinterLink";
 import {BannerContainer} from "pages/banner/Banners";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faTrash} from "@fortawesome/free-solid-svg-icons";
+import MinterValue from "../../components/minter/MinterValue";
 
 
-export default function CabinetBanner(props) {
+export default function BannerCabinet(props) {
     const [banners, setBanners] = useState();
     const [loader, setLoader] = useState(false);
     const [errors, setErrors] = useState([]);
@@ -89,15 +90,15 @@ export default function CabinetBanner(props) {
 
     if (!banners) return <div/>
     return <div>
-        <h1>Banners</h1>
-        <div className="alert alert-success">{amounts.prize - amounts.total} {props.store.network.coin} left until the next round of the lottery. Lottery
-            prize: {amounts.prize} {props.store.network.coin}</div>
+        <h1>My banners</h1>
+        <div className="alert alert-success"> <MinterValue value={amounts.prize - amounts.total} {...props}/> left until the next round of the lottery. Lottery
+            prize: <MinterValue value={amounts.prize} {...props}/></div>
         <div className="alert alert-info">
             <ul>
-                <li>Upload an image, enter the url, translate it to an address of at least {process.env.REACT_APP_BANNER_PRICE} {props.store.network.coin} and your banner will
+                <li>Upload an image, enter the url, translate it to an address of at least <MinterValue value={props.store.params.bannerPrice} {...props}/> and your banner will
                     appear at the top of the left column. The next paid banner will move your banner down
                 </li>
-                <li>Each banner participates in a lottery. The drawing takes place when the total amount of banner coins reaches <strong>{amounts.prize} {props.store.network.coin}</strong></li>
+                <li>Each banner participates in a lottery. The drawing takes place when the total amount of banner coins reaches <strong><MinterValue value={amounts.prize} {...props}/> {props.store.network.coin}</strong></li>
                 <li>The odds in the lottery depend on the number of coins sent to enable the banner. More coins, more chances</li>
 
             </ul>
@@ -111,7 +112,7 @@ export default function CabinetBanner(props) {
         </div>}
         <div className="container">
             {banners.map(b => <div key={b.id} className={`row mb-2 border ${b.payDate ? '' : 'border-danger'}`}>
-                <div className="col-sm-2   text-right d-flex align-items-center justify-content-center bg-dark text-light">{b.wallet.balance} {props.store.network.coin}</div>
+                <div className="col-sm-2   text-right d-flex align-items-center justify-content-center bg-dark text-light"><MinterValue value={b.wallet.balance} {...props}/></div>
                 <div className="col-sm-6   d-flex align-items-center justify-content-center">
                     <div>
                         <MinterAddressLink address={b.wallet.address} {...props}/>

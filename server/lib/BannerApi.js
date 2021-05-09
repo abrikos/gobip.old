@@ -98,6 +98,7 @@ const obj = {
     async checkTransaction(tx) {
         const wallet = await Mongoose.wallet.findOne({type: 'banner', address: tx.to}).populate('banner');
         if (!wallet) return;
+        wallet.balance = await MinterApi.walletBalance(wallet.address);
         wallet.banner.payDate = new Date();
         wallet.addressPaymentFrom = tx.from;
         await wallet.banner.save();

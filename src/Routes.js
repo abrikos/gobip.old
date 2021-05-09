@@ -7,15 +7,19 @@ import Login from "components/login/login";
 import Cabinet from "pages/cabinet/cabinet";
 import PostView from "pages/post/PostView";
 import UnboundCharts from "pages/UnboundCharts";
-import Mixer from "pages/Mixer";
+import Mixer from "pages/mixer/Mixer";
 import {Banners} from "pages/banner/Banners";
 import BannerLottery from "./pages/banner/BannerLottery";
+import BetList from "./pages/bet/BetList";
+import BetView from "./pages/bet/BetView";
 
 export default function Routes(store) {
     const routes = {
         "/": () => <Home store={store}/>,
         "/unbound": () => <UnboundCharts store={store}/>,
         "/mixer": () => <Mixer store={store}/>,
+        "/bet": () => <BetList store={store}/>,
+        "/bet/:id": (params) => <BetView store={store}  {...params}/>,
         "/banners/:type": (params) => <Banners limit={100} store={store}  {...params}/>,
         "/lottery/winners": (params) => <BannerLottery store={store}  {...params}/>,
         "/post/:id/:head": (params) => <PostView store={store} {...params}/>,
@@ -25,6 +29,7 @@ export default function Routes(store) {
     const routesLogged = {
         "/cabinet": (params) => <Cabinet store={store} {...params}/>,
         "/cabinet/:control": (params) => <Cabinet store={store} {...params}/>,
+        "/cabinet/:control/:id": (params) => <Cabinet store={store} {...params}/>,
         "/logout": () => <Logout store={store}/>,
     }
 

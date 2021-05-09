@@ -39,6 +39,22 @@ modelSchema.virtual('banner', {
     justOne: true // set true for one-to-one relationship
 });
 
+modelSchema.virtual('betF', {
+    ref: 'bet',
+    localField: '_id',
+    foreignField: 'walletF',
+    //options:{match:{paymentTx:null}},
+    justOne: true // set true for one-to-one relationship
+});
+
+modelSchema.virtual('betA', {
+    ref: 'bet',
+    localField: '_id',
+    foreignField: 'walletA',
+    //options:{match:{paymentTx:null}},
+    justOne: true // set true for one-to-one relationship
+});
+
 
 export default mongoose.model(name, modelSchema)
 
