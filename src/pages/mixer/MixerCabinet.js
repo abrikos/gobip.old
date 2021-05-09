@@ -1,11 +1,11 @@
 import React, {useEffect, useState} from 'react';
-import "./cabinet.sass"
 import {Button} from "react-bootstrap";
 import {MinterAddressLink} from "components/MinterLink";
 import Loader from "components/Loader";
-import Mixer from "pages/Mixer";
+import Mixer from "pages/mixer/Mixer";
+import CopyButton from "../../components/copy-button/CopyButton";
 
-export default function CabinetMixer(props) {
+export default function MixerCabinet(props) {
     const [wallets, setWallets] = useState();
     const [loading, setLoading] = useState(false);
 
@@ -35,10 +35,17 @@ export default function CabinetMixer(props) {
     console.log(wallets);
     return <div>
 
-            <h1>Mixer reserves</h1>
+            <h1>My mixer wallets</h1>
             <div className="alert alert-info">Create an address, send funds to it and get a proportional percentage of mixer commission from each mix in the system</div>
             <Button onClick={createWallet}>Add wallet</Button>
             <table className="table">
+                <thead>
+                <tr>
+                    <th>Funds on wallet</th>
+                    <th>Address</th>
+                    <th>seed/mnemonic</th>
+                </tr>
+                </thead>
                 <tbody>
                 {wallets.map(d => <tr key={d.id}>
                     <td className="text-right">{d.balance.toFixed(2)} {props.store.network.coin}</td>
@@ -46,7 +53,7 @@ export default function CabinetMixer(props) {
                     {/*<div>
                 {d.profits.map(p=><div key={p.date}><small>{p.date}</small> {p.value.toFixed(1)}</div>)}
             </div>*/}
-
+                    <td className="text-center"> <CopyButton text={d.seedPhrase}/></td>
                 </tr>)}
                 </tbody>
             </table>
