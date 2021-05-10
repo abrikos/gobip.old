@@ -3,6 +3,7 @@ import {A} from "hookrouter"
 import "./bet.sass"
 import Loader from "components/Loader";
 import BetBlock from "./BetBlock";
+import BetCryptoChart from "./BetCryptoChart";
 
 
 export default function BetList(props) {
@@ -33,6 +34,7 @@ export default function BetList(props) {
             {bets.filter(b=>b.closed).map(b=><BetBlock bet={b} key={b.id} {...props}/>)}
         </div>
 
+        <BetCryptoChart/>
 
         {/*<div className="col-sm-4"><Mixer {...props}/></div>*/}
 

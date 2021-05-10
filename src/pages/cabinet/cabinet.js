@@ -24,7 +24,7 @@ export default function Cabinet(props) {
             {label: pages[props.control] && pages[props.control].label}
         ]}/>
         <div>
-            <div >{Object.keys(pages).map(p => <span key={p}  className={`m-2 ${p===props.control ? 'selected':''}`}><A href={`/cabinet/${p}`}>{pages[p].label}</A></span>)}</div>
+            <div >{Object.keys(pages).map(p => <span key={p}  className={`m-2 ${p===props.control ? 'glowed':''}`}><A href={`/cabinet/${p}`}>{pages[p].label}</A></span>)}</div>
             <hr/>
             <div>
                 {props.control === 'mixer' && <MixerCabinet {...props}/>}

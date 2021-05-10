@@ -10,7 +10,6 @@ module.exports.controller = function (app) {
         Mongoose.bet.findById(req.params.id)
             .populate({path: 'walletF', select: ['address', 'balance']})
             .populate({path: 'walletA', select: ['address', 'balance']})
-            .sort({createdAt: -1})
             .then(r => {
                 if (!r) return res.status(404).send('Bet not found')
                 res.send(r)
@@ -42,10 +41,11 @@ module.exports.controller = function (app) {
             .catch(e => res.status(500).send(e.message))
     });
 
-    app.post('/api/cabinet/bet/:id', passport.isLogged, (req, res) => {
+    app.post('/api/cabinet/bet/view/:id', passport.isLogged, (req, res) => {
         Mongoose.bet.findOne({user: req.session.userId, _id: req.params.id})
             .populate({path: 'walletF', select: ['address', 'balance']})
             .populate({path: 'walletA', select: ['address', 'balance']})
+            .populate('user')
             .then(r => {
                 if (!r) return res.status(404).send('Bet not found')
                 res.send(r)

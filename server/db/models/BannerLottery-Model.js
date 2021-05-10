@@ -24,6 +24,11 @@ modelSchema.virtual('date')
         return moment(this.createdAt).format('YYYY-MM-DD HH:mm:ss')
     });
 
+modelSchema.virtual('winDate')
+    .get(function () {
+        return moment(this.updatedAt).format('YYYY-MM-DD HH:mm:ss')
+    });
+
 modelSchema.virtual('liveTime')
     .get(function () {
         return moment().diff(moment(this.updatedAt),'seconds')

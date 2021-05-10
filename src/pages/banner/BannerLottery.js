@@ -3,6 +3,7 @@ import "./banner.sass";
 import {A} from "hookrouter"
 import {BannerContainer} from "./Banners";
 import {MinterTxLink} from "../../components/minter/MinterLink";
+import MinterValue from "../../components/minter/MinterValue";
 
 
 export default function BannerLottery(props) {
@@ -18,7 +19,7 @@ export default function BannerLottery(props) {
         <div className="d-flex flex-wrap">
         {winners.map(w=><div key={w.id}  className="w-25 p-2">
             <BannerContainer {...w.banner}/>
-            <div className="text-center">{<MinterTxLink tx={w.txWin} {...props}/>}</div>
+            <div className="text-center"><small>{w.winDate}</small> {<MinterTxLink tx={w.txWin} {...props}/>}</div>
         </div>)}
         </div>
     </div>

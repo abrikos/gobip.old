@@ -41,7 +41,7 @@ export default function BetView(props) {
     }
 
     function votePrize(votes) {
-        const sum = votes.reduce((a, b) => a.value + b.value)
+        const sum = votes.length && votes.reduce((a, b) => a.value + b.value)
         return <table className="table">
             <thead>
             <th>Tx</th>
@@ -52,7 +52,7 @@ export default function BetView(props) {
             {votes.map(v => <tr>
                 <td>{v.hash.substr(0, 8)}...</td>
                 <td><MinterValue value={v.value} {...props}/></td>
-                <td><MinterValue value={v.value / sum * bet.sum} {...props}/></td>
+                <td><MinterValue value={v.value / sum * bet.prizeForWinners} {...props}/></td>
             </tr>)}
             </tbody>
         </table>
@@ -66,11 +66,11 @@ export default function BetView(props) {
             <small className="d-block">Metatags are present</small>
         </div>
         <div className="alert alert-primary">
-            <h1><strong className="text-info">{bet.checkDateHuman}</strong> pair <strong className="text-info">{bet.pair}</strong> will be {bet.conditionHuman} <strong
+            <h1>At <strong className="text-info">{bet.checkDateHuman}</strong> pair <strong className="text-info">{bet.pair}</strong> will be {bet.conditionHuman} <strong
                 className="text-info">${bet.value}</strong></h1>
             {!!bet.sum && <HighchartsReact highcharts={Highcharts} options={options} allowChartUpdate ref={chartRef}/>}
         </div>
-        <h2 className="text-center">Stake: <MinterValue value={bet.sum} {...props}/></h2>
+        <h2 className="text-center">Prize: <MinterValue value={bet.prizeForWinners} {...props}/></h2>
         <div className="row">
             <div className="col">
                 {choiceCell(bet, 'for')}

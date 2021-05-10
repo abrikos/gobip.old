@@ -8,6 +8,8 @@ import {faTrash} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import BetView from "./BetView";
 import CopyButton from "../../components/copy-button/CopyButton";
+import {MinterAddressLink} from "../../components/minter/MinterLink";
+import MinterValue from "../../components/minter/MinterValue";
 
 export default function BetCabinetEdit(props) {
     const [bet, setBet] = useState();
@@ -26,7 +28,7 @@ export default function BetCabinetEdit(props) {
 
     function loadBet() {
         if (props.id === 'create') return setBet({name: 'New bet'});
-        props.store.api('/cabinet/bet/' + props.id)
+        props.store.api('/cabinet/bet/view/' + props.id)
             .then(d => {
                 setBet(d);
             })
@@ -101,6 +103,7 @@ export default function BetCabinetEdit(props) {
                 {bet.id && <Button variant="danger" onClick={deleteBet}><FontAwesomeIcon icon={faTrash}/></Button>}
             </div>
         </Form>}
+        <div className="alert-success alert">After the <i>"Check date"</i>, the bet will close and you will receive <MinterValue value={bet.userRefund} {...props}/> to your wallet  <MinterAddressLink address={bet.user.address} {...props}/></div>
         <A href={'/cabinet/bet'}> &lt;Back to the my list</A>
         {loading && <Loader/>}
         {error && <div className="alert alert-danger">{error.message}</div>}

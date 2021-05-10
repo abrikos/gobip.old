@@ -48,6 +48,7 @@ const obj = {
         //console.log({saveResult: true, to: win.addressPaymentFrom, value: MinterApi.params.lotteryPrise, fromAddress: mainWallet.address, fromSeed: mainWallet.seedPhrase})
         console.log('Lottery liveTime', lottery.liveTime)
         await payment.save()
+        lottery.amount = MinterApi.params.lotteryPrise;
         lottery.payment = payment;
         await lottery.save();
         await Mongoose.lottery.create({});

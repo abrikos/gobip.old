@@ -47,6 +47,16 @@ modelSchema.virtual('votes')
         return {for: this.votesF.length, against: this.votesA.length}
     });
 
+modelSchema.virtual('userRefund')
+    .get(function () {
+        return this.sum /100 * process.env.BET_USER_PECRENT;
+    });
+
+modelSchema.virtual('prizeForWinners')
+    .get(function () {
+        return this.sum /100 * (100 - process.env.BET_USER_PECRENT);
+    });
+
 modelSchema.virtual('sum')
     .get(function () {
         return this.walletF.balance + this.walletA.balance;

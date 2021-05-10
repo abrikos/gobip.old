@@ -2,17 +2,20 @@ import React from "react";
 import "themes/main/theme-main.sass"
 import ThemeMainTopMenu from "./ThemeMainTopMenu";
 import {A} from "hookrouter";
-import {faBlender, faCoins, faImages} from "@fortawesome/free-solid-svg-icons";
+import {faBlender, faCog, faCoins, faImages} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {Banners} from "pages/banner/Banners";
 
 export default function ThemeMain(props) {
     const links = {
-        '/mixer':{label: props.store.network.coin + ' Mixer', icon: faBlender},
-        '/lottery/winners':{label:'Banner lottery', icon: faImages},
-        '/bet':{label:'Crypto bets', icon: faCoins},
+        '/mixer': {label: props.store.network.coin + ' Mixer', icon: faBlender},
+        '/lottery/winners': {label: 'Banner lottery', icon: faImages},
+        '/bet': {label: 'Crypto bets', icon: faCoins},
     }
 
+    if (props.store.authenticatedUser) {
+        links['/cabinet/user'] = {label: 'Cabinet', icon: faCog}
+    }
     return <div>
         <ThemeMainTopMenu {...props}/>
         <div className="theme-main">
@@ -20,10 +23,10 @@ export default function ThemeMain(props) {
                 <div className="col-sm-2">
                     <div className="block">
                         <ul className="list-unstyled column-menu">
-                            {Object.keys(links).map(l=><li key={l} className={document.location.pathname===l?'selected':''}>
+                            {Object.keys(links).map(l => <li key={l} className={document.location.pathname === l ? 'glowed' : ''}>
                                 <A href={l} className="d-flex align-items-center">
                                     <span className="icon">
-                                        <FontAwesomeIcon  icon={links[l].icon}/>
+                                        <FontAwesomeIcon icon={links[l].icon}/>
                                     </span>
                                     <span>{links[l].label}</span>
                                 </A>

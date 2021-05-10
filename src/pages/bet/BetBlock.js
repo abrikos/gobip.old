@@ -19,7 +19,7 @@ export default function BetBlock(props) {
                 </div>
                 {!!d.sum && <div className="col">
 
-                    <MinterValue value={d.sum} {...props}/>
+                    <MinterValue value={d.prizeForWinners} {...props}/>
                     <div className="text-success">{d.balance.for.toFixed(0)}% <small>({d.votes.for})</small></div>
                     <div className="text-danger">{d.balance.against.toFixed(0)}% <small>({d.votes.against})</small></div>
                 </div>}
