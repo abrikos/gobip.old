@@ -1,6 +1,6 @@
 import React from "react";
 import "themes/main/theme-main.sass"
-import MenuTop from "./MenuTop";
+import ThemeMainTopMenu from "./ThemeMainTopMenu";
 import {A} from "hookrouter";
 import {faBlender, faCoins, faImages} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
@@ -14,7 +14,7 @@ export default function ThemeMain(props) {
     }
 
     return <div>
-        <MenuTop {...props}/>
+        <ThemeMainTopMenu {...props}/>
         <div className="theme-main">
             <div className="row">
                 <div className="col-sm-2">

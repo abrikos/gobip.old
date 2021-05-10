@@ -98,7 +98,7 @@ export default function BannerCabinet(props) {
                 <li>Upload an image, enter the url, translate it to an address of at least <MinterValue value={props.store.params.bannerPrice} {...props}/> and your banner will
                     appear at the top of the left column. The next paid banner will move your banner down
                 </li>
-                <li>Each banner participates in a lottery. The drawing takes place when the total amount of banner coins reaches <strong><MinterValue value={amounts.prize} {...props}/> {props.store.network.coin}</strong></li>
+                <li>Each banner participates in a lottery. The drawing takes place when the total amount of banner coins reaches <strong><MinterValue value={amounts.prize} {...props}/></strong></li>
                 <li>The odds in the lottery depend on the number of coins sent to enable the banner. More coins, more chances</li>
 
             </ul>

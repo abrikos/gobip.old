@@ -9,6 +9,7 @@ const modelSchema = new Schema({
         name: {type: String},
         username: String,
         password: String,
+        address: String,
         photo: String,
         admin: {type: Boolean},
         editor: {type: Boolean},

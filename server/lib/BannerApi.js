@@ -17,22 +17,6 @@ const obj = {
         await lottery.save();
     },
 
-    async fundsBack() {
-        const seed = process.env.MAIN_SEED;
-        const wallets = await Mongoose.wallet.find({type: 'banner'});
-        const list = []
-        for (const w of wallets) {
-            const data = {value: 5, coin: 0, to: w.address}
-            list.push(data)
-        }
-        const tx = await MinterApi.sendTx({
-            txParams: {data: {list}},
-            address: process.env.MAIN_WALLET,
-            seedPhrase: process.env.MAIN_SEED
-        });
-        console.log(tx)
-    },
-
     async totalAmount() {
         const res = await Mongoose.lottery.findOne({closed: false});
         return res ? res.amount : 0
@@ -44,22 +28,23 @@ const obj = {
         let lottery = await Mongoose.lottery.findOne({closed: false}).sort({createdAt: -1});
         if (!lottery) return //console.log('no lottery');
         if (lottery.liveTime < 60) return //console.log('LiveTime', lottery.liveTime);
-        const wallets = await Mongoose.wallet.find({type: 'banner', balance: {$gt: 0}}).populate('banner');
+        const wallets = await Mongoose.wallet.find({type: 'banner', balance: {$gt: 0}}).populate({path:'banner', populate:'user'});
         if (!wallets.length) return console.log('NO LOTTERY WALLETS')
         const mainWallet = await Mongoose.wallet.findOne({address: process.env.MAIN_WALLET});
         const payment = new Mongoose.payment({tx: lottery.id})
         const items = [];
         for (const wallet of wallets) {
-            //console.log({to: mainWallet.address, value: wallet.balance, fromAddress: wallet.address, fromSeed: wallet.seedPhrase})
+            //Collect from banners to Main
             payment.singleSends.push({to: mainWallet.address, value: wallet.balance, fromAddress: wallet.address, fromSeed: wallet.seedPhrase})
             for (let i = 0; i < wallet.balance; i++) {
                 items.push(wallet)
             }
         }
-        const win = items.filter(i => i.addressPaymentFrom)[Math.floor(Math.random() * items.filter(i => i.addressPaymentFrom).length)];
+        const win = items.filter(i => i.banner.user.address)[Math.floor(Math.random() * items.filter(i => i.addressPaymentFrom).length)];
 
         lottery.banner = win.banner;
-        payment.singleSends.push({saveResult: true, to: win.addressPaymentFrom, value: MinterApi.params.lotteryPrise, fromAddress: mainWallet.address, fromSeed: mainWallet.seedPhrase})
+        //Pay to winner
+        payment.singleSends.push({saveResult: true, to: win.banner.user.address, value: MinterApi.params.lotteryPrise, fromAddress: mainWallet.address, fromSeed: mainWallet.seedPhrase})
         //console.log({saveResult: true, to: win.addressPaymentFrom, value: MinterApi.params.lotteryPrise, fromAddress: mainWallet.address, fromSeed: mainWallet.seedPhrase})
         console.log('Lottery liveTime', lottery.liveTime)
         await payment.save()

@@ -1,10 +1,10 @@
 import React from "react";
-import MenuTop from "themes/main/MenuTop";
+import ThemeMainTopMenu from "themes/main/ThemeMainTopMenu";
 import "./theme-admin.sass"
 
 export default function ThemeAdmin(props) {
     return <div className="container-fluid bg-light">
-        <MenuTop store={props.store}/>
+        <ThemeMainTopMenu store={props.store}/>
         {/*<div className="m-auto bg-light p-3">
             <Letters path={'/editor/article/letter'} letter={decodeURI(props.letter)} store={props.store}/>
             <SearchForm editor store={props.store}/>

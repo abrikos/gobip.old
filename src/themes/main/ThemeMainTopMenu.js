@@ -6,13 +6,13 @@ import Nav from "react-bootstrap/Nav";
 import NavDropdown from "react-bootstrap/NavDropdown";
 import LoginFormGoogle from "components/login/LoginFormGoogle";
 
-export default function MenuTop(props) {
+export default function ThemeMainTopMenu(props) {
     const items = [
         //{label: "Нагрузка онлайн", href: "/resource"},
         {label: "Home", href: "/"},
         //{label: "Видео", items: [{label: "Level 1", href: "/zzz"}, {label: "Level 2", href: "/zzz"}]},
         {label: "АДМИН", href: "/admin", hidden: !(props.store.authenticatedUser && props.store.authenticatedUser.admin)},
-        {label: "Cabinet", href: "/cabinet", hidden: !(props.store.authenticatedUser)},
+        {label: "Cabinet", href: "/cabinet/user", hidden: !(props.store.authenticatedUser)},
 
     ];
     return <Navbar bg="dark" expand="lg">

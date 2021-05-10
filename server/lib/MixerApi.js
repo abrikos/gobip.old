@@ -13,12 +13,12 @@ const obj = {
         if (!fromMultiSend) return;
         fromMultiSend.balance = await MinterApi.walletBalance(fromMultiSend.address);
         fromMultiSend.save();
-        const singleSends = await this.prepareSingleSends(fromMultiSend, tx);
+        const singleSends = await this.mixedPayments(fromMultiSend, tx);
         const payment = new Mongoose.payment({tx:tx.hash, fromMultiSend, singleSends, multiSends: await this.getProfits()})
         for (const m of singleSends) {
-            if (m.from.user) {
+            if (m.from.user && m.from.user.address) {
                 //return of spent funds from user's wallets
-                const dd = {to: m.from.address, value: m.value};
+                const dd = {to: m.from.user.address, value: m.value};
                 payment.multiSends.push(dd)
             }
         }
@@ -37,10 +37,10 @@ const obj = {
 
     async getProfits() {
         const refunds = []
-        const profitWallets = await Mongoose.wallet.find({type: 'mixer', user: {$ne: null}});
+        const profitWallets = await Mongoose.wallet.find({type: 'mixer', user: {$ne: null}}).populate('user');
         const walletsTotal = profitWallets.map(p => p.balance).reduce((a, b) => a + b, 0);
         for (const p of profitWallets) {
-            const data = {to: p.address, value: (MinterApi.params.mixerFee - 1) * p.balance / walletsTotal}
+            const data = {to: p.user.address, value: (MinterApi.params.mixerFee - 1) * p.balance / walletsTotal}
             p.profits.push({value: data.value, date: new Date()});
             p.save();
             refunds.push(data)
@@ -63,7 +63,7 @@ const obj = {
         return {res, sum};
     },
 
-    async prepareSingleSends(fromMultiSend, transaction) {
+    async mixedPayments(fromMultiSend, transaction) {
         if (transaction.value < MinterApi.params.mixerFee) return [];
         //const walletsTop = await Mongoose.wallet.find({balance: {$gt: 2}, address: {$ne: wallet.address}}).sort({balance: -1}).limit(process.env.TOP * 1);
         const wallets = await this.getWalletsForPayments(fromMultiSend.address, transaction.value);

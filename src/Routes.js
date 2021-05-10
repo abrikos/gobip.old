@@ -27,7 +27,6 @@ export default function Routes(store) {
     };
 
     const routesLogged = {
-        "/cabinet": (params) => <Cabinet store={store} {...params}/>,
         "/cabinet/:control": (params) => <Cabinet store={store} {...params}/>,
         "/cabinet/:control/:id": (params) => <Cabinet store={store} {...params}/>,
         "/logout": () => <Logout store={store}/>,

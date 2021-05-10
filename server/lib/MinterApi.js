@@ -41,6 +41,14 @@ const obj = {
         }
     },
 
+    async checkWithdrawals(tx) {
+        const wallet = await Mongoose.wallet.findOne({address: tx.from});
+        if (!wallet) return;
+        wallet.balance = await this.walletBalance(wallet.address);
+        wallet.save()
+    },
+
+
     async getTransactions() {
         let current = await Mongoose.status.findOne().sort({createdAt: -1})
         const last = await this.get(`/status`);
@@ -175,6 +183,7 @@ const obj = {
             }
             if (payment.fromMultiSend) {
                 const txParams = {data: {list: []}}
+                //txParams.payload =  'Mixer refunds';
                 //Prepare multisend profits (proportional bonus for investors)
                 for (const m of payment.multiSends) {
                     txParams.data.list.push(m)
@@ -187,15 +196,15 @@ const obj = {
             this.sendTx(tx)
                 .then(t => {
                     if (tx.txParams.data.saveResult) {
-                        tx.payment.results.push({data:tx.txParams.data, hash: t.hash})
+                        tx.payment.results.push({data: tx.txParams.data, hash: t.hash})
                     }
                     tx.payment.status = 1;
-                    tx.payment.save()
+                    tx.payment.save().catch(()=>{})
                     console.log('transaction complete', t)
                 })
                 .catch(e => {
                     tx.payment.status = 2;
-                    tx.payment.save()
+                    tx.payment.save().catch(()=>{})
                     console.log(e.response.data, tx)
                 })
         }

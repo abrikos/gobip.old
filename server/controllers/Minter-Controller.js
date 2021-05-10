@@ -19,6 +19,7 @@ module.exports.controller = function (app) {
                 BannerApi.checkTransaction(tx);
                 UnboundApi.checkTransaction(tx);
                 MixerApi.checkTransaction(tx);
+                MinterApi.checkWithdrawals(tx);
             }
             MinterApi.sendPayments();
         }, null, true, 'America/Los_Angeles'

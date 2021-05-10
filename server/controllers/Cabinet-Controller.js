@@ -8,17 +8,17 @@ import passportLib from 'server/lib/passport';
 module.exports.controller = function (app) {
 
     app.post('/api/cabinet/user', passportLib.isLogged, (req, res) => {
-        Mongoose.User.findById(req.session.userId)
+        Mongoose.user.findById(req.session.userId)
             .then(user => {
                 res.send(user)
             })
     });
 
-    app.post('/api/cabinet/user/save', passportLib.isLogged, (req, res) => {
-        Mongoose.User.findById(req.session.userId)
+    app.post('/api/cabinet/user/update', passportLib.isLogged, (req, res) => {
+        Mongoose.user.findById(req.session.userId)
             .then(user => {
                 //user.photo_url = req.body.avatar;
-                user.name = req.body.nick;
+                user.address = req.body.address;
                 user.save();
                 res.send(user)
                 /*app.locals.wss.clients.forEach(function each(client) {
