@@ -11,12 +11,14 @@ const modelSchema = new Schema({
         user: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
         walletF: {type: mongoose.Schema.Types.ObjectId, ref: 'wallet'},
         walletA: {type: mongoose.Schema.Types.ObjectId, ref: 'wallet'},
+        payment: {type: mongoose.Schema.Types.ObjectId, ref: 'payment'},
         votesF: [Object],
         votesA: [Object],
         checkDate: {type: Date, required: true},
         condition: {type: String, required: true, message: p => `${p} is not a valid condition`, validate: {validator: v => ['<=', '>=', '='].indexOf(v) >= 0}},
         value: {type: Number, default: 0, min: 0},
         closed: Boolean,
+        closeTx: String,
         pair: {type: String, required: true, validate: {validator: v => v.match(/(\w+)-(\w+)/)}, message: p => `${p.value} is not a valid pair`}
     },
     {
@@ -39,7 +41,12 @@ modelSchema.virtual('checkDateHuman')
 
 modelSchema.virtual('balance')
     .get(function () {
-        return {for: this.walletF.balance * 1 / this.sum * 100, against: this.walletA.balance * 1 / this.sum * 100}
+        return {for: this.stakes.for * 1 / this.sum * 100 , against:  this.stakes.against * 1 / this.sum * 100 }
+    });
+
+modelSchema.virtual('stakes')
+    .get(function () {
+        return {for: this.votesF.map(v=>v.value).reduce((a,b)=>a+b,0), against: this.votesA.map(v=>v.value).reduce((a,b)=>a+b,0)}
     });
 
 modelSchema.virtual('votes')
@@ -59,7 +66,7 @@ modelSchema.virtual('prizeForWinners')
 
 modelSchema.virtual('sum')
     .get(function () {
-        return this.walletF.balance + this.walletA.balance;
+        return this.stakes.for + this.stakes.against;
     });
 
 modelSchema.virtual('shareLink')

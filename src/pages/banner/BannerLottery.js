@@ -1,9 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import "./banner.sass";
-import {A} from "hookrouter"
 import {BannerContainer} from "./Banners";
 import {MinterTxLink} from "../../components/minter/MinterLink";
-import MinterValue from "../../components/minter/MinterValue";
 
 
 export default function BannerLottery(props) {

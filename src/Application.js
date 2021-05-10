@@ -7,7 +7,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import "themes/common.sass"
 import axios from "axios";
 import f2o from "form-to-object"
-import networks from "params";
 
 export default function Application() {
     const [authenticatedUser, setAuthUser] = useState(false);

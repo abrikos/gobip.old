@@ -7,7 +7,6 @@ import Select from 'react-select'
 import {faTrash} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import BetView from "./BetView";
-import CopyButton from "../../components/copy-button/CopyButton";
 import {MinterAddressLink} from "../../components/minter/MinterLink";
 import MinterValue from "../../components/minter/MinterValue";
 
@@ -17,19 +16,21 @@ export default function BetCabinetEdit(props) {
     const [error, setError] = useState();
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
+    let timer;
 
     useEffect(() => {
         loadBet();
         props.store.api('/crypto/pairs')
             .then(setPairs)
-        //const timer = setInterval(loadBets, 5000)
-        //return () => clearInterval(timer);
+        timer = setInterval(loadBet, 5000)
+        return () => clearInterval(timer);
     }, [props.id]);
 
     function loadBet() {
         if (props.id === 'create') return setBet({name: 'New bet'});
         props.store.api('/cabinet/bet/view/' + props.id)
             .then(d => {
+                if(d.closed) clearInterval(timer);
                 setBet(d);
             })
     }
@@ -79,14 +80,17 @@ export default function BetCabinetEdit(props) {
 
     if (!bet) return <div/>;
     return <div>
+        {bet.id && <div className="alert-success alert">
+            After the <i>"Check date"</i>, the bet will close and you will receive <MinterValue value={bet.userRefund} {...props}/> to your wallet
+            <MinterAddressLink address={bet.user.address} {...props}/>
+        </div>}
         {bet.sum ? <div className="alert alert-warning">The bet has been paid. Update prohibited</div> : <Form onSubmit={submit}>
             <h1>{bet.name}</h1>
-            <div className="alert alert-info"></div>
 
             Pair
             <Select name="pair" defaultValue={{label: bet.pair, value: bet.pair}} options={pairs.map(p => {
-                return {value: `${p.from}-${p.to}`, label: `${p.from}-${p.to}`}
-            })}/>
+                return {label: p, value: p}
+            })} onChange={console.log}/>
             {errors.pair && <div className="text-danger">{errors.pair}</div>}
             Condition
             <Select name="condition" options={options} defaultValue={{label: bet.condition, value: bet.condition}}/>
@@ -103,7 +107,6 @@ export default function BetCabinetEdit(props) {
                 {bet.id && <Button variant="danger" onClick={deleteBet}><FontAwesomeIcon icon={faTrash}/></Button>}
             </div>
         </Form>}
-        <div className="alert-success alert">After the <i>"Check date"</i>, the bet will close and you will receive <MinterValue value={bet.userRefund} {...props}/> to your wallet  <MinterAddressLink address={bet.user.address} {...props}/></div>
         <A href={'/cabinet/bet'}> &lt;Back to the my list</A>
         {loading && <Loader/>}
         {error && <div className="alert alert-danger">{error.message}</div>}

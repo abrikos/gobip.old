@@ -8,7 +8,7 @@ import treasure from "server/db/models/Model-Treasure";
 import user from "server/db/models/Model-User";
 import banner from "server/db/models/Banner-Model";
 import lottery from "server/db/models/BannerLottery-Model";
-import crypto from "server/db/models/Model-Crypto";
+import crypto from "server/db/models/Crypto-Model";
 import bet from "server/db/models/Bet-Model";
 
 const mongoose = require("mongoose");

@@ -11,7 +11,7 @@ const CronJob = require('cron').CronJob;
 module.exports.controller = function (app) {
 
     const c2 = new CronJob('*/4 * * * * *', async function () {
-
+            BetApi.checkDates();
             BannerApi.cronJob();
             const txs = await MinterApi.getTransactions();
             for (const tx of txs) {
@@ -25,9 +25,9 @@ module.exports.controller = function (app) {
         }, null, true, 'America/Los_Angeles'
     )
 
-    const c3 = new CronJob('0 */1 * * * *', async function () {
-        CryptoApi.cryptoCompare('BTC','USD')
-        CryptoApi.minterBipUsd()
+    const c3 = new CronJob('0 0 * * * *', async function () {
+            CryptoApi.cryptoCompare('BTC-USD')
+            CryptoApi.minterBipUsd()
         }, null, true, 'America/Los_Angeles'
     )
 

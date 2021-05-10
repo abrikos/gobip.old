@@ -1,11 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import MyBreadCrumb from "components/MyBreadCrumb";
-import {A} from "hookrouter";
 import "./cabinet.sass"
-import MixerCabinet from "pages/mixer/MixerCabinet";
-import BannerCabinet from "pages/banner/BannerCabinet";
-import BetCabinet from "../bet/BetCabinet";
-import {MinterAddressLink} from "../../components/minter/MinterLink";
 import {Button, Form, FormControl} from "react-bootstrap";
 
 export default function CabinetUser(props) {
@@ -16,7 +10,7 @@ export default function CabinetUser(props) {
 
     }, [props.control])
 
-    function submit(e){
+    function submit(e) {
         e.preventDefault();
         const form = props.store.formToObject(e.target)
         props.store.api('/cabinet/user/update', form)
@@ -24,13 +18,11 @@ export default function CabinetUser(props) {
 
     }
 
-    if(!user) return <div/>
+    if (!user) return <div/>
     return <div className="cabinet">
         <div>
-            <h1>My data</h1>
-
-            <Form onSubmit={submit}>
-                Address for all payments from the system
+            <Form onSubmit={submit} className={`alert alert-${user.address ? 'success' : 'danger'}`}>
+                Address for all payments from the system. {user.address ? '' : <strong>No address specified. You will not receive payments from the system!</strong>}
                 <FormControl name="address" defaultValue={user.address}/>
                 {/*{user.address && <MinterAddressLink address={user.address} {...props}/>}*/}
                 <hr/>

@@ -9,48 +9,52 @@ import MinterValue from "../../components/minter/MinterValue";
 
 export default function BetView(props) {
     const [bet, setBet] = useState();
-    const [loading, setLoading] = useState(false);
     const chartRef = useRef(null);
+    let timer;
 
     useEffect(() => {
         loadBet();
-        const timer = setInterval(loadBet, 1000)
+        timer = setInterval(loadBet, 1000)
         return () => clearInterval(timer);
     }, []);
 
     function loadBet() {
         props.store.api('/bet/view/' + props.id)
             .then(d => {
+                if(d.closed) clearInterval(timer);
                 chartRef.current && chartRef.current.chart.series[0].setData([
-                    {name: 'For', y: d.walletF.balance, color: '#28a745'},
-                    {name: 'Against', y: d.walletA.balance, color: '#dc3545'},
+                    {name: 'For', y: d.stakes.for, color: '#28a745'},
+                    {name: 'Against', y: d.stakes.against, color: '#dc3545'},
                 ])
                 setBet(d);
             })
     }
 
     function choiceCell(b, choice) {
+        if(b.closed) return
         const yes = choice === 'for';
         const wallet = yes ? b.walletF : b.walletA;
         return <div className={`border p-2 ${yes ? 'border-success' : 'border-danger'}`}>
             <div>address to vote <strong>{choice}</strong>:</div>
             <MinterAddressLink address={wallet.address} {...props}/>
-            <hr/>
-            <div>{!!b.sum && b.balance[choice].toFixed(1)}% <small>(Votes: {!!b.sum && b.votes[choice]})</small></div>
+
+            {!!b.sum && <div><hr/>{b.balance[choice].toFixed(1)}% <small>(Votes: {b.votes[choice]})</small></div>}
         </div>
     }
 
     function votePrize(votes) {
-        const sum = votes.length && votes.reduce((a, b) => a.value + b.value)
+        const sum = votes.length && votes.map(v=>v.value).reduce((a, b) => a + b)
         return <table className="table">
             <thead>
-            <th>Tx</th>
-            <th>Payed</th>
-            <th>Prize</th>
+            <tr>
+                <th>From</th>
+                <th>Payed</th>
+                <th>Prize</th>
+            </tr>
             </thead>
             <tbody>
-            {votes.map(v => <tr>
-                <td>{v.hash.substr(0, 8)}...</td>
+            {votes.map(v => <tr key={v.hash}>
+                <td>{v.from.substr(0, 8)}...</td>
                 <td><MinterValue value={v.value} {...props}/></td>
                 <td><MinterValue value={v.value / sum * bet.prizeForWinners} {...props}/></td>
             </tr>)}
@@ -68,7 +72,7 @@ export default function BetView(props) {
         <div className="alert alert-primary">
             <h1>At <strong className="text-info">{bet.checkDateHuman}</strong> pair <strong className="text-info">{bet.pair}</strong> will be {bet.conditionHuman} <strong
                 className="text-info">${bet.value}</strong></h1>
-            {!!bet.sum && <HighchartsReact highcharts={Highcharts} options={options} allowChartUpdate ref={chartRef}/>}
+            <HighchartsReact highcharts={Highcharts} options={options} allowChartUpdate ref={chartRef}/>
         </div>
         <h2 className="text-center">Prize: <MinterValue value={bet.prizeForWinners} {...props}/></h2>
         <div className="row">

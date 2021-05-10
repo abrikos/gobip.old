@@ -1,7 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {A} from "hookrouter"
 import "./bet.sass"
-import Loader from "components/Loader";
 import BetBlock from "./BetBlock";
 import BetCryptoChart from "./BetCryptoChart";
 
@@ -27,14 +25,19 @@ export default function BetList(props) {
     return <div>
         <h1>Active bets</h1>
         <div className="d-flex flex-wrap">
-            {bets.filter(b=>!b.closed).map(b=><BetBlock bet={b} key={b.id} {...props}/>)}
+            {bets.filter(b => !b.closed).map(b => <BetBlock bet={b} key={b.id} {...props}/>)}
         </div>
-        <h1>Closed bets</h1>
-        <div className="d-flex flex-wrap">
-            {bets.filter(b=>b.closed).map(b=><BetBlock bet={b} key={b.id} {...props}/>)}
-        </div>
+        {!!bets.filter(b => b.closed).length && <div>
+            <h1>Closed bets</h1>
+            <div className="d-flex flex-wrap">
+                {bets.filter(b => b.closed).map(b => <BetBlock bet={b} key={b.id} {...props}/>)}
+            </div>
+        </div>}
+        <hr/>
+        <BetCryptoChart pair={'BTC-USD'} {...props}/>
+        <hr/>
+        <BetCryptoChart pair={'BIP-USD'} {...props}/>
 
-        <BetCryptoChart/>
 
         {/*<div className="col-sm-4"><Mixer {...props}/></div>*/}
 

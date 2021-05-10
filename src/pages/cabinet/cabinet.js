@@ -15,8 +15,6 @@ export default function Cabinet(props) {
         bet: {label: 'Bets'},
     }
 
-    useEffect(() => {
-    }, [props.control])
 
     return <div className="cabinet">
         <MyBreadCrumb items={[

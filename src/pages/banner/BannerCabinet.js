@@ -31,14 +31,6 @@ export default function BannerCabinet(props) {
         //.catch(console.warn)
     }
 
-    function createBanner() {
-        props.store.api('/cabinet/banner/create')
-            .then(b => {
-                console.log(b)
-                loadData()
-            })
-    }
-
     function _handleImageChange(e) {
         setLoader(true)
         e.preventDefault();

@@ -1,14 +1,12 @@
 import React, {useEffect, useState} from 'react';
 import {Button} from "react-bootstrap";
-import {MinterAddressLink} from "components/minter/MinterLink";
-import {A, navigate} from "hookrouter"
-import Loader from "components/Loader";
+import {navigate} from "hookrouter"
 import BetBlock from "./BetBlock";
 
 
 export default function BetCabinetList(props) {
     const [bets, setBets] = useState([]);
-    const [loading, setLoading] = useState(false);
+
 
     useEffect(() => {
         loadBets();
@@ -25,13 +23,6 @@ export default function BetCabinetList(props) {
 
     function createBet() {
         return navigate('/cabinet/bet/create')
-        setLoading(true)
-        props.store.api('/cabinet/bet/create')
-            .then(d => {
-                loadBets();
-                navigate('/cabinet/bet/'+d.id)
-                setLoading(false)
-            })
     }
 
     //if(!bets) return <div/>;

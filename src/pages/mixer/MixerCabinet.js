@@ -2,7 +2,6 @@ import React, {useEffect, useState} from 'react';
 import {Button} from "react-bootstrap";
 import {MinterAddressLink} from "components/minter/MinterLink";
 import Loader from "components/Loader";
-import Mixer from "pages/mixer/Mixer";
 import CopyButton from "../../components/copy-button/CopyButton";
 import MinterValue from "../../components/minter/MinterValue";
 
@@ -33,7 +32,6 @@ export default function MixerCabinet(props) {
     }
 
     if(!wallets) return <div/>;
-    console.log(wallets);
     return <div>
 
             <h1>My mixer wallets</h1>

@@ -2,20 +2,46 @@ import React from "react";
 import "themes/main/theme-main.sass"
 import ThemeMainTopMenu from "./ThemeMainTopMenu";
 import {A} from "hookrouter";
-import {faBlender, faCog, faCoins, faImages} from "@fortawesome/free-solid-svg-icons";
+import {faBlender, faCoins, faCrown, faImages, faSignInAlt, faSignOutAlt, faUserCog} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {Banners} from "pages/banner/Banners";
+import LoginFormGoogle from "../../components/login/LoginFormGoogle";
 
 export default function ThemeMain(props) {
-    const links = {
-        '/mixer': {label: props.store.network.coin + ' Mixer', icon: faBlender},
-        '/lottery/winners': {label: 'Banner lottery', icon: faImages},
-        '/bet': {label: 'Crypto bets', icon: faCoins},
+    const links = [
+        {path: '/mixer', label: props.store.network.coin + ' Mixer', icon: faBlender},
+        {path: '/lottery/winners', label: 'Banner lottery', icon: faImages},
+        {path: '/bet', label: 'Crypto bets', icon: faCoins},
+        {path: '/cabinet/user', label: 'Cabinet', icon: faUserCog, type: 'logged'},
+        {path: '/admin/start', label: 'Admin', icon: faCrown, type: 'admin'},
+        {path: '/logout', label: 'Logout', icon: faSignOutAlt, type: 'logged'},
+        {path: '/login', component: <LoginFormGoogle store={props.store}/>, icon: faSignInAlt, type: 'not-logged'},
+
+    ]
+
+    function checkPath(p){
+        const loc = document.location.pathname.match(/\/\w+/)
+        const loc2 = p.match(/\/\w+/)
+        return loc2 && loc2[0] === loc[0];
     }
 
-    if (props.store.authenticatedUser) {
-        links['/cabinet/user'] = {label: 'Cabinet', icon: faCog}
+    function menuItem(l) {
+        let ret = false;
+        switch (l.type){
+            case 'logged': ret = !props.store.authenticatedUser ; break;
+            case 'admin': ret = !(props.store.authenticatedUser && props.store.authenticatedUser.admin) ; break;
+            case 'not-logged': ret = props.store.authenticatedUser ; break;
+        }
+        if(ret) return;
+        return <li key={l.path} className={checkPath( l.path) ? 'glowed' : ''}>
+            <span className="icon">
+                                        <FontAwesomeIcon icon={l.icon}/>
+                                    </span>
+            {l.path && <A href={l.path} className="d-flex align-items-center"><span>{l.label}</span></A>}
+            {l.component}
+        </li>
     }
+
     return <div>
         <ThemeMainTopMenu {...props}/>
         <div className="theme-main">
@@ -23,17 +49,10 @@ export default function ThemeMain(props) {
                 <div className="col-sm-2">
                     <div className="block">
                         <ul className="list-unstyled column-menu">
-                            {Object.keys(links).map(l => <li key={l} className={document.location.pathname === l ? 'glowed' : ''}>
-                                <A href={l} className="d-flex align-items-center">
-                                    <span className="icon">
-                                        <FontAwesomeIcon icon={links[l].icon}/>
-                                    </span>
-                                    <span>{links[l].label}</span>
-                                </A>
-                            </li>)}
-
+                            {links.map(menuItem)}
                         </ul>
                     </div>
+
                     <div className="d-sm-block d-none">
 
                     </div>

@@ -107,7 +107,7 @@ module.exports.controller = function (app) {
             })
     });
 
-    app.post('/api/banner/lottery/winners', passport.isLogged, (req, res) => {
+    app.post('/api/banner/lottery/winners', (req, res) => {
         Mongoose.lottery.find({payment:{$ne:null}})
             .populate('payment',['results'])
             .populate('banner')

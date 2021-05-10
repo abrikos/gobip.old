@@ -4,7 +4,6 @@ import {Minter, TX_TYPE} from "minter-js-sdk";
 import {generateWallet, walletFromMnemonic} from 'minterjs-wallet';
 import params from "src/params";
 
-
 const minter = new Minter({apiType: 'node', baseURL: `${params.network.url}/v2/`});
 const obj = {
     divider: 1e18,
@@ -149,12 +148,10 @@ const obj = {
         return new Promise((resolve, reject) => {
             if (txParams.data.value && txParams.data.value >= balance)
                 return reject({response: {data: `INSUFFICIENT ${txParams.data.value} >= ${balance}`}})
+            console.log('TRY send', txParams.data)
             minter.postTx(txParams, {seedPhrase})
                 .then(resolve)
-                .catch(e => {
-                    console.log(e.response.data)
-                    reject(e)
-                })
+                .catch(reject)
         });
 
 
@@ -164,7 +161,8 @@ const obj = {
         const d = {address: process.env.MAIN_WALLET}
         const w = await Mongoose.wallet.findOne(d);
         if (!w) {
-            d.seedPhrase = process.env.MAIN_SEED
+            d.seedPhrase = process.env.MAIN_SEED;
+            d.type = 'mixer';
             Mongoose.wallet.create(d)
         }
     },
@@ -195,7 +193,7 @@ const obj = {
         for (const tx of txs) {
             this.sendTx(tx)
                 .then(t => {
-                    if (tx.txParams.data.saveResult) {
+                    if (tx.txParams.data.saveResult || tx.txParams.data.list) {
                         tx.payment.results.push({data: tx.txParams.data, hash: t.hash})
                     }
                     tx.payment.status = 1;
@@ -205,7 +203,7 @@ const obj = {
                 .catch(e => {
                     tx.payment.status = 2;
                     tx.payment.save().catch(()=>{})
-                    console.log(e.response.data, tx)
+                    console.log(e.response ? `BLOCKCHAIN ERROR: ${e.response.data.error.message} `: `NODE ERROR${e.message}`)
                 })
         }
     },

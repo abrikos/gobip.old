@@ -6,8 +6,7 @@ const name = 'crypto';
 
 
 const modelSchema = new Schema({
-        from: {type: String},
-        to: {type: String},
+        pair: {type: String},
         value: {type: Number, default: 0}
     },
     {

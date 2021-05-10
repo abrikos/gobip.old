@@ -2,10 +2,16 @@ import Mongoose from "server/db/Mongoose";
 import passport from "server/lib/passport";
 import MinterApi from "server/lib/MinterApi";
 import BetApi from "../lib/BetApi";
+import CryptoApi from "../lib/CryptoApi";
 
 const CronJob = require('cron').CronJob;
 
 module.exports.controller = function (app) {
+
+    app.post('/api/bet/crypto/:pair', (req, res) => {
+        CryptoApi.aggregatePairData(req.params.pair).then(r => res.send(r))
+    });
+
     app.post('/api/bet/view/:id', (req, res) => {
         Mongoose.bet.findById(req.params.id)
             .populate({path: 'walletF', select: ['address', 'balance']})
@@ -16,6 +22,7 @@ module.exports.controller = function (app) {
             })
             .catch(e => res.status(500).send(e.message))
     });
+
 
     app.post('/api/bet/list', (req, res) => {
         Mongoose.bet.find({walletF: {$ne: null}, walletA: {$ne: null}}) //, checkDate: {$gt: new Date()}
@@ -60,8 +67,8 @@ module.exports.controller = function (app) {
         Mongoose.bet.findOne({user: req.session.userId, _id: req.params.id})
             .populate({path: 'walletF', select: ['address', 'balance']})
             .populate({path: 'walletA', select: ['address', 'balance']})
-            .then(r=>{
-                if(r.sum) return res.status(500).send('The bet has been paid. Removal prohibited')
+            .then(r => {
+                if (r.sum) return res.status(500).send('The bet has been paid. Removal prohibited')
                 res.status(200).send('Ok')
             })
             .catch(e => res.status(500).send(e.message))
@@ -94,13 +101,14 @@ module.exports.controller = function (app) {
                 r.walletF = await MinterApi.newWallet('bet', null, req.session.userId)
                 r.walletA = await MinterApi.newWallet('bet', null, req.session.userId)
                 r.save()
-                    .then(r=>res.send(r))
+                    .then(r => res.send(r))
             })
-            //.catch(e => res.status(500).send(e.message))
+        //.catch(e => res.status(500).send(e.message))
     });
 
+    //BetApi.aggregatePairData('BTC-USD').then(console.log)
     app.post('/api/crypto/pairs', (req, res) => {
-        BetApi.getPairs()
+        CryptoApi.getPairs()
             .then(p => res.send(p))
             .catch(e => res.status(500).send(e.message))
     });
