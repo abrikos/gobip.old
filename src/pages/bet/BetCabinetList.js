@@ -15,7 +15,7 @@ export default function BetCabinetList(props) {
     }, []);
 
     function loadBets() {
-        props.store.api('/cabinet/bet/list')
+        props.store.api('/cabinet/bet/list', {}, true)
             .then(d => {
                 setBets(d);
             })
@@ -30,11 +30,11 @@ export default function BetCabinetList(props) {
         <Button onClick={createBet}>Create bet</Button>
         <h1>My active bets</h1>
         <div className="d-flex flex-wrap">
-            {bets.filter(b=>!b.closed).map(b=><BetBlock bet={b} key={b.id} cabinet {...props}/>)}
+            {bets.filter(b => !b.closed).map(b => <BetBlock bet={b} key={b.id} cabinet {...props}/>)}
         </div>
         <h1>My closed bets</h1>
         <div className="d-flex flex-wrap">
-            {bets.filter(b=>b.closed).map(b=><BetBlock bet={b} key={b.id} cabinet {...props}/>)}
+            {bets.filter(b => b.closed).map(b => <BetBlock bet={b} key={b.id} cabinet {...props}/>)}
         </div>
     </div>
 

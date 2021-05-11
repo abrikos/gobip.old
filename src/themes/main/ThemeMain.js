@@ -32,6 +32,7 @@ export default function ThemeMain(props) {
             case 'logged': ret = !props.store.authenticatedUser ; break;
             case 'admin': ret = !(props.store.authenticatedUser && props.store.authenticatedUser.admin) ; break;
             case 'not-logged': ret = props.store.authenticatedUser ; break;
+            default:
         }
         if(ret) return;
         return <li key={l.path} className={checkPath( l.path) ? 'glowed' : ''}>

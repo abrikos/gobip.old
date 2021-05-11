@@ -28,15 +28,16 @@ export default function Application() {
         authenticatedUser,
         params,
         network:params.network,
-        async postData(path = '', data = {}) {
-            const label = new Date().valueOf() + ' - POST ' + path;
-            if(process.env.REACT_APP_LOG_ENABLE * 1) console.time(label)
+        async postData(path = '', data = {}, noLogs) {
+
+            const label = 'POST: ' + path;
+            if(!(process.env.REACT_APP_API_LOG_DISABLE * 1) && !noLogs) console.time(label)
             const url = '/api' + path;
             return new Promise((resolve, reject) => {
                 axios.post(url, data)
                     .then(res => {
                         resolve(res.data)
-                        if(process.env.REACT_APP_LOG_ENABLE * 1) console.timeEnd(label)
+                        if(!(process.env.REACT_APP_API_LOG_DISABLE * 1) && !noLogs) console.timeEnd(label)
                     })
                     .catch(err => {
                         //resolve({error: err.response.status, message: err.response.data.message || err.response.statusText})
@@ -46,8 +47,8 @@ export default function Application() {
             })
         },
 
-        async api(path, data) {
-            return await this.postData(path, data)
+        async api(path, data, noLogs) {
+            return await this.postData(path, data, noLogs)
         },
 
         logOut() {

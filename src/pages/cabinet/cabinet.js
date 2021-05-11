@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import MyBreadCrumb from "components/MyBreadCrumb";
 import {A} from "hookrouter";
 import "./cabinet.sass"

@@ -1,7 +1,4 @@
 import React, {useEffect, useState} from "react";
-import {Button, Form, InputGroup} from "react-bootstrap";
-import Loader from "components/Loader";
-import {MinterAddressLink} from "components/minter/MinterLink";
 import MinterValue from "../../components/minter/MinterValue";
 import MixerAddressForm from "./MixerAddressForm";
 import MixerCalcForm from "./MixerCalcForm";
