@@ -1,4 +1,5 @@
-import unbound from "server/db/models/Model-Unbound";
+import unbound from "server/db/models/Unbound-Model";
+import transaction from "server/db/models/Transaction-Model";
 import ethereum from "server/db/models/Model-Eth";
 import training from "server/db/models/Model-Training";
 import wallet from "server/db/models/Wallet-Model";
@@ -38,7 +39,7 @@ const Mongoose = {
     isValidId: function (id) {
         return mongoose.Types.ObjectId.isValid(id)
     },
-    user, unbound, ethereum, training, wallet, payment, status, treasure, banner, lottery, crypto, bet
+    user, unbound, ethereum, training, wallet, payment, status, treasure, banner, lottery, crypto, bet, transaction
 
 };
 export default Mongoose;

@@ -1,18 +1,13 @@
 import Mongoose from "server/db/Mongoose";
-import MinterApi from "server/lib/MinterApi";
+//import MinterApi from "server/lib/MinterApi";
 
 async function startup(){
-
-    Mongoose.transaction.count({}).then(console.log)
-    await Mongoose.transaction.deleteMany({})
-    MinterApi.get(`transactions`, `query=tags.tx.type='08'&page=0&per_page=1`)
-        .then(console.log)
-        .catch(r=>console.log(r.response.data))
-
-    for(let i = 1; i<=2; i++){
-        await MinterApi.getUnboundTxs(i)
+    const txs = await Mongoose.transaction.find()
+    for (const tx of txs){
+        console.log(tx)
     }
-    console.log('DONE. Press Ctrl+C')
+
+
 }
 
 startup();

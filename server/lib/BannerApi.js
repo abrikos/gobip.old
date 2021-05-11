@@ -11,6 +11,7 @@ const obj = {
 
     async lotteryCheckAmount() {
         const res = await Mongoose.wallet.aggregate([{$group: {_id: "$type", amount: {$sum: "$balance"}}}, {$match: {"_id": "banner"}}])
+        if(!res.length) return;
         let lottery = await Mongoose.lottery.findOne({closed: false});
         if (!lottery) return;
         lottery.amount = res[0].amount -  MinterApi.params.bannerPrice * 2;

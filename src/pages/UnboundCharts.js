@@ -12,7 +12,7 @@ export default function UnboundCharts(props) {
     const [txView, setTxView] = useState(false)
 
     function init() {
-        props.store.api(`/daily/${coin}/${days}`).then(setData)
+        props.store.api(`/unbound/daily/${coin}/${days}`).then(setData)
 
     }
 
@@ -26,7 +26,7 @@ export default function UnboundCharts(props) {
 
     const options = {
         chart: {
-            type: 'column'
+            type: 'line'
         },
         title: {
             text: `Unbound  volumes in ${days} days (${data.length > 0 && data.map(d => d.values).reduce((a, b) => a + b).toLocaleString()} ${coin})`
@@ -67,12 +67,12 @@ export default function UnboundCharts(props) {
 
     return <div className="m-1">
         Coin: <select value={coin} onChange={changeCoin}>{coins.map(c=><option value={c.coin} key={c.coin}>{c.coin}</option>)}</select>
-
+        Days: <input value={days} onChange={e=>setDays(e.target.value*1)} type="number" size={5}/>
         {/*{coins.map(c => <span onClick={() => setCoin(c.coin)} key={c.coin} className={`badge ${c.coin === coin ? '' : 'badge-info'} m-2 pointer`}>{c.coin}</span>)}*/}
         <hr/>
 
         <HighchartsReact highcharts={Highcharts} options={options}/>
-        {/*Days: <input value={days} onChange={changeDays} type="number"/>*/}
+
         <Button size="sm" variant={!txView ? 'primary' : 'warning'} onClick={() => setTxView(!txView)}>{txView ? 'Hide' : 'Show'} transactions</Button>
 
         {txView && <TransactionsList model={'unbound'} fields={['hash', 'value', 'coin']} link={`https`} {...props}/>}

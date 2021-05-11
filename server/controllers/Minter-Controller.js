@@ -50,8 +50,8 @@ module.exports.controller = function (app) {
             })
     });
 
-    app.post('/api/daily/:coin/:limit', async (req, res) => {
-        daily(req.params.limit * 1 || 30, {coin: req.params.coin})
+    app.post('/api/unbound/daily/:coin/:limit', async (req, res) => {
+        UnboundApi.daily(req.params.limit * 1 || 30, {coin: req.params.coin})
             .then(txs => {
                 res.send(txs)
             })
@@ -59,38 +59,7 @@ module.exports.controller = function (app) {
 
     //Mongoose.payment.deleteMany({}).then(console.log)
 
-    async function daily(limit, match) {
-        const aggregateDaily = [
-            {
-                $group: {
-                    _id: {
-                        month: {$month: "$createdAt"},
-                        day: {$dayOfMonth: "$createdAt"},
-                        year: {$year: "$createdAt"},
-                        coin: "$coin"
-                    },
-                    date: {$min: "$createdAt"},
-                    values: {$sum: "$value"},
-                    coin: {$first: "$coin"}
 
-                },
-
-            },
-
-            {$addFields: {coin: "$coin"}},
-            {$sort: {date: 1, _id: 1}},
-            {
-                $project: {
-                    date: {$dateToString: {format: "%Y-%m-%d", date: "$date", timezone: "UTC"}},
-                    values: {$round: ["$values", 1]},
-                    coin: 1
-                }
-            },
-
-        ]
-        aggregateDaily.push({$match: match})
-        return Mongoose.unbound.aggregate(aggregateDaily).limit(limit)
-    }
 
 
 //Mongoose.transaction.aggregate(aggregateCoin).then(console.log)
