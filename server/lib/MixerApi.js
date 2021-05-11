@@ -5,16 +5,66 @@ import MinterApi from "server/lib/MinterApi";
 const obj = {
     usePayload: true,
 
+
+
+    async createAddressForMixing(to) {
+        return new Promise((resolve, reject) => {
+            if (!MinterApi.checkAddress(to)) return reject({message: 'Invalid address'})
+            MinterApi.newWallet('mixer', to)
+                .then(async w => {
+                    const {address} = w;
+                    const data = {
+                        address,
+                        min: MinterApi.params.mixerFee * 2 + 1,
+                        max: await this.totalAmount()
+                    }
+                    resolve(data)
+                })
+        });
+    },
+
+    async calculateMix(value) {
+        const txParams = await this.mixedPayments({
+            address: 'Mxe43ac6c88f573a7703fe7f2c3d8d342818e8fb97',
+            to: 'Mx111ac6c88f573a7703fe7f2c3d8d342818e8fb97',
+            balance: value
+        }, {value})
+        const commission = await MinterApi.getCommission();
+        const data = {
+            balance: txParams.map(t => t.value).reduce((a, b) => a + b, 0) - commission * txParams.length,
+            count: txParams.length,
+            value,
+            commission
+        }
+        const amount = await this.totalAmount();
+        return new Promise((resolve, reject) => {
+            if (amount < data.value - data.profit - data.commission * data.count) reject({message: 'Wrong amount'})
+            resolve(data)
+        });
+
+
+    },
+
     async checkTransaction(tx) {
         //if(tx.value <= MinterApi.params.mixerFee * 1 + 1) return console.log('DONATE', tx.hash, tx.value, MinterApi.params.mixerFee + 1);
         const found = await Mongoose.payment.findOne({tx: tx.hash});
         if (found) return;
-        const fromMultiSend = await Mongoose.wallet.findOne({type: 'mixer', to: {$ne: null}, address: tx.to});
+        const fromMultiSend = await Mongoose.wallet.findOne({
+            type: 'mixer',
+            to: {$ne: null},
+            address: tx.to
+        });
         if (!fromMultiSend) return;
         fromMultiSend.balance = await MinterApi.walletBalance(fromMultiSend.address);
         fromMultiSend.save();
+        if(fromMultiSend.user) return;
         const singleSends = await this.mixedPayments(fromMultiSend, tx);
-        const payment = new Mongoose.payment({tx:tx.hash, fromMultiSend, singleSends, multiSends: await this.getProfits()})
+        const payment = new Mongoose.payment({
+            tx: tx.hash,
+            fromMultiSend,
+            singleSends,
+            multiSends: await this.getProfits()
+        })
         for (const m of singleSends) {
             if (m.from.user && m.from.user.address) {
                 //return of spent funds from user's wallets
@@ -30,7 +80,12 @@ const obj = {
     },
 
     async totalAmount() {
-        const res = await Mongoose.wallet.aggregate([{$group: {_id: "$type", amount: {$sum: "$balance"}}}, {$match: {"_id": "mixer"}}])
+        const res = await Mongoose.wallet.aggregate([{
+            $group: {
+                _id: "$type",
+                amount: {$sum: "$balance"}
+            }
+        }, {$match: {"_id": "mixer"}}])
         return res[0].amount
     },
 

@@ -30,14 +30,10 @@ module.exports.controller = function (app) {
 
    // Mongoose.wallet.aggregate([{$group: {_id: "", amount: {$sum: "$balance"}}}]).then(console.log)
 
-    app.post('/api/mixer/address', async (req, res) => {
-        const {to} = req.body;
-        if (!to) return res.send({error: {message: 'No address specified'}})
-        const valid = MinterApi.checkAddress(to);
-        if (!valid) return res.send({error: {message: 'Invalid address'}})
-        const wallet = await MinterApi.newWallet('mixer', to);
-        const {address} = wallet;
-        res.send({address, network: MinterApi.network})
+    app.post('/api/mixer/address', (req, res) => {
+        MixerApi.createAddressForMixing(req.body.to)
+            .then(r=>res.send(r))
+            .catch(e => res.status(500).send(e.message))
     });
 
     app.post('/api/mixer/calc', async (req, res) => {

@@ -82,7 +82,7 @@ export default function BetCabinetEdit(props) {
     return <div>
         {bet.id && <div className="alert-success alert">
             After the <i>"Check date"</i>, the bet will close and you will receive <MinterValue value={bet.userRefund} {...props}/> to your wallet
-            <MinterAddressLink address={bet.user.address} {...props}/>
+            &nbsp;<MinterAddressLink address={bet.user.address} {...props}/>
         </div>}
         {bet.sum ? <div className="alert alert-warning">The bet has been paid. Update prohibited</div> : <Form onSubmit={submit}>
             <h1>{bet.name}</h1>

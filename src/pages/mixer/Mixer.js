@@ -6,6 +6,7 @@ import MinterValue from "../../components/minter/MinterValue";
 
 export default function Mixer(props) {
     const [data, setData] = useState({});
+    const [error, setError] = useState();
     const [totalAmount, setTotalAmount] = useState(0);
     const [calc, setCalc] = useState({});
     const [loading, setLoading] = useState({});
@@ -16,15 +17,19 @@ export default function Mixer(props) {
             .then(r => setTotalAmount(r.amount))
     })
 
-    async function getAddress(e) {
+    function getAddress(e) {
         setLoading({address: true})
+        setError(null)
         e.preventDefault()
         const form = props.store.formToObject(e.target)
-        setData(await props.store.api('/mixer/address', form))
+        props.store.api('/mixer/address', form)
+            .then(setData)
+            .catch(setError)
         setLoading({})
     }
 
     async function calcPrice(e) {
+        setError(null)
         setLoading({balance: true})
         e.preventDefault()
         const form = props.store.formToObject(e.target)
@@ -40,12 +45,17 @@ export default function Mixer(props) {
             <ol>
                 <li>In the form "Get address", enter the address where you want to send the mixed funds</li>
                 <li>Press "Go"</li>
-                <li>Copy the received address and send funds to it <small>(Pay attention to the indicated limits)</small></li>
-                <li>After a while, funds <small>(minus all commissions)</small> will be received from several wallets to the address you specified</li>
+                <li>Copy the received address and send funds to it <small>(Pay attention to the indicated
+                    limits)</small></li>
+                <li>After a while, funds <small>(minus all commissions)</small> will be received from several wallets to
+                    the address you specified
+                </li>
             </ol>
             You can calculate the approximate amount of funds sent and received in the form "Calculate amount"
         </div>
         Available amount for mixing <MinterValue value={totalAmount} {...props}/>
+
+        {error && <div className="alert alert-danger">{error.message}</div>}
         <Form onSubmit={getAddress} className="border p-3 my-2">
             <h3>Get address</h3>
             <InputGroup>
@@ -56,10 +66,11 @@ export default function Mixer(props) {
             </InputGroup>
             {loading.address ? <Loader/> : <div>
                 {data.address &&
-                <div className="alert alert-info">Send more than <strong><MinterValue value={min} {...props}/></strong> and less than <strong><MinterValue value={totalAmount} {...props}/></strong> to
+                <div className="alert alert-info">Send more than <strong><MinterValue
+                    value={min} {...props}/></strong> and less than <strong><MinterValue
+                    value={totalAmount} {...props}/></strong> to
                     the
                     address <MinterAddressLink address={data.address} {...props}/></div>}
-                {data.error && <div className="alert alert-danger">{data.error.message}</div>}
             </div>}
         </Form>
 
@@ -74,15 +85,20 @@ export default function Mixer(props) {
                 </InputGroup.Append>
             </InputGroup>
             {loading.balance ? <Loader/> : <div>
-                {!!calc.balance && <div className="alert alert-info">An approximate amount will be received: <strong><MinterValue value={calc.balance} {...props}/></strong>,&nbsp;
-                    mixer commission: {}<MinterValue value={props.store.params.mixerFee} {...props}/>, count of txs: {calc.count}
+                {!!calc.balance &&
+                <div className="alert alert-info">An approximate amount will be received: <strong><MinterValue
+                    value={calc.balance} {...props}/></strong>,&nbsp;
+                    mixer commission: {}<MinterValue value={props.store.params.mixerFee} {...props}/>, count of
+                    txs: {calc.count}
                     {calc.exceed && <span className="text-danger">Amount exceed mixer's limit</span>}</div>}
             </div>}
         </Form>
 
         <div className="alert-success alert">
-            After completing a simple registration, you will be able to receive your income from the funds placed in the mixer. The system commission from each mix <small>(<MinterValue
-            value={props.store.params.mixerFee} {...props}/>)</small> is divided among all investors in proportion to the amount on their wallets.
+            After completing a simple registration, you will be able to receive your income from the funds placed in the
+            mixer. The system commission from each mix <small>(<MinterValue
+            value={props.store.params.mixerFee} {...props}/>)</small> is divided among all investors in proportion to
+            the amount on their wallets.
         </div>
 
 

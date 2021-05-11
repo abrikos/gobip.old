@@ -13,7 +13,7 @@ const obj = {
     },
 
     checkAddress(address) {
-        return address.match(/^Mx[a-fA-F0-9]{40}$/)
+        return /^Mx[a-fA-F0-9]{40}$/.test(address)
     },
 
     async get(action, query) {
