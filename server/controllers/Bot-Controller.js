@@ -1,9 +1,8 @@
-import Mongoose from "server/db/Mongoose";
 import MinterApi from "../lib/MinterApi";
 import MixerApi from "../lib/MixerApi";
 
 const TelegramBot = require('node-telegram-bot-api');
-const bot = new TelegramBot(process.env.BOT_API, {polling: true});
+const bot = new TelegramBot(process.env.BOT_API, {polling: !!(process.env.BOT_ENABLE * 1)});
 
 
 module.exports.controller = function (app) {

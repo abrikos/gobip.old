@@ -16,8 +16,7 @@ export default function Mixer(props) {
 
 
     return <div>
-        <h1>{props.store.network.coin} Mixer </h1>
-
+        <h1>{props.store.network.coin} Mixer <small className="badge"><a href="https://t.me/BipMixerBot" target="_blank">t.me/BipMixerBot</a></small> </h1>
         Available amount for mixing <MinterValue value={totalAmount} {...props}/>
         <MixerAddressForm  totalAmount={totalAmount} {...props}/>
         <MixerCalcForm totalAmount={totalAmount} {...props}/>

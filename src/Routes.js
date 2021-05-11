@@ -5,13 +5,15 @@ import ErrorPage from "components/service/ErrorPage";
 import AdminIndex from "pages/admin/AdminIndex";
 import Login from "components/login/login";
 import Cabinet from "pages/cabinet/cabinet";
-import PostView from "pages/post/PostView";
 import UnboundCharts from "pages/UnboundCharts";
 import Mixer from "pages/mixer/Mixer";
 import {Banners} from "pages/banner/Banners";
 import BannerLottery from "./pages/banner/BannerLottery";
 import BetList from "./pages/bet/BetList";
 import BetView from "./pages/bet/BetView";
+import PokerPlay from "./pages/poker/PokerPlay";
+import Poker from "./pages/poker/Poker";
+import PokerView from "./pages/poker/PokerView";
 
 export default function Routes(store) {
     const routes = {
@@ -22,11 +24,14 @@ export default function Routes(store) {
         "/bet/:id": (params) => <BetView store={store}  {...params}/>,
         "/banners/:type": (params) => <Banners limit={100} store={store}  {...params}/>,
         "/lottery/winners": (params) => <BannerLottery store={store}  {...params}/>,
-        "/post/:id/:head": (params) => <PostView store={store} {...params}/>,
+        "/poker": (params) => <Poker store={store} {...params}/>,
+        "/poker/view/:id": (params) => <PokerView store={store} {...params}/>,
         "/login": () => <Login store={store}/>,
     };
 
     const routesLogged = {
+
+        "/poker/play/:id": (params) => <PokerPlay store={store} {...params}/>,
         "/cabinet/:control": (params) => <Cabinet store={store} {...params}/>,
         "/cabinet/:control/:id": (params) => <Cabinet store={store} {...params}/>,
         "/logout": () => <Logout store={store}/>,

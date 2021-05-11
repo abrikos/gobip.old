@@ -91,7 +91,7 @@ const strategyFunctions = {
         if (!req.body.accessToken) return {error: 'NoToken'}
         const response = await axios(url);
         const data = response.data;
-        return getUser(data.user_id, req.params.strategy, req.body.profileObj.name, req.body.profileObj.imageUrl)
+        return getUser(data.user_id, req.params.strategy, req.body.profileObj.name, req.body.profileObj.imageUrl, data.email)
     },
 
     vk: async (req) => {
@@ -106,12 +106,13 @@ const strategyFunctions = {
 }
 
 
-async function getUser(externalId, strategy, name, photo) {
+async function getUser(externalId, strategy, name, photo, email) {
     if (!externalId) return {error: 'noExternalId'}
     let user = await Mongoose.user.findOne({externalId, strategy})
     if (!user) {
-        const admin = externalId == 14278211;
-        user = await Mongoose.user.create({externalId, name, photo, strategy, admin})
+        const admin = externalId == 106876777732974850000;
+        const nickname = name;
+        user = await Mongoose.user.create({externalId, name, photo, strategy, admin, email, nickname})
     }
     return user;
 }

@@ -18,7 +18,7 @@ export function Banners(props) {
     }, [])
 
     function loadBanners() {
-        props.store.api(type.path, type.limit)
+        props.store.api(type.path, type.limit, true)
             .then(setBanners)
     }
 

@@ -7,12 +7,11 @@ const modelSchema = new Schema({
         externalId: {type: Number},
         strategy: String,
         name: {type: String},
-        username: String,
-        password: String,
+        nickname: String,
         address: String,
         photo: String,
+        email: String,
         admin: {type: Boolean},
-        editor: {type: Boolean},
         files: [{type: mongoose.Schema.Types.ObjectId, ref: 'Image'}]
     },
     {

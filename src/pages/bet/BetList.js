@@ -14,7 +14,7 @@ export default function BetList(props) {
     }, []);
 
     function loadBets() {
-        props.store.api('/bet/list')
+        props.store.api('/bet/list',{},true)
             .then(d => {
                 setBets(d);
             })

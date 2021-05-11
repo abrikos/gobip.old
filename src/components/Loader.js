@@ -3,5 +3,5 @@ import loader from 'files/loader.gif'
 
 export default function Loader() {
 
-    return <img src={loader} alt={'loading...'} width={30}/>
+    return <img src={loader} alt={'loading...'} height={20}/>
 }

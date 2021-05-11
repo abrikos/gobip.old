@@ -19,6 +19,8 @@ module.exports.controller = function (app) {
             .then(user => {
                 //user.photo_url = req.body.avatar;
                 user.address = req.body.address;
+                user.nickname = req.body.nickname;
+                user.photo = req.body.photo;
                 user.save();
                 res.send(user)
                 /*app.locals.wss.clients.forEach(function each(client) {
