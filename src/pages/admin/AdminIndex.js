@@ -9,7 +9,6 @@ export default function AdminIndex(props) {
         users: {label: 'Users'},
     }
 
-
     return <div className="cabinet">
         <div>
             <div >{Object.keys(pages).map(p => <span key={p}  className={`m-2 ${p===props.control ? 'glowed':''}`}><A href={`/admin/${p}`}>{pages[p].label}</A></span>)}</div>
