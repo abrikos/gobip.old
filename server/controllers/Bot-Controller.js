@@ -31,7 +31,8 @@ module.exports.controller = function (app) {
             await bot.sendMessage(chatId, `*${data.address}*`, {parse_mode: "Markdown"})
         }
         if (isNumber) {
-            const calc = await MixerApi.calculateMix(msg.text)
+            const calc = await MixerApi.calculateMix(msg.text);
+            console.log(calc)
             await bot.sendMessage(chatId, `If you send ${calc.value} BIP
              will be received: *${calc.balance.toFixed(2)} BIP*  
              mixer commission: ${MinterApi.params.mixerFee} BIP, 

@@ -33,7 +33,7 @@ const obj = {
         const data = {
             balance: txParams.map(t => t.value).reduce((a, b) => a + b, 0) - commission * txParams.length,
             count: txParams.length,
-            value,
+            value: value * 1,
             commission
         }
         const amount = await this.totalAmount();

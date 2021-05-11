@@ -30,13 +30,13 @@ export default function Application() {
         network:params.network,
         async postData(path = '', data = {}) {
             const label = new Date().valueOf() + ' - POST ' + path;
-            console.time(label)
+            if(process.env.REACT_APP_LOG_ENABLE * 1) console.time(label)
             const url = '/api' + path;
             return new Promise((resolve, reject) => {
                 axios.post(url, data)
                     .then(res => {
                         resolve(res.data)
-                        console.timeEnd(label)
+                        if(process.env.REACT_APP_LOG_ENABLE * 1) console.timeEnd(label)
                     })
                     .catch(err => {
                         //resolve({error: err.response.status, message: err.response.data.message || err.response.statusText})

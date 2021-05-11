@@ -37,17 +37,9 @@ module.exports.controller = function (app) {
     });
 
     app.post('/api/mixer/calc', async (req, res) => {
-        const txParams = await MixerApi.mixedPayments({address: 'Mxe43ac6c88f573a7703fe7f2c3d8d342818e8fb97', to: 'Mx111ac6c88f573a7703fe7f2c3d8d342818e8fb97', balance: req.body.value}, {value: req.body.value})
-        const commission = await MinterApi.getCommission();
-        const data = {
-            balance: txParams.map(t => t.value).reduce((a, b) => a + b, 0) - commission * txParams.length,
-            count: txParams.length,
-            value: req.body.value,
-            commission
-        }
-        const amount = await MixerApi.totalAmount();
-        if (amount < data.value - data.profit - data.commission * data.count) data.exceed = true;
-        res.send(data)
+        MixerApi.calculateMix(req.body.value)
+            .then(r=>res.send(r))
+            .catch(e => res.status(500).send(e.message))
     });
 
     app.post('/api/cabinet/mixer/wallets', passport.isLogged, (req, res) => {
