@@ -26,6 +26,7 @@ module.exports.controller = function (app) {
                     if (['opponent', 'viewer'].includes(params.role)) poker.cardsUser = [0, 1];
                 }
                 params.canJoin = params.role === 'viewer' && req.session.userId
+                params.isViewer = params.canJoin;
                 res.send({poker, params});
             })
             .catch(e => res.status(500).send(e.message))
@@ -35,7 +36,7 @@ module.exports.controller = function (app) {
         Mongoose.poker.findById(req.params.id)
             .then(async poker => {
                 poker.opponent = req.session.userId
-                const bet = await PokerApi.userBet(process.env.POKER_SMALL_BLINDE, poker, req.session.userId)
+                const bet = await PokerApi.userBet(process.env.POKER_SMALL_BLINDE, poker, req.session.userId, true)
                 if (bet.error) return res.status(500).send(bet.error)
                 await poker.save()
                 res.sendStatus(200)

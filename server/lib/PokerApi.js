@@ -3,20 +3,19 @@ import Mongoose from "../db/Mongoose";
 const PokerApi = {
     testing: false,
 
-    async userBet(bet, poker, userId) {
+    async userBet(bet, poker, userId, smallBlind) {
         if (!(bet * 1)) return {error: 'Wrong bet ' + bet};
         const user = await Mongoose.user.findById(userId);
         if (poker.user.equals(userId)) {
             poker.betsUser.push(bet)
             poker.playerTurn = poker.opponent;
-            console.log('fff', poker.playerTurn)
         } else if (poker.opponent && poker.opponent.equals(userId)) {
             poker.betsOpponent.push(bet)
             poker.playerTurn = poker.user;
-            console.log('aaa', poker.playerTurn)
         } else {
             return {error: 'Wrong player ' + userId}
         }
+        if(smallBlind) poker.playerTurn = poker.opponent;
         if (poker.type === 'real') {
             user.balanceReal -= bet;
             if (user.balanceReal < 0) return {error: 'Insufficient funds'};

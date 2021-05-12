@@ -36,9 +36,9 @@ export default function PokerPlay(props) {
             .then(loadData)
     }
 
-    function betButton() {
-        console.log(data.poker.playerTurn , props.store.authenticatedUser._id)
-        if (data.poker.playerTurn !== props.store.authenticatedUser._id) return;
+    function betButton(who) {
+        console.log(who, data.poker.playerTurn, props.store.authenticatedUser._id)
+        if (data.poker.playerTurn !== props.store.authenticatedUser._id || data.poker.playerTurn !== who) return;
         return <Form onSubmit={doBet}>
             <FormControl name="bet"/>
             <Button type="submit">Bet</Button>
@@ -49,18 +49,23 @@ export default function PokerPlay(props) {
 
     return <div>
         {error && <ErrorPage {...error}/>}
-        My balance: {data.poker.type === 'real' ?
-        <MinterValue value={balance.real} {...props}/> : `${balance.virtual} virtual`}
+        <div>
+            My balance: {data.poker.type === 'real' ?
+            <MinterValue value={balance.real} {...props}/> : `${balance.virtual} virtual`}
+        </div>
+
+        {data.poker.playerTurn + ' - ' + props.store.authenticatedUser._id}
 
         <h1>{data.poker.type} Pokher "{data.poker.name}"</h1>
 
-        Turn: {data.poker.playerTurn || 'Waiting for opponent'}
+
+        Turn: {data.poker.playerTurn === props.store.authenticatedUser._id ? 'You turn' : 'Waiting for opponent'}
 
         <div className="d-flex">
             {data.poker.cardsOpponent && data.poker.cardsOpponent.map((p, i) => <PokerCard {...p} key={i}/>)}
             <div>
                 {JSON.stringify(data.poker.betsOpponent)}
-                {betButton('opponent')}
+                {betButton(data.poker.opponent.id)}
             </div>
 
         </div>
@@ -73,7 +78,7 @@ export default function PokerPlay(props) {
         <div className="d-flex">
             <div>{data.poker.cardsUser && data.poker.cardsUser.map((p, i) => <PokerCard {...p} key={i}/>)}</div>
             {JSON.stringify(data.poker.betsUser)}
-            {betButton('user')}
+            {betButton(data.poker.user.id)}
         </div>
         <hr/>
         {data.params.canJoin && <Button onClick={join}>Join game</Button>}
