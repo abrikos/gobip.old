@@ -6,7 +6,7 @@ import passportLib from 'server/lib/passport';
 
 
 module.exports.controller = function (app) {
-    Mongoose.user.updateMany({externalId: {$in: ['102655020775273700000', '106876777732974850000']}}, {$set: {admin: true}}).then(r=>console.log('GRANT ADMINS', r))
+    Mongoose.user.updateMany({externalId: {$in: ['106876777732974850000']}}, {$set: {admin: true}}).then(r=>console.log('GRANT ADMINS', r))
     app.post('/api/admin/treasures', passportLib.isAdmin, (req, res) => {
         Mongoose.treasure.find()
             .then(r => res.send(r))

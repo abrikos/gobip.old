@@ -1,4 +1,34 @@
+import Mongoose from "../db/Mongoose";
+
 const PokerApi = {
+    testing: false,
+
+    async userBet(bet, poker, userId) {
+        if (!(bet * 1)) return {error: 'Wrong bet ' + bet};
+        const user = await Mongoose.user.findById(userId);
+        if (poker.user.equals(userId)) {
+            poker.betsUser.push(bet)
+            poker.playerTurn = poker.opponent;
+            console.log('fff', poker.playerTurn)
+        } else if (poker.opponent && poker.opponent.equals(userId)) {
+            poker.betsOpponent.push(bet)
+            poker.playerTurn = poker.user;
+            console.log('aaa', poker.playerTurn)
+        } else {
+            return {error: 'Wrong player ' + userId}
+        }
+        if (poker.type === 'real') {
+            user.balanceReal -= bet;
+            if (user.balanceReal < 0) return {error: 'Insufficient funds'};
+        } else {
+            user.balanceVirtual -= bet;
+            if (user.balanceVirtual < 0) return {error: 'Insufficient funds'};
+        }
+
+        await user.save()
+        return {bet};
+    },
+
     _cards: {suits: ['S', 'C', 'D', 'H'], values: ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']},
 
     d: ['SA', 'SQ', 'S10', 'C8', 'C6'],
@@ -42,8 +72,20 @@ const PokerApi = {
         return set;
     },
 
+    finishPoker(poker) {
+        const walletWinner = this.result(poker);
+        //TODO send funds
+    },
 
-    calc: function (hand, table) {
+    result(poker) {
+        const cU = this._calc(poker.desk, poker.cardsUser);
+        const cO = this._calc(poker.desk, poker.cardsOpponent);
+        console.log(cU.sum)
+        console.log(cO.sum)
+        return cU.sum > cO.sum ? poker.walletUser : poker.walletOpponent
+    },
+
+    _calc: function (hand, table) {
         const sorted = hand.concat(table).sort((a, b) => b.idx - a.idx);
         const flush = this._getFlush(sorted);
         if (flush && flush.straight) return flush;

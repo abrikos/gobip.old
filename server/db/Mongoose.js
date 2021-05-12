@@ -6,7 +6,7 @@ import wallet from "server/db/models/Wallet-Model";
 import payment from "server/db/models/Model-Payment";
 import status from "server/db/models/Model-Status";
 import treasure from "server/db/models/Model-Treasure";
-import user from "server/db/models/Model-User";
+import user from "server/db/models/User-Model";
 import banner from "server/db/models/Banner-Model";
 import lottery from "server/db/models/BannerLottery-Model";
 import crypto from "server/db/models/Crypto-Model";

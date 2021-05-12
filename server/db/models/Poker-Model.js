@@ -7,16 +7,16 @@ const name = 'poker';
 
 const modelSchema = new Schema({
         name: String,
-        walletsUser: {type: mongoose.Schema.Types.ObjectId, ref: 'wallet'},
-        walletsOpponent: {type: mongoose.Schema.Types.ObjectId, ref: 'wallet'},
         user: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
         opponent: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
+        playerTurn: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
         desk: [Object],
         cardsUser: [Object],
         cardsOpponent: [Object],
         betsUser: [Number],
         betsOpponent: [Number],
-
+        closed: Boolean,
+        type: {type: String, default: 'virtual'},
     },
     {
         timestamps: {createdAt: 'createdAt'},
@@ -26,11 +26,39 @@ const modelSchema = new Schema({
         toJSON: {virtuals: true}
     });
 
+modelSchema.method.isPLayer = function (userId) {
+    return this.user.equals(userId) || (this.opponent && this.opponent.equals(userId))
+}
+
 modelSchema.virtual('date')
     .get(function () {
         return moment(this.createdAt).format('YYYY-MM-DD HH:mm:ss')
     });
 
+modelSchema.virtual('bank')
+    .get(function () {
+        return this.sumUser + this.sumOpponent;
+    });
+
+modelSchema.virtual('sumUser')
+    .get(function () {
+        return this.betsUser ? this.betsUser.reduce((a, b) => a + b, 0) : 0
+    });
+
+modelSchema.virtual('sumOpponent')
+    .get(function () {
+        return this.betsOpponent ? this.betsOpponent.reduce((a, b) => a + b, 0) : 0
+    });
+
+modelSchema.virtual('lastBetOpponent')
+    .get(function () {
+        return this.betsOpponent ? this.betsOpponent[this.betsOpponent.length - 1] : 0
+    });
+
+modelSchema.virtual('lastBetUser')
+    .get(function () {
+        return this.betsUser ? this.betsUser[this.betsUser.length - 1] : 0
+    });
 
 
 export default mongoose.model(name, modelSchema)
