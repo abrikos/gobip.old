@@ -10,15 +10,15 @@ const modelSchema = new Schema({
         name: String,
         user: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
         opponent: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
-        playerTurn: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
-        winner: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
+        turn: {type: String, default: 'opponent'},
+        winner: String,
         desk: {type: [Object], default: []},
         userCards: {type: [Object], default: []},
         opponentCards: {type: [Object], default: []},
         userBets: {type: [Number], default: []},
         opponentBets: {type: [Number], default: []},
         checks: {type: Number, default: 1},
-        status: String,
+        status: {type: String, default: 'round-started'},
         prize: Number,
         result: Object,
         bargain: {type: Boolean, default: true},
@@ -41,10 +41,6 @@ modelSchema.methods.isPlayer = function (userId) {
     return this.user.equals(userId) || (this.opponent && this.opponent.equals(userId)) || false
 }
 
-modelSchema.methods.getOtherPlayer = function (userId) {
-    return this.user.equals(userId) ?  this.opponent : this.user;
-}
-
 modelSchema.methods.setWinner = function () {
     if (this.desk.length < 5) return {error: 'game not finished'}
     const cU = this.userResult;
@@ -56,13 +52,10 @@ modelSchema.methods.setWinner = function () {
 
 
 modelSchema.methods.makeBet = async function (bet, userId) {
-    if (!(bet * 1)) return {error: 'API: Wrong bet ' + bet};
     const player = this.user.equals(userId) ? this.user : this.opponent;
-    const other = this.getOtherPlayer(player);
     const smallBlind = this.opponentBets.length === 0;
     const who = this.user.equals(player) ? 'user' : 'opponent';
     this[`${who}Bets`].push(bet)
-    this.playerTurn = other;
     if (smallBlind) this.playerTurn = this.opponent;
     if (this.type === 'real') {
         if (player.balanceReal < 0) return {error: 'Insufficient funds'};
@@ -76,10 +69,21 @@ modelSchema.methods.makeBet = async function (bet, userId) {
 
 }
 
-
-modelSchema.virtual('isFlop')
+modelSchema.virtual('playerTurn')
     .get(function () {
-        return !(this.desk && this.desk.length);
+        return this[this.turn]
+    });
+
+modelSchema.virtual('otherPlayer')
+    .get(function () {
+        return this.turn === 'user' ? 'opponent' : 'user'
+    });
+
+modelSchema.virtual('round')
+    .get(function () {
+        if (!this.desk) return '-'
+        const a = ['pre-flop', '', '', 'flop', 'turn', 'river', 'finish']
+        return a[this.desk.length]
     });
 
 modelSchema.virtual('userResult')
@@ -111,9 +115,11 @@ modelSchema.virtual('availableActions')
 modelSchema.virtual('isCall')
     .get(function () {
         return this.minBet === 0;
-        if (!this.opponent) return false;
-        if (!this.userBets || !this.opponentBets) return false;
-        return this.userBets.length === this.opponentBets.length && !this.minBet;
+    });
+
+modelSchema.virtual('blind')
+    .get(function () {
+        return process.env.POKER_SMALL_BLINDE * 2;
     });
 
 modelSchema.virtual('allCards')

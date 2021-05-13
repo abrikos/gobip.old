@@ -1,18 +1,20 @@
 import Mongoose from "server/db/Mongoose";
 import passport from "server/lib/passport";
-import MinterApi from "server/lib/MinterApi";
 import PokerApi from "../lib/PokerApi";
 import PokerGame from "../lib/PokerGame";
+
+
 
 
 module.exports.controller = function (app) {
     //Mongoose.poker.findOne().then(console.log)
     app.post('/api/poker/view/:id', async (req, res) => {
-        Mongoose.poker.findById(req.params.id)
+        //Mongoose.poker.findById(req.params.id)
+        Mongoose.poker.findOne().sort({createdAt: -1})
             .populate('user', ['name', 'photo'])
             .populate('opponent', ['name', 'photo'])
             .populate('winner', ['name', 'photo'])
-            .select(['name', 'createdAt', 'desk', 'type', 'opponentCards', 'userCards', 'userBets', 'opponentBets', 'playerTurn', 'result', 'bargain'])
+            .select(['name', 'createdAt', 'desk', 'type', 'opponentCards', 'userCards', 'userBets', 'opponentBets', 'playerTurn', 'result', 'bargain', 'turn'])
             .then(poker => {
                 const params = {}
                 if (poker.user.equals(req.session.userId)) {
@@ -22,11 +24,13 @@ module.exports.controller = function (app) {
                 } else {
                     params.role = 'viewer'
                 }
+
                 //if (!(isUser || isOpponent)) return res.status(403).send('Wrong user')
                 if (!poker.result && !PokerApi.testing) {
                     if (['user', 'viewer'].includes(params.role)) poker.opponentCards = [0, 1];
                     if (['opponent', 'viewer'].includes(params.role)) poker.userCards = [0, 1];
                 }
+
                 params.canJoin = params.role === 'viewer' && req.session.userId
                 params.isViewer = params.canJoin;
                 //console.log(poker.playerTurn.name)
@@ -48,7 +52,6 @@ module.exports.controller = function (app) {
             .then(() => res.sendStatus(200))
             .catch(e => res.status(500).send(e.message))
     })
-    //Mongoose.poker.findById('609b1f6bf9692d10635893bd')        .then(r => {            console.log(r.opponentCards)        })
 
     app.post('/api/poker/player/cards/:id', passport.isLogged, async (req, res) => {
         Mongoose.poker.findById(req.params.id)

@@ -5,7 +5,7 @@ export default function PokerBet(props) {
     const {who, poker} = props;
     const [bet, setBet] = useState(poker.minBet)
     const balance = props.balance[poker.type]
-    const showBetForm = !(poker.playerTurn !== props.store.authenticatedUser._id || poker.playerTurn !== poker[who].id)
+    const showBetForm = poker.turn === who && (poker.playerTurn && poker.playerTurn.id === props.store.authenticatedUser._id)
 
     function doBet(e) {
         e.preventDefault()
@@ -24,7 +24,7 @@ export default function PokerBet(props) {
             .then(props.onBet)
     }
 
-    if (!poker[who]) return <div></div>
+    if (!poker[who]) return <div>no who</div>
 
     function Action(props) {
         const {a} = props;
@@ -41,7 +41,7 @@ export default function PokerBet(props) {
         if (a === 'fold') return <Button>Fold</Button>
     }
 
-    if(poker.result) return <span/>
+    if(poker.result) return <span>bet done</span>
     return <div>
         {JSON.stringify(poker[`${who}Bets`])}
         {poker.isCall && 'CALL'}

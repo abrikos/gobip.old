@@ -11,7 +11,7 @@ export default function PokerPlay(props) {
     const [data, setData] = useState();
     const [balance, setBalance] = useState({virtual: 0, real: 0});
     const [loader, setLoader] = useState();
-    const [error, setError] = useState();
+
     useEffect(() => {
         loadData()
         const timer = setInterval(loadData, 1000)
@@ -19,9 +19,8 @@ export default function PokerPlay(props) {
     }, [props.id])
 
     function loadData() {
-        setError(false)
-        props.store.api(`/cabinet/user/balance`, {}, true).then(setBalance).catch(setError)
-        props.store.api(`/poker/view/${props.id}`, {}, true).then(setData).catch(setError)
+        props.store.api(`/cabinet/user/balance`, {}, true).then(setBalance)
+        props.store.api(`/poker/view/${props.id}`, {}, true).then(setData)
         //props.store.api(`/poker/player/cards/${props.id}`,{},false).then(setCards).catch(setError)
     }
 
@@ -31,10 +30,9 @@ export default function PokerPlay(props) {
     }
 
 
-    if (!data) return <div>Loading</div>
+    if (!data) return <div>Loading PokerPlay</div>
     const desk = data.poker.desk.length ? data.poker.desk : [1, 2, 3]
     return <div>
-        {error && <ErrorPage {...error}/>}
         <div>
             My balance: {data.poker.type === 'real' ?
             <MinterValue value={balance.real} {...props}/> : `${balance.virtual} virtual`}
