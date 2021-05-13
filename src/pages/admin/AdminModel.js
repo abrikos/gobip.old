@@ -13,7 +13,6 @@ export default function AdminModel(props) {
     const [totalCount, setTotalCount] = useState(0);
     const [list, setList] = useState([]);
     const [model, setModel] = useState();
-    const [errors, setErrors] = useState({});
     const [filter, setFilter] = useState({});
     const modelName = props.control;
 

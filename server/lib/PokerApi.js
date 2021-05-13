@@ -3,30 +3,6 @@ import Mongoose from "../db/Mongoose";
 const PokerApi = {
     testing: false,
 
-    async userBet(bet, poker, userId, smallBlind) {
-        if (!(bet * 1)) return {error: 'Wrong bet ' + bet};
-        const user = await Mongoose.user.findById(userId);
-        if (poker.user.equals(userId)) {
-            poker.betsUser.push(bet)
-            poker.playerTurn = poker.opponent;
-        } else if (poker.opponent && poker.opponent.equals(userId)) {
-            poker.betsOpponent.push(bet)
-            poker.playerTurn = poker.user;
-        } else {
-            return {error: 'Wrong player ' + userId}
-        }
-        if(smallBlind) poker.playerTurn = poker.opponent;
-        if (poker.type === 'real') {
-            user.balanceReal -= bet;
-            if (user.balanceReal < 0) return {error: 'Insufficient funds'};
-        } else {
-            user.balanceVirtual -= bet;
-            if (user.balanceVirtual < 0) return {error: 'Insufficient funds'};
-        }
-
-        await user.save()
-        return {bet};
-    },
 
     _cards: {suits: ['S', 'C', 'D', 'H'], values: ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']},
 
@@ -76,15 +52,8 @@ const PokerApi = {
         //TODO send funds
     },
 
-    result(poker) {
-        const cU = this._calc(poker.desk, poker.cardsUser);
-        const cO = this._calc(poker.desk, poker.cardsOpponent);
-        console.log(cU.sum)
-        console.log(cO.sum)
-        return cU.sum > cO.sum ? poker.walletUser : poker.walletOpponent
-    },
 
-    _calc: function (hand, table) {
+    calc: function (hand, table) {
         const sorted = hand.concat(table).sort((a, b) => b.idx - a.idx);
         const flush = this._getFlush(sorted);
         if (flush && flush.straight) return flush;

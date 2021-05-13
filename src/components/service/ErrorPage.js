@@ -3,6 +3,7 @@ import LoginFormGoogle from "components/login/LoginFormGoogle";
 
 export default function ErrorPage(props) {
     let message;
+    const {path} = props;
     switch (props.error) {
         case 403:
             //message = <span>Доступ запрещен. Пожалуйста <GoToLogin title={'зарегистрируйтесь'} store={props.store}/>!</span>;
@@ -21,6 +22,6 @@ export default function ErrorPage(props) {
     }
 
     return <div className="alert alert-danger text-center">
-        <h1>{props.error} {message}</h1>
+        <strong>{props.error} {message} {path}</strong>
     </div>
 };

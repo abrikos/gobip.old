@@ -26,8 +26,8 @@ export default function PokerList(props) {
     }
 
     function filter(type, p){
-        if(p.closed && type==='closed') return true;
-        if(!p.closed && type===p.type) return true;
+        if(p.result && type==='closed') return true;
+        if(!p.result && type===p.type) return true;
         return false;
     }
 

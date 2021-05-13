@@ -6,6 +6,7 @@ import {faBlender, faCoins, faCrown, faHeart, faImages, faSignInAlt, faSignOutAl
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {Banners} from "pages/banner/Banners";
 import LoginFormGoogle from "../../components/login/LoginFormGoogle";
+import ErrorPage from "../../components/service/ErrorPage";
 
 export default function ThemeMain(props) {
     const links = [
@@ -62,7 +63,10 @@ export default function ThemeMain(props) {
 
 
                 </div>
-                <div className="col-sm-8">{props.errorPage || props.routeResult}</div>
+                <div className="col-sm-8">
+                    {props.store.errorGlobal.error  && <ErrorPage {...props.store.errorGlobal}/>}
+                    {props.errorPage || props.routeResult}
+                </div>
                 <div className="col-sm-2"><Banners type={'payed'} limit={10} {...props}/></div>
             </div>
 

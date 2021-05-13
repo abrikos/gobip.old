@@ -11,6 +11,7 @@ import f2o from "form-to-object"
 export default function Application() {
     const [authenticatedUser, setAuthUser] = useState(false);
     const [params, setParams] = useState({});
+    const [errorGlobal, setErrorGlobal] = useState({});
     useEffect(() => {
         //let isSubscribed = true
         //startWebSocket();
@@ -27,9 +28,10 @@ export default function Application() {
     const store = {
         authenticatedUser,
         params,
+        errorGlobal,
         network:params.network,
         async postData(path = '', data = {}, noLogs) {
-
+            //setErrorGlobal({})
             const label = 'POST: ' + path;
             if(!(process.env.REACT_APP_API_LOG_DISABLE * 1) && !noLogs) console.time(label)
             const url = '/api' + path;
@@ -40,8 +42,14 @@ export default function Application() {
                         if(!(process.env.REACT_APP_API_LOG_DISABLE * 1) && !noLogs) console.timeEnd(label)
                     })
                     .catch(err => {
+                        const error = {
+                            path,
+                            error: err.response && err.response.status,
+                            message: err.response.data.match("<html>") ? err.response.statusText : err.response.data
+                        }
+                        setErrorGlobal(error)
                         //resolve({error: err.response.status, message: err.response.data.message || err.response.statusText})
-                        reject({error: err.response.status, message: err.response.data.match("<html>") ? err.response.statusText : err.response.data})
+                        reject(error)
                     })
 
             })

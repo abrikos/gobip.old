@@ -13,7 +13,6 @@ import MinterValue from "../../components/minter/MinterValue";
 export default function BetCabinetEdit(props) {
     const [bet, setBet] = useState();
     const [pairs, setPairs] = useState([]);
-    const [error, setError] = useState();
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
     let timer;
@@ -42,7 +41,6 @@ export default function BetCabinetEdit(props) {
     function submit(e) {
         e.preventDefault()
         setLoading(true)
-        setError(null)
         setErrors({})
         const form = props.store.formToObject(e.target)
         const errs = {}
@@ -61,7 +59,6 @@ export default function BetCabinetEdit(props) {
             })
             .catch(r => {
                 setLoading(false)
-                setError(r)
             })
     }
 
@@ -75,7 +72,6 @@ export default function BetCabinetEdit(props) {
         if (!window.confirm(`Delete ${bet.name}?`)) return;
         props.store.api('/cabinet/bet/delete/' + bet.id)
             .then(() => navigate('/cabinet/bet'))
-            .catch(setError)
     }
 
     if (!bet) return <div/>;
@@ -109,7 +105,6 @@ export default function BetCabinetEdit(props) {
         </Form>}
         <A href={'/cabinet/bet'}> &lt;Back to the my list</A>
         {loading && <Loader/>}
-        {error && <div className="alert alert-danger">{error.message}</div>}
         {/*<div className="col-sm-4"><Mixer {...props}/></div>*/}
         {bet.id && <div className="p-0">
             <hr/>
