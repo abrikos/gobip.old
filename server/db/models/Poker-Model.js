@@ -17,11 +17,11 @@ const modelSchema = new Schema({
         opponentCards: {type: [Object], default: []},
         userBets: {type: [Number], default: []},
         opponentBets: {type: [Number], default: []},
-        checks: {type: Number, default: 1},
+        bank: {type: Number, default: 0},
         status: {type: String, default: 'round-started'},
-        prize: Number,
         result: Object,
-        bargain: {type: Boolean, default: true},
+        userCheck: Boolean,
+        opponentCheck: Boolean,
         type: {type: String, default: 'virtual'},
     },
     {
@@ -45,8 +45,9 @@ modelSchema.methods.setWinner = function () {
     if (this.desk.length < 5) return {error: 'game not finished'}
     const cU = this.userResult;
     const cO = this.opponentResult;
-    this.winner = cU.sum > cO.sum ? this.user : this.opponent;
+    this.winner = cU.sum > cO.sum ? 'user' : 'opponent';
     this.result = cU.sum > cO.sum ? cU : cO;
+
 
 }
 
@@ -58,10 +59,10 @@ modelSchema.methods.makeBet = async function (bet, userId) {
     this[`${who}Bets`].push(bet)
     if (smallBlind) this.playerTurn = this.opponent;
     if (this.type === 'real') {
-        if (player.balanceReal < 0) return {error: 'Insufficient funds'};
+        if (player.balanceReal < 0) return {error: 500, message: 'Insufficient funds'};
         player.balanceReal -= bet;
     } else {
-        if (player.balanceVirtual < 0) return {error: 'Insufficient funds'};
+        if (player.balanceVirtual < 0) return {error: 500, message:'Insufficient funds'};
         player.balanceVirtual -= bet;
     }
     await player.save()
@@ -71,7 +72,7 @@ modelSchema.methods.makeBet = async function (bet, userId) {
 
 modelSchema.virtual('playerTurn')
     .get(function () {
-        return this[this.turn]
+        return this[this.turn].id
     });
 
 modelSchema.virtual('otherPlayer')
@@ -128,10 +129,6 @@ modelSchema.virtual('allCards')
         return this.userCards.concat(this.opponentCards).concat(this.desk);
     });
 
-modelSchema.virtual('bank')
-    .get(function () {
-        return this.userSum + this.opponentSum;
-    });
 
 modelSchema.virtual('minBet')
     .get(function () {
@@ -148,15 +145,6 @@ modelSchema.virtual('opponentSum')
         return this.opponentBets ? this.opponentBets.reduce((a, b) => a + b, 0) : 0
     });
 
-modelSchema.virtual('lastBetOpponent')
-    .get(function () {
-        return this.opponentBets ? this.opponentBets[this.opponentBets.length - 1] : 0
-    });
-
-modelSchema.virtual('lastBetUser')
-    .get(function () {
-        return this.userBets ? this.userBets[this.userBets.length - 1] : 0
-    });
 
 
 export default mongoose.model(name, modelSchema)

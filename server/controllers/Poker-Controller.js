@@ -13,8 +13,7 @@ module.exports.controller = function (app) {
         Mongoose.poker.findOne().sort({createdAt: -1})
             .populate('user', ['name', 'photo'])
             .populate('opponent', ['name', 'photo'])
-            .populate('winner', ['name', 'photo'])
-            .select(['name', 'createdAt', 'desk', 'type', 'opponentCards', 'userCards', 'userBets', 'opponentBets', 'playerTurn', 'result', 'bargain', 'turn'])
+            .select(['name', 'createdAt', 'desk', 'bank', 'type', 'opponentCards', 'userCards', 'userBets', 'opponentBets', 'result', 'winner', 'turn'])
             .then(poker => {
                 const params = {}
                 if (poker.user.equals(req.session.userId)) {

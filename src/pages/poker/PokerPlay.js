@@ -1,10 +1,11 @@
 import PokerCard from "./PokerCard";
 import React, {useEffect, useState} from "react";
-import {Button, Form, FormControl, InputGroup} from "react-bootstrap";
-import {navigate} from "hookrouter";
+import {Button} from "react-bootstrap";
 import Loader from "../../components/Loader";
-import ErrorPage from "../../components/service/ErrorPage";
 import MinterValue from "../../components/minter/MinterValue";
+import PokerBetForm from "./PokerBetForm";
+import PokerPlayerDesk from "./PokerPlayerDesk";
+import PokerPlayerCards from "./PokerPlayerCards";
 import PokerBet from "./PokerBet";
 
 export default function PokerPlay(props) {
@@ -14,7 +15,7 @@ export default function PokerPlay(props) {
 
     useEffect(() => {
         loadData()
-        const timer = setInterval(loadData, 1000)
+        const timer = setInterval(loadData, 5000)
         return () => clearInterval(timer);
     }, [props.id])
 
@@ -32,6 +33,8 @@ export default function PokerPlay(props) {
 
     if (!data) return <div>Loading PokerPlay</div>
     const desk = data.poker.desk.length ? data.poker.desk : [1, 2, 3]
+    const iam = props.store.authenticatedUser._id === data.poker.user.id ? 'user' : 'opponent';
+    const other = iam === 'user' ? 'opponent' : 'user';
     return <div>
         <div>
             My balance: {data.poker.type === 'real' ?
@@ -40,30 +43,28 @@ export default function PokerPlay(props) {
 
 
         <h1>{data.poker.type} Pokher "{data.poker.name}"</h1>
-
-        Turn: {data.poker.playerTurn === props.store.authenticatedUser._id ? 'You turn' : 'Waiting for opponent'}
-
-        {data.poker.opponentResult.sum && <div>{data.poker.opponentResult.name}</div>}
-        <div className="d-flex">
-            {data.poker.opponentCards.map((p, i) => <PokerCard {...p} key={i}/>)}
-            <div>
-                <PokerBet who={'opponent'} {...data} {...props} balance={balance} onBet={loadData}/>
-            </div>
-
-        </div>
-        <div className="d-flex">
-            <div>
-                {data.poker.bank}
-            </div>
-            <div>{desk.map((p, i) => <PokerCard {...p} key={i}/>)}</div>
-        </div>
-        <div className="d-flex">
-            <div>{data.poker.userCards && data.poker.userCards.map((p, i) => <PokerCard {...p} key={i}/>)}</div>
-            <PokerBet who={'user'} {...data} {...props} balance={balance} onBet={loadData}/>
-        </div>
-        {data.poker.userResult.sum && <div>{data.poker.userResult.name}</div>}
-        <hr/>
         {data.params.canJoin && <Button onClick={join}>Join game</Button>}
+
+        {!data.poker.result && <div>Turn: {data.poker.playerTurn === props.store.authenticatedUser._id ? 'You turn' : 'Waiting for opponent'}</div>}
+
+        <table>
+            <tbody>
+            <tr>
+                <td><PokerBet bet={data.poker[`${other}Sum`]}/></td>
+                <td><div>{data.poker.result && data.poker.opponentResult.name}</div>
+                    <PokerPlayerCards bet={data.poker[`${other}Sum`]} cards={data.poker[`${other}Cards`]}/></td>
+            </tr>
+            <tr className="bg-success">
+                <td><PokerBet bet={data.poker.bank}/></td>
+                <td className="p-2 d-flex justify-content-center flex-wrap">{desk.map((p, i) => <PokerCard {...p} key={i}/>)}</td>
+            </tr>
+            <tr>
+                <td><PokerBet bet={data.poker[`${iam}Sum`]}/></td>
+                <td><PokerPlayerCards bet={data.poker[`${iam}Sum`]} cards={data.poker[`${iam}Cards`]}/></td>
+            </tr>
+            </tbody>
+        </table>
+        <PokerPlayerDesk data={data} who={iam} loadData={loadData} balance={balance} {...props}/>
 
         {loader && <Loader/>}
         {data.poker.type} {data.params.role}

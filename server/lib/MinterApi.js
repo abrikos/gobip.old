@@ -18,8 +18,12 @@ const obj = {
 
     async get(action, query) {
         const url = `${this.params.network.url}/v2/${action}?${query}`;
-        const res = await axios.get(url)
-        return res.data;
+        try {
+            const res = await axios.get(url)
+            return res.data;
+        }catch (e) {
+            console.log('AXIOS ERORR:', e.message, url)
+        }
     },
 
     async walletBalance(address) {
