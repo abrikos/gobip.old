@@ -33,13 +33,13 @@ export default function Application() {
         async postData(path = '', data = {}, noLogs) {
             //setErrorGlobal({})
             const label = 'POST: ' + path;
-            if(!(process.env.REACT_APP_API_LOG_DISABLE * 1) && !noLogs) console.time(label)
+            if(process.env.REACT_APP_LOG_ENABLE * 1 && !noLogs) console.time(label)
             const url = '/api' + path;
             return new Promise((resolve, reject) => {
                 axios.post(url, data)
                     .then(res => {
                         resolve(res.data)
-                        if(!(process.env.REACT_APP_API_LOG_DISABLE * 1) || !noLogs) console.timeEnd(label)
+                        if(process.env.REACT_APP_LOG_ENABLE * 1 && !noLogs) console.timeEnd(label)
                     })
                     .catch(err => {
                         const error = {
@@ -47,7 +47,7 @@ export default function Application() {
                             error: err.response && err.response.status,
                             message: err.response.data.match("<html>") ? err.response.statusText : err.response.data
                         }
-                        if(process.env.REACT_APP_API_LOG_DISABLE * 1 || !noLogs) setErrorGlobal(error)
+                        if(process.env.REACT_APP_LOG_ENABLE * 1) setErrorGlobal(error)
                         //resolve({error: err.response.status, message: err.response.data.message || err.response.statusText})
                         reject(error)
                     })
