@@ -7,7 +7,7 @@ import {MinterAddressLink} from "../../components/minter/MinterLink";
 
 export default function PokerList(props) {
     const [pokers, setPokers] = useState([])
-    const [address, setAddress] = useState(props.store.authenticatedUser.pokerAddress)
+    const [address, setAddress] = useState(props.store.authenticatedUser && props.store.authenticatedUser.pokerAddress)
 
     useEffect(() => {
         loadData()
