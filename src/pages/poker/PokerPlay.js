@@ -50,16 +50,24 @@ export default function PokerPlay(props) {
         <table>
             <tbody>
             <tr>
-                <td><PokerBet bet={data.poker[`${other}Sum`]}/></td>
+                <td></td>
                 <td><div>{data.poker.result && data.poker.opponentResult.name}</div>
                     <PokerPlayerCards bet={data.poker[`${other}Sum`]} cards={data.poker[`${other}Cards`]}/></td>
             </tr>
             <tr className="bg-success">
-                <td><PokerBet bet={data.poker.bank}/></td>
-                <td className="p-2 d-flex justify-content-center flex-wrap">{desk.map((p, i) => <PokerCard {...p} key={i}/>)}</td>
+                <td>
+                    <PokerBet bet={data.poker[`${other}Sum`]}/>
+                    <PokerBet bet={data.poker.bank}/>
+                    <PokerBet bet={data.poker[`${iam}Sum`]}/>
+                </td>
+                <td className="p-2">
+                    <div className="d-flex justify-content-center flex-wrap">
+                        {desk.map((p, i) => <PokerCard {...p} key={i}/>)}
+                    </div>
+                </td>
             </tr>
             <tr>
-                <td><PokerBet bet={data.poker[`${iam}Sum`]}/></td>
+                <td></td>
                 <td><PokerPlayerCards bet={data.poker[`${iam}Sum`]} cards={data.poker[`${iam}Cards`]}/></td>
             </tr>
             </tbody>
