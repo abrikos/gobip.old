@@ -2,6 +2,7 @@ import Mongoose from "server/db/Mongoose";
 import passport from "server/lib/passport";
 import PokerApi from "../lib/PokerApi";
 import PokerGame from "../lib/PokerGame";
+import MinterApi from "../lib/MinterApi";
 
 
 PokerGame.runTest && PokerGame.test()
@@ -11,11 +12,15 @@ module.exports.controller = function (app) {
     app.post('/api/poker/view/:id', async (req, res) => {
         const prom = PokerGame.runTest ? Mongoose.poker.findOne().sort({createdAt: -1}) : Mongoose.poker.findById(req.params.id);
         prom
-            .populate('user', ['name', 'photo'])
-            .populate('opponent', ['name', 'photo'])
-            .select(['name', 'createdAt', 'desk', 'bank', 'type', 'opponentCards', 'userCards', 'userBets', 'opponentBets', 'result', 'winner', 'turn'])
+            .populate('user', ['name', 'photo', 'realBalance', 'virtualBalance'])
+            .populate('opponent', ['name', 'photo', 'realBalance', 'virtualBalance'])
+            //.select(['name', 'createdAt', 'desk', 'bank', 'type', 'opponentCards', 'userCards', 'userBets', 'opponentBets', 'result', 'winner', 'turn'])
             .then(poker => {
                 const params = {}
+                if (!poker.result && poker.isPlaying && poker.secondsLeft <= 0) {
+                    poker.doFold()
+                    poker.save()
+                }
                 if (poker.user.equals(req.session.userId)) {
                     params.role = 'user';
                 } else if (poker.opponent && poker.opponent.equals(req.session.userId)) {
@@ -32,22 +37,43 @@ module.exports.controller = function (app) {
 
                 params.canJoin = params.role === 'viewer' && req.session.userId
                 params.isViewer = params.canJoin;
-                //console.log(poker.playerTurn.name)
+                params.alertSeconds = process.env.POKER_ALERT_SECONDS * 1;
                 res.send({poker, params});
             })
-            .catch(e => res.status(500).send(e.message))
+            .catch(e => {
+                console.log(e.message);
+                res.status(500).send(e.message)
+            })
     });
 
     app.post('/api/poker/join/:id', passport.isLogged, (req, res) => {
         PokerGame.join(req.params.id, req.session.userId)
             .then(r => res.sendStatus(200))
-            .catch(e => res.status(500).send(e.message))
+            .catch(e => {
+                console.log(e.message);
+                res.status(500).send(e.message)
+            })
     })
 
     app.post('/api/poker/again/:id', passport.isLogged, (req, res) => {
         PokerGame.again(req.params.id, req.session.userId)
             .then(r => res.sendStatus(200))
-            .catch(e => res.status(500).send(e.message))
+            .catch(e => {
+                console.log(e.message);
+                res.status(500).send(e.message)
+            })
+    })
+
+    app.post('/api/cabinet/poker/address/change', passport.isLogged, async (req, res) => {
+        const pokerAddress = await MinterApi.newWallet('poker', '', req.session.userId);
+        const user = await Mongoose.user.findById(req.session.userId)
+        user.pokerAddress = pokerAddress.address;
+        user.save()
+            .then(r => res.send(user.pokerAddress))
+            .catch(e => {
+                console.log(e.message);
+                res.status(500).send(e.message)
+            })
     })
 
 
@@ -55,7 +81,10 @@ module.exports.controller = function (app) {
     app.post('/api/poker/bet/:id', passport.isLogged, async (req, res) => {
         PokerGame.bet(req.params.id, req.session.userId, req.body.bet * 1)
             .then(() => res.sendStatus(200))
-            .catch(e => res.status(500).send(e.message))
+            .catch(e => {
+                console.log(e.message);
+                res.status(500).send(e.message)
+            })
     })
 
     app.post('/api/poker/player/cards/:id', passport.isLogged, async (req, res) => {
@@ -74,7 +103,7 @@ module.exports.controller = function (app) {
                 }
                 res.send(r)
             })
-        //.catch(e => res.status(500).send(e.message))
+        //.catch(e => {console.log(e.message);res.status(500).send(e.message)})
     });
 
 
@@ -83,7 +112,7 @@ module.exports.controller = function (app) {
             .select(['name', 'createdAt', 'type', 'user', 'opponent'])
             .sort({createdAt: -1})
             .then(r => res.send(r))
-        //.catch(e => res.status(500).send(e.message))
+        //.catch(e => {console.log(e.message);res.status(500).send(e.message)})
     });
 
     app.post('/api/poker/list', async (req, res) => {
@@ -91,13 +120,19 @@ module.exports.controller = function (app) {
             .select(['name', 'createdAt', 'user', 'opponent', 'type'])
             .sort({createdAt: -1})
             .then(r => res.send(r))
-            .catch(e => res.status(500).send(e.message))
+            .catch(e => {
+                console.log(e.message);
+                res.status(500).send(e.message)
+            })
     });
 
     app.post('/api/poker/game/start', passport.isLogged, (req, res) => {
         PokerGame.create(req.session.userId, req.body.type === 'real' ? 'real' : 'virtual')
             .then(r => res.send(r))
-            .catch(e => res.status(500).send(e.message))
+            .catch(e => {
+                console.log(e.message);
+                res.status(500).send(e.message)
+            })
     });
 
 }

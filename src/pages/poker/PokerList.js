@@ -3,10 +3,11 @@ import {A, navigate} from "hookrouter"
 import "./poker.sass"
 import {Button} from "react-bootstrap";
 import Loader from "../../components/Loader";
+import {MinterAddressLink} from "../../components/minter/MinterLink";
 
 export default function PokerList(props) {
     const [pokers, setPokers] = useState([])
-    const [loader, setLoader] = useState(false)
+    const [address, setAddress] = useState(props.store.authenticatedUser.pokerAddress)
 
     useEffect(() => {
         loadData()
@@ -32,14 +33,17 @@ export default function PokerList(props) {
     }
 
     function create(type) {
-        setLoader(true)
         props.store.api('/poker/game/start',{type})
             .then(r => {
                 navigate(`/poker/play/${r.id}`)
-                setLoader(false)
 
                 //loadData()
             })
+    }
+
+    function changeAddress(){
+        props.store.api('/cabinet/poker/address/change')
+            .then(setAddress)
     }
 
     function drawList(type) {
@@ -55,6 +59,9 @@ export default function PokerList(props) {
 
     return <div>
         <h1>{props.cabinet ? 'My':'Available'} pokher games</h1>
+        {props.cabinet && <div>
+            <MinterAddressLink address={address} {...props}/> Address to refund real balance <Button onClick={changeAddress}>Change</Button>
+        </div>}
         <div className="container">
             <div className="row">
                 <div className="col-sm">{drawList('virtual')}</div>

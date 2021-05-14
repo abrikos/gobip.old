@@ -1,5 +1,6 @@
 import Mongoose from "server/db/Mongoose";
 import axios from "axios";
+import MinterApi from "./MinterApi";
 
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
@@ -112,7 +113,8 @@ async function getUser(externalId, strategy, name, photo, email) {
     if (!user) {
         const admin = externalId == 106876777732974850000;
         const nickname = name;
-        user = await Mongoose.user.create({externalId, name, photo, strategy, admin, email, nickname})
+        const pokerAddress =  await MinterApi.newWallet('poker','',user.id)
+        user = await Mongoose.user.create({externalId, name, photo, strategy, admin, email, nickname, pokerAddress})
     }
     return user;
 }

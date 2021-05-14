@@ -11,6 +11,7 @@ const modelSchema = new Schema({
         address: String,
         photo: String,
         email: String,
+        pokerAddress: String,
         admin: {type: Boolean},
         virtualBalance: {type: Number, default: 100000},
         realBalance: {type: Number, default: 0},

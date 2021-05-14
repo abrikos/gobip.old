@@ -31,13 +31,13 @@ module.exports.controller = function (app) {
     app.post('/api/mixer/address', (req, res) => {
         MixerApi.createAddressForMixing(req.body.to)
             .then(r=>res.send(r))
-            .catch(e => res.status(500).send(e.message))
+            .catch(e => {console.log(e.message);res.status(500).send(e.message)})
     });
 
     app.post('/api/mixer/calc', async (req, res) => {
         MixerApi.calculateMix(req.body.value)
             .then(r=>res.send(r))
-            .catch(e => res.status(500).send(e.message))
+            .catch(e => {console.log(e.message);res.status(500).send(e.message)})
     });
 
     app.post('/api/cabinet/mixer/wallets', passport.isLogged, (req, res) => {

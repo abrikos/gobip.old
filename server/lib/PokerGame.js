@@ -1,5 +1,6 @@
 import Mongoose from "../db/Mongoose";
 import PokerApi from "./PokerApi";
+import moment from "moment";
 
 const randomWords = require('random-words');
 const PokerGame = {
@@ -10,7 +11,6 @@ const PokerGame = {
         poker.user = await Mongoose.user.findById(userId);
         poker.userCards = PokerApi.randomSet(poker.allCards, 2);
         poker.opponentCards = PokerApi.randomSet(poker.allCards, 2);
-
         const bet = await poker.makeBet(poker.blind, userId)
         if (bet.error) throw bet;
         poker.name = randomWords({exactly: 1, wordsPerString: 3, formatter: (word, i) => i ? word : word.slice(0, 1).toUpperCase().concat(word.slice(1))})[0]
@@ -23,6 +23,7 @@ const PokerGame = {
         poker.opponent = await Mongoose.user.findById(userId)
         const bet = await poker.makeBet(poker.blind / 2, userId)
         if (bet.error) throw bet
+        poker.timer = moment().unix();
         return poker.save();
     },
 
@@ -72,10 +73,7 @@ const PokerGame = {
         if (poker.status === 'new-round') {
             poker.status = 'round-started';
             poker.turn = 'user';
-            poker.bank += poker.userSum + poker.opponentSum;
-            console.log(poker.bank)
-            poker.userBets = [];
-            poker.opponentBets = [];
+            poker.fillBank()
             poker.desk = poker.desk.concat(PokerApi.randomSet(poker.allCards, poker.desk.length ? 1 : 3));
             console.log('NEW ROUND', poker.round)
         }
@@ -83,6 +81,7 @@ const PokerGame = {
             poker.calcWinner()
             console.log('EEEEEEEEEEEEEEEEEEEEEEEE',)
         }
+        poker.timer = moment().unix();
         return poker.save();
     },
 
@@ -94,6 +93,7 @@ const PokerGame = {
             let poker = await this.create(user, 'virtual')
             poker = await this.join(poker.id, opponent);
             //================================================
+            return
             poker = await this.bet(poker.id, opponent, 5);
             poker = await this.bet(poker.id, user, 0);
 
