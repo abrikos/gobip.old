@@ -41,14 +41,11 @@ export default function AdminUser(props) {
             <tbody>
             {users.map(u => <tr key={u.id}>
 
-                <td>{u.name}</td>
+                <td>{u.name} {u.email}</td>
                 <td>{u.username}</td>
                 <td>{u.id}</td>
                 <td>
                     <input type="checkbox" defaultChecked={u.admin} onChange={() => setAdmin(u)}/> Администратор
-                </td>
-                <td>
-                    <input type="checkbox" defaultChecked={u.editor} onChange={() => setEditor(u)}/> Редактор
                 </td>
                 <td>
                     <Button onClick={() => deleteUser(u)} variant="danger">Удалить</Button>
