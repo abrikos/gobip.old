@@ -2,7 +2,7 @@ import React from "react";
 import "themes/main/theme-main.sass"
 import ThemeMainTopMenu from "./ThemeMainTopMenu";
 import {A} from "hookrouter";
-import {faBlender, faCoins, faCrown, faHeart, faImages, faSignInAlt, faSignOutAlt, faUserCog} from "@fortawesome/free-solid-svg-icons";
+import {faBlender, faCoins, faCrown, faHeart, faHome, faImages, faSignInAlt, faSignOutAlt, faUserCog} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {Banners} from "pages/banner/Banners";
 import LoginFormGoogle from "../../components/login/LoginFormGoogle";
@@ -10,6 +10,7 @@ import ErrorPage from "../../components/service/ErrorPage";
 
 export default function ThemeMain(props) {
     const links = [
+        {path: '/', label: 'Home', icon: faHome},
         {path: '/poker', label: 'Pokher', icon: faHeart},
         {path: '/mixer', label: props.store.network.coin + ' Mixer', icon: faBlender},
         {path: '/lottery/winners', label: 'Banner lottery', icon: faImages},

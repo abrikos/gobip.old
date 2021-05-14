@@ -16,7 +16,7 @@ export default function ThemeMainTopMenu(props) {
 
     ];
     return <Navbar bg="dark" expand="lg">
-        <Navbar.Brand href="/" className="text-light"><img src="/logo.svg" alt="Логотип" width={50}/> {process.env.REACT_APP_SITE_TITLE}</Navbar.Brand>
+        <Navbar.Brand className="text-light"><img src="/logo.svg" alt="Логотип" width={50}/> {process.env.REACT_APP_SITE_TITLE}</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav"/>
         <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="ml-auto">

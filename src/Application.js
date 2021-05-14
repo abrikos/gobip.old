@@ -47,7 +47,7 @@ export default function Application() {
                             error: err.response && err.response.status,
                             message: err.response.data.match("<html>") ? err.response.statusText : err.response.data
                         }
-                        setErrorGlobal(error)
+                        if(process.env.REACT_APP_API_LOG_DISABLE * 1) setErrorGlobal(error)
                         //resolve({error: err.response.status, message: err.response.data.message || err.response.statusText})
                         reject(error)
                     })
