@@ -34,7 +34,7 @@ modelSchema.virtual('date')
 
 modelSchema.virtual('displayName')
     .get(function () {
-        return this.name || this.username;
+        return this.nickname || this.name || this.username;
     });
 
 modelSchema.virtual('quizzes', {
