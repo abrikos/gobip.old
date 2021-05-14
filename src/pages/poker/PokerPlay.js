@@ -7,6 +7,7 @@ import PokerBetForm from "./PokerBetForm";
 import PokerPlayerDesk from "./PokerPlayerDesk";
 import PokerPlayerCards from "./PokerPlayerCards";
 import PokerBet from "./PokerBet";
+import UserAvatar from "../cabinet/UserAvatar";
 
 export default function PokerPlay(props) {
     const [data, setData] = useState();
@@ -56,7 +57,11 @@ export default function PokerPlay(props) {
             <tr>
                 <td></td>
                 <td className="p-2"><div>{data.poker.result && data.poker.opponentResult.name}</div>
-                    <PokerPlayerCards bet={data.poker[`${other}Sum`]} cards={data.poker[`${other}Cards`]}/></td>
+                    <div className="d-flex justify-content-between">
+                    <PokerPlayerCards bet={data.poker[`${other}Sum`]} cards={data.poker[`${other}Cards`]}/>
+                    <UserAvatar {...data.poker[other]}/>
+                    </div>
+                </td>
             </tr>
             <tr className="bg-success">
                 <td>
@@ -73,7 +78,12 @@ export default function PokerPlay(props) {
             </tr>
             <tr>
                 <td></td>
-                <td className="p-2"><PokerPlayerCards bet={data.poker[`${iam}Sum`]} cards={data.poker[`${iam}Cards`]}/></td>
+                <td className="p-2">
+                    <div className="d-flex  justify-content-between">
+                    <PokerPlayerCards bet={data.poker[`${iam}Sum`]} cards={data.poker[`${iam}Cards`]}/>
+                    <UserAvatar {...data.poker[iam]}/>
+                    </div>
+                </td>
             </tr>
             </tbody>
         </table>

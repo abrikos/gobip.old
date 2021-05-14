@@ -11,8 +11,8 @@ module.exports.controller = function (app) {
     app.post('/api/poker/view/:id', async (req, res) => {
         Mongoose.poker.findById(req.params.id)
         //Mongoose.poker.findOne().sort({createdAt: -1})
-            .populate('user', ['name', 'photo'])
-            .populate('opponent', ['name', 'photo'])
+            .populate('user', ['name', 'photo', 'nickname'])
+            .populate('opponent', ['name', 'photo', 'nickname'])
             .select(['name', 'createdAt', 'desk', 'bank', 'type', 'opponentCards', 'userCards', 'userBets', 'opponentBets', 'result', 'winner', 'turn'])
             .then(poker => {
                 const params = {}
@@ -74,7 +74,7 @@ module.exports.controller = function (app) {
 
     app.post('/api/poker/cabinet/list', passport.isLogged, async (req, res) => {
         Mongoose.poker.find({user: req.session.userId, type: {$ne: null}})
-            .select(['name', 'createdAt', 'type', 'user', 'opponent'])
+            .select(['nickname', 'createdAt', 'type', 'user', 'opponent'])
             .sort({createdAt: -1})
             .then(r => res.send(r))
         //.catch(e => res.status(500).send(e.message))
