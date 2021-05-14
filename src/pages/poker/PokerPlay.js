@@ -3,7 +3,7 @@ import React, {useEffect, useState} from "react";
 import {Button} from "react-bootstrap";
 import Loader from "../../components/Loader";
 import MinterValue from "../../components/minter/MinterValue";
-import PokerBetForm from "./PokerBetForm";
+import {navigate} from "hookrouter";
 import PokerPlayerDesk from "./PokerPlayerDesk";
 import PokerPlayerCards from "./PokerPlayerCards";
 import PokerBet from "./PokerBet";
@@ -15,7 +15,7 @@ export default function PokerPlay(props) {
 
     useEffect(() => {
         loadData()
-        const timer = setInterval(loadData, 5000)
+        const timer = setInterval(loadData, 1000)
         return () => clearInterval(timer);
     }, [props.id])
 
@@ -31,14 +31,16 @@ export default function PokerPlay(props) {
     }
 
     function oneMoreTime(){
-        props.store.api(`/poker/one-more/${data.poker.id}`)
+        props.store.api(`/poker/again/${data.poker.id}`)
             .then(loadData)
     }
 
     if (!data) return <div>Loading PokerPlay</div>
+    if(data.poker.pokerAgainId) navigate(`/poker/play/${data.poker.pokerAgainId}`)
     const desk = data.poker.desk.length ? data.poker.desk : [1, 2, 3]
     const iam = props.store.authenticatedUser._id === data.poker.user.id ? 'user' : 'opponent';
     const other = iam === 'user' ? 'opponent' : 'user';
+
     return <div>
         <div>
             My balance: {data.poker.type === 'real' ?
@@ -77,7 +79,7 @@ export default function PokerPlay(props) {
             </tr>
             </tbody>
         </table>
-        {data.poker.result && <Button onClick={oneMoreTime}>One more time?</Button>}
+        {data.poker.result && (data.poker[`${iam}Again`] ?  <Button variant="warning">Wait opponent</Button> : <Button onClick={oneMoreTime}>One more time?</Button> )}
         <PokerPlayerDesk data={data} who={iam} loadData={loadData} balance={balance} {...props}/>
 
         {loader && <Loader/>}

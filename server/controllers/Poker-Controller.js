@@ -4,13 +4,13 @@ import PokerApi from "../lib/PokerApi";
 import PokerGame from "../lib/PokerGame";
 
 
-
+PokerGame.runTest && PokerGame.test()
 
 module.exports.controller = function (app) {
     //Mongoose.poker.findOne().then(console.log)
     app.post('/api/poker/view/:id', async (req, res) => {
-        Mongoose.poker.findById(req.params.id)
-        //Mongoose.poker.findOne().sort({createdAt: -1})
+        const prom = PokerGame.runTest ? Mongoose.poker.findOne().sort({createdAt: -1}) : Mongoose.poker.findById(req.params.id);
+        prom
             .populate('user', ['name', 'photo'])
             .populate('opponent', ['name', 'photo'])
             .select(['name', 'createdAt', 'desk', 'bank', 'type', 'opponentCards', 'userCards', 'userBets', 'opponentBets', 'result', 'winner', 'turn'])
@@ -40,6 +40,12 @@ module.exports.controller = function (app) {
 
     app.post('/api/poker/join/:id', passport.isLogged, (req, res) => {
         PokerGame.join(req.params.id, req.session.userId)
+            .then(r => res.sendStatus(200))
+            .catch(e => res.status(500).send(e.message))
+    })
+
+    app.post('/api/poker/again/:id', passport.isLogged, (req, res) => {
+        PokerGame.again(req.params.id, req.session.userId)
             .then(r => res.sendStatus(200))
             .catch(e => res.status(500).send(e.message))
     })

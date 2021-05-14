@@ -22,6 +22,9 @@ const modelSchema = new Schema({
         result: Object,
         userCheck: Boolean,
         opponentCheck: Boolean,
+        userAgain: Boolean,
+        opponentAgain: Boolean,
+        pokerAgainId: String,
         type: {type: String, default: 'virtual'},
     },
     {
@@ -41,14 +44,28 @@ modelSchema.methods.isPlayer = function (userId) {
     return this.user.equals(userId) || (this.opponent && this.opponent.equals(userId)) || false
 }
 
-modelSchema.methods.setWinner = function () {
+modelSchema.methods.moveBank = function () {
+    const prize = this.bank - process.env.POKER_SMALL_BLINDE * 1;
+    this[this.winner][`${this.type}Balance`] += prize;
+    this[this.winner].save()
+    return prize
+}
+
+modelSchema.methods.calcWinner = function () {
     if (this.desk.length < 5) return {error: 'game not finished'}
     const cU = this.userResult;
     const cO = this.opponentResult;
     this.winner = cU.sum > cO.sum ? 'user' : 'opponent';
     this.result = cU.sum > cO.sum ? cU : cO;
+    this.moveBank()
+}
 
-
+modelSchema.methods.doFold = function () {
+    this.winner = this.otherPlayer;
+    const prize = this.moveBank()
+    this.result = this[`${this.winner}Result`]
+    this.status = 'fold'
+    console.log(this.turn, 'FOLD', prize,  this.winner);
 }
 
 
@@ -59,11 +76,11 @@ modelSchema.methods.makeBet = async function (bet, userId) {
     this[`${who}Bets`].push(bet)
     if (smallBlind) this.playerTurn = this.opponent;
     if (this.type === 'real') {
-        if (player.balanceReal < 0) return {error: 500, message: 'Insufficient funds'};
-        player.balanceReal -= bet;
+        if (player.realBalance < 0) return {error: 500, message: 'Insufficient funds'};
+        player.realBalance -= bet;
     } else {
-        if (player.balanceVirtual < 0) return {error: 500, message:'Insufficient funds'};
-        player.balanceVirtual -= bet;
+        if (player.virtualBalance < 0) return {error: 500, message:'Insufficient funds'};
+        player.virtualBalance -= bet;
     }
     await player.save()
     return {bet};
@@ -73,6 +90,11 @@ modelSchema.methods.makeBet = async function (bet, userId) {
 modelSchema.virtual('playerTurn')
     .get(function () {
         return this[this.turn] && this[this.turn].id
+    });
+
+modelSchema.virtual('turnUser')
+    .get(function () {
+        return this[this.turn]
     });
 
 modelSchema.virtual('otherPlayer')

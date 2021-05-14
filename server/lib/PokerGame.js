@@ -14,8 +14,7 @@ const PokerGame = {
         const bet = await poker.makeBet(poker.blind, userId)
         if (bet.error) throw bet;
         poker.name = randomWords({exactly: 1, wordsPerString: 3, formatter: (word, i) => i ? word : word.slice(0, 1).toUpperCase().concat(word.slice(1))})[0]
-        await poker.save()
-        return poker;
+        return poker.save()
     },
 
     async join(id, userId) {
@@ -24,17 +23,33 @@ const PokerGame = {
         poker.opponent = await Mongoose.user.findById(userId)
         const bet = await poker.makeBet(poker.blind / 2, userId)
         if (bet.error) throw bet
-        await poker.save();
-        return poker;
+        return poker.save();
+    },
 
+    async again(id, userId) {
+        const poker = await Mongoose.poker.findById(id)
+        const who = poker.who(userId)
+        poker[`${who}Again`] = true;
+        await poker.save();
+        if (!poker.result) throw {message: "Game online"};
+        console.log('again?', poker.userAgain, poker.opponentAgain)
+        if (poker.userAgain && poker.opponentAgain) {
+            const newPoker = await this.create(poker.opponent, poker.type);
+            await this.join(newPoker.id, poker.user);
+            poker.pokerAgainId = newPoker.id;
+            poker.save()
+        }
     },
 
     async bet(id, userId, BET) {
-
-        if (!(BET >= 0)) throw {message: 'POST: wrong bet'};
         const poker = await Mongoose.poker.findById(id)
             .populate('user')
             .populate('opponent')
+
+        if (!(BET >= 0)) {
+            await poker.doFold()
+            return poker.save()
+        }
         if (poker.result) throw {message: 'Game closed'}
         if (BET < poker.minBet && !poker.isCall) throw {message: 'Bet too small. Min ' + poker.minBet}
         if (!poker.playerTurn === userId) throw {message: 'Not your turn'};
@@ -42,7 +57,7 @@ const PokerGame = {
 
         const bet = await poker.makeBet(BET, userId)
         if (bet.error) throw bet
-        console.log(`..........  BET ${poker.turn}`, BET, 'userSum', poker.userSum, 'oppsum', poker.opponentSum)
+        //console.log(`..........  BET ${poker.turn}`, BET, 'userSum', poker.userSum, 'oppsum', poker.opponentSum)
         poker.turn = poker.otherPlayer
 
         if (poker.isCall) {
@@ -65,13 +80,13 @@ const PokerGame = {
             console.log('NEW ROUND', poker.round)
         }
         if (poker.round === 'finish') {
-            poker.setWinner()
+            poker.calcWinner()
             console.log('EEEEEEEEEEEEEEEEEEEEEEEE',)
         }
-        await poker.save();
-        return poker;
+        return poker.save();
     },
 
+    runTest: false,
     async test() {
         try {
             const user = process.env.POKER_USER;
@@ -85,7 +100,7 @@ const PokerGame = {
             //return
             poker = await this.bet(poker.id, user, 0);
             poker = await this.bet(poker.id, opponent, 20);
-            poker = await this.bet(poker.id, user, 20);
+
         } catch (e) {
             console.log('ERRRR', e.message)
         }
@@ -93,5 +108,4 @@ const PokerGame = {
     }
 }
 
-//PokerGame.test()
 export default PokerGame;

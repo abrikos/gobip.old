@@ -12,8 +12,8 @@ const modelSchema = new Schema({
         photo: String,
         email: String,
         admin: {type: Boolean},
-        balanceVirtual: {type: Number, default: 100000},
-        balanceReal: {type: Number, default: 0},
+        virtualBalance: {type: Number, default: 100000},
+        realBalance: {type: Number, default: 0},
         files: [{type: mongoose.Schema.Types.ObjectId, ref: 'Image'}]
     },
     {
