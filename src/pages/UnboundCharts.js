@@ -73,9 +73,9 @@ export default function UnboundCharts(props) {
 
         <HighchartsReact highcharts={Highcharts} options={options}/>
 
-        <Button size="sm" variant={!txView ? 'primary' : 'warning'} onClick={() => setTxView(!txView)}>{txView ? 'Hide' : 'Show'} transactions</Button>
+        {/*<Button size="sm" variant={!txView ? 'primary' : 'warning'} onClick={() => setTxView(!txView)}>{txView ? 'Hide' : 'Show'} transactions</Button>
 
-        {txView && <TransactionsList model={'unbound'} fields={['hash', 'value', 'coin']} link={`https`} {...props}/>}
+        {txView && <TransactionsList model={'unbound'} fields={['hash', 'value', 'coin']} link={`https`} {...props}/>}*/}
 
     </div>
 }
