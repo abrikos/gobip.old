@@ -72,7 +72,7 @@ modelSchema.methods.makeBet = async function (bet, userId) {
 
 modelSchema.virtual('playerTurn')
     .get(function () {
-        return this[this.turn].id
+        return this[this.turn] && this[this.turn].id
     });
 
 modelSchema.virtual('otherPlayer')

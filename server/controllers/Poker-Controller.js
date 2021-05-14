@@ -9,8 +9,8 @@ import PokerGame from "../lib/PokerGame";
 module.exports.controller = function (app) {
     //Mongoose.poker.findOne().then(console.log)
     app.post('/api/poker/view/:id', async (req, res) => {
-        //Mongoose.poker.findById(req.params.id)
-        Mongoose.poker.findOne().sort({createdAt: -1})
+        Mongoose.poker.findById(req.params.id)
+        //Mongoose.poker.findOne().sort({createdAt: -1})
             .populate('user', ['name', 'photo'])
             .populate('opponent', ['name', 'photo'])
             .select(['name', 'createdAt', 'desk', 'bank', 'type', 'opponentCards', 'userCards', 'userBets', 'opponentBets', 'result', 'winner', 'turn'])

@@ -30,6 +30,10 @@ export default function PokerPlay(props) {
             .then(loadData)
     }
 
+    function oneMoreTime(){
+        props.store.api(`/poker/one-more/${data.poker.id}`)
+            .then(loadData)
+    }
 
     if (!data) return <div>Loading PokerPlay</div>
     const desk = data.poker.desk.length ? data.poker.desk : [1, 2, 3]
@@ -47,11 +51,11 @@ export default function PokerPlay(props) {
 
         {!data.poker.result && <div>Turn: {data.poker.playerTurn === props.store.authenticatedUser._id ? 'You turn' : 'Waiting for opponent'}</div>}
 
-        <table>
+        <table  className="border border-success">
             <tbody>
             <tr>
                 <td></td>
-                <td><div>{data.poker.result && data.poker.opponentResult.name}</div>
+                <td className="p-2"><div>{data.poker.result && data.poker.opponentResult.name}</div>
                     <PokerPlayerCards bet={data.poker[`${other}Sum`]} cards={data.poker[`${other}Cards`]}/></td>
             </tr>
             <tr className="bg-success">
@@ -60,7 +64,8 @@ export default function PokerPlay(props) {
                     <PokerBet bet={data.poker.bank}/>
                     <PokerBet bet={data.poker[`${iam}Sum`]}/>
                 </td>
-                <td className="p-2">
+                <td className="p-2 text-center">
+                    {data.poker.round}
                     <div className="d-flex justify-content-center flex-wrap">
                         {desk.map((p, i) => <PokerCard {...p} key={i}/>)}
                     </div>
@@ -68,10 +73,11 @@ export default function PokerPlay(props) {
             </tr>
             <tr>
                 <td></td>
-                <td><PokerPlayerCards bet={data.poker[`${iam}Sum`]} cards={data.poker[`${iam}Cards`]}/></td>
+                <td className="p-2"><PokerPlayerCards bet={data.poker[`${iam}Sum`]} cards={data.poker[`${iam}Cards`]}/></td>
             </tr>
             </tbody>
         </table>
+        {data.poker.result && <Button onClick={oneMoreTime}>One more time?</Button>}
         <PokerPlayerDesk data={data} who={iam} loadData={loadData} balance={balance} {...props}/>
 
         {loader && <Loader/>}

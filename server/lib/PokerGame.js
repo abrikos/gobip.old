@@ -93,5 +93,5 @@ const PokerGame = {
     }
 }
 
-PokerGame.test()
+//PokerGame.test()
 export default PokerGame;
