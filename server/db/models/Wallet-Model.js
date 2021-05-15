@@ -9,7 +9,7 @@ const modelSchema = new Schema({
         address: {type: String, unique:true},
         seedPhrase: {type: String},
         to: {type: String},
-        balance: {type: Number, default:0},
+        balanceReal: {type: Number, default:0},
         type: {type: String},
         profits:[Object],
         addressPaymentFrom: String,
@@ -25,6 +25,15 @@ const modelSchema = new Schema({
         // see http://stackoverflow.com/q/13133911/488666
         toJSON: {virtuals: true}
     });
+
+modelSchema.virtual('balance')
+    .get(function () {
+        return this.balanceReal ? this.balanceReal.toFixed(1) * 1 : 0
+    })
+    .set(function (b) {
+        return this.balanceReal = b
+    })
+;
 
 modelSchema.virtual('dateHuman')
     .get(function () {

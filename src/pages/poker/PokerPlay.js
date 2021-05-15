@@ -7,6 +7,7 @@ import PokerPlayerDesk from "./PokerPlayerDesk";
 import PokerPlayerCards from "./PokerPlayerCards";
 import PokerBet from "./PokerBet";
 import audioFile from "../../sounds/beep-07.mp3"
+import PokerInfo from "./PokerInfo";
 
 export default function PokerPlay(props) {
     const [data, setData] = useState();
@@ -48,12 +49,7 @@ export default function PokerPlay(props) {
     }
 
     return <div>
-        <div>
-            My balance: {data.poker.type === 'real' ?
-            <MinterValue value={balance.real} {...props}/> : `${balance.virtual} virtual`}
-        </div>
-
-
+        <PokerInfo {...props}/>
         <h1>{data.poker.type} Pokher "{data.poker.name}"</h1>
         {data.params.canJoin && <Button onClick={join}>Join game</Button>}
 

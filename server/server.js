@@ -49,6 +49,10 @@ app.use(passport.session());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
+app.locals.adaptError = (e) => {
+    return e.response ? e.response.data.error.message : e.message;
+};
+
 
 fs.readdirSync(__dirname + '/controllers').forEach(function (file) {
     if (file.substr(-3) === '.js') {

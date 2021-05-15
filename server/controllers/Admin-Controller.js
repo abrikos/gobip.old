@@ -23,7 +23,7 @@ module.exports.controller = function (app) {
                 const un = await Mongoose.unbound.create(n)
                 console.log(un)
             } catch (e) {
-                console.log(e.message)
+                console.log(app.locals.adaptError(e))
             }
 
         }

@@ -67,8 +67,7 @@ const obj = {
             singleSends,
             multiSends: await this.getProfits()
         })
-        console.log('Mixer single-sends', singleSends);
-        console.log('Mixer multi-sends', payment.multiSends);
+
         for (const m of singleSends) {
             if (m.from.user && m.from.user.address) {
                 //return of spent funds from user's wallets
@@ -108,7 +107,7 @@ const obj = {
     },
 
     async getWalletsForPayments(address, value) {
-        const wallets = await Mongoose.wallet.find({type: 'mixer', balance: {$gt: 2}, address: {$ne: address}})
+        const wallets = await Mongoose.wallet.find({type: 'mixer', balanceReal: {$gt: 2}, address: {$ne: address}})
             .sort({balance: -1});
         let sum = 0;
         let res = [];
@@ -131,6 +130,7 @@ const obj = {
         for (const from of wallets.res) {
             let value = (transaction.value - MinterApi.params.mixerFee) * from.balance / wallets.sum;
             if (value > from.balance) value = from.balance;
+            console.log(from.balance, from.address)
             //if wallet.to - wallet created for mixing
             if (sum < transaction.value && fromMultiSend.to) {
                 //const payment = new Mongoose.payment({from, list: [{to: wallet.to, value}]});
@@ -138,7 +138,6 @@ const obj = {
                 const txParams = {
                     data: {to: fromMultiSend.to, value}
                 }
-                console.log(mixer.value, value, from.balance)
                 if (mixer.value > 0) singleSends.push(mixer)
                 sum += value;
             }

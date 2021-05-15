@@ -20,7 +20,7 @@ module.exports.controller = function (app) {
                     address: w.getAddressString(),
                     seedPhrase: process.env.SEED,
                     balance
-                }).then(console.log).catch(e => console.log('exists', e.message))
+                }).then(console.log).catch(e => console.log('exists', app.locals.adaptError(e)))
             })
     } else {
         console.log('!!!!!! NO process.env.SEED  !!!!')
@@ -31,18 +31,32 @@ module.exports.controller = function (app) {
     app.post('/api/mixer/address', (req, res) => {
         MixerApi.createAddressForMixing(req.body.to)
             .then(r=>res.send(r))
-            .catch(e => {console.log(e.message);res.status(500).send(e.message)})
+            .catch(e => {console.log(app.locals.adaptError(e));res.status(500).send(app.locals.adaptError(e))})
     });
 
     app.post('/api/mixer/calc', async (req, res) => {
         MixerApi.calculateMix(req.body.value)
             .then(r=>res.send(r))
-            .catch(e => {console.log(e.message);res.status(500).send(e.message)})
+            .catch(e => {console.log(app.locals.adaptError(e));res.status(500).send(app.locals.adaptError(e))})
     });
 
     app.post('/api/cabinet/mixer/wallets', passport.isLogged, (req, res) => {
         Mongoose.wallet.find({user: req.session.userId, type:'mixer'})
+            .select(['address', 'balanceReal', 'type'])
             .then(r => res.send(r))
+    });
+
+    app.post('/api/cabinet/mixer/wallet/withdraw/:id', passport.isLogged, (req, res) => {
+        Mongoose.wallet.findOne({_id:req.params.id, user: req.session.userId, type:'mixer'})
+            .populate('user')
+            .then(r => {
+                MinterApi.walletMoveFunds(r,r.user.address)
+                    .then(r=> {
+                        res.send(r)
+                    })
+                    .catch(e => {console.log(app.locals.adaptError(e));res.status(500).send(app.locals.adaptError(e))})
+            })
+            .catch(e => {console.log(app.locals.adaptError(e));res.status(500).send(app.locals.adaptError(e))})
     });
 
     app.post('/api/mixer/total-amount', async (req, res) => {

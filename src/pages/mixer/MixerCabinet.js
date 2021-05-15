@@ -1,12 +1,14 @@
 import React, {useEffect, useState} from 'react';
 import {Button} from "react-bootstrap";
-import {MinterAddressLink} from "components/minter/MinterLink";
+import {MinterAddressLink, MinterTxLink} from "components/minter/MinterLink";
 import Loader from "components/Loader";
 import CopyButton from "../../components/copy-button/CopyButton";
 import MinterValue from "../../components/minter/MinterValue";
+import ButtonLoading from "../../components/ButtonLoading";
 
 export default function MixerCabinet(props) {
     const [wallets, setWallets] = useState();
+    const [success, setSuccess] = useState();
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -31,10 +33,13 @@ export default function MixerCabinet(props) {
             })
     }
 
+
+
     if(!wallets) return <div/>;
     return <div>
 
             <h1>My mixer wallets</h1>
+            {success && <div className="alert alert-success">{success}</div>}
             <div className="alert alert-info">Create an address, send funds to it and get a proportional percentage of mixer commission from each mix in the system</div>
             <Button onClick={createWallet}>Add wallet</Button>
             <table className="table">
@@ -52,7 +57,20 @@ export default function MixerCabinet(props) {
                     {/*<div>
                 {d.profits.map(p=><div key={p.date}><small>{p.date}</small> {p.value.toFixed(1)}</div>)}
             </div>*/}
-                    <td className="text-center"> <CopyButton text={d.seedPhrase}/></td>
+                    <td className="text-center">
+                        {!!d.balance  && <ButtonLoading
+                            onFinish={r => {
+                                console.log('onFinis', r)
+                                setSuccess(<div>Withdraw TX: <MinterTxLink tx={r.hash} {...props}/></div>);
+                                loadWallets()
+                            }}
+                            url={'/cabinet/mixer/wallet/withdraw/' + d.id}
+                            variant={'warning'}
+                            confirmMessage={`Withdraw ${d.balance} to ${props.store.authenticatedUser.address}?`}
+                            {...props}>
+                            Withdraw
+                        </ButtonLoading>}
+                    </td>
                 </tr>)}
                 </tbody>
             </table>

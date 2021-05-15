@@ -11,11 +11,10 @@ const modelSchema = new Schema({
         address: String,
         photo: String,
         email: String,
-        pokerAddress: String,
+        pokerWallet: {type: mongoose.Schema.Types.ObjectId, ref: 'wallet'},
         admin: {type: Boolean},
         virtualBalance: {type: Number, default: 100000},
         realBalance: {type: Number, default: 0},
-        files: [{type: mongoose.Schema.Types.ObjectId, ref: 'Image'}]
     },
     {
         timestamps: {createdAt: 'createdAt'},

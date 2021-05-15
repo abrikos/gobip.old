@@ -1,25 +1,19 @@
 import React, {useState} from "react";
-import {Button, Form, InputGroup} from "react-bootstrap";
+import {Form, InputGroup} from "react-bootstrap";
 import Loader from "../../components/Loader";
 import MinterValue from "../../components/minter/MinterValue";
+import ButtonLoading from "../../components/ButtonLoading";
 
 export default function MixerCalcForm(props) {
     const [calc, setCalc] = useState({});
-    const [error, setError] = useState();
-    const [loading, setLoading] = useState(false);
+    const [form, setForm] = useState({});
     const min = props.store.params.mixerFee * 2 + 1;
 
-    async function calcPrice(e) {
-        setError(null)
-        setLoading(true)
-        e.preventDefault()
-        const form = props.store.formToObject(e.target)
-        setCalc(await props.store.api('/mixer/calc', form))
-        setLoading(false)
+    function fto(e) {
+        setForm({value: e.target.value})
     }
 
-
-    return <Form onSubmit={calcPrice} className="border p-3 my-2 block">
+    return <Form onChange={fto} className="border p-3 my-2 block">
         <h3>Calculate amount</h3>
         <div className="alert alert-info">You can calculate the approximate amount of funds sent and received in the form "Calculate amount"</div>
 
@@ -27,10 +21,16 @@ export default function MixerCalcForm(props) {
         <InputGroup>
             <Form.Control name="value" type="number" min={min + 1} max={props.totalAmount.toFixed(0)} step="any"/>
             <InputGroup.Append>
-                <Button type="submit">Go</Button>
+                <ButtonLoading
+                    onFinish={setCalc}
+                    url={'/mixer/calc'}
+                    data={form}
+                    {...props}>
+                    Go
+                </ButtonLoading>
             </InputGroup.Append>
         </InputGroup>
-        {loading ? <Loader/> : <div>
+        <div>
             {!!calc.balance &&
             <div className="alert alert-info">If you send <MinterValue value={calc.value} {...props}/>
                 &nbsp;you will receive approximately <strong><MinterValue value={calc.balance} {...props}/></strong>
@@ -39,7 +39,6 @@ export default function MixerCalcForm(props) {
                 txs: {calc.count}
             </div>
             }
-        </div>}
-        {error && <div className="alert alert-danger">{error.message}</div>}
+        </div>
     </Form>
 }

@@ -8,7 +8,7 @@ const obj = {
             .populate('betF')
             .populate('betA')
         if (!wallet) return;
-        wallet.balance = await MinterApi.walletBalance(wallet.address);
+        wallet.balanceReal = await MinterApi.walletBalance(wallet.address);
         await wallet.save();
         const {hash, value, from} = tx;
         const obj = {hash, value, from};
@@ -30,8 +30,8 @@ const obj = {
 
     async checkDates() {
         const bets = await Mongoose.bet.find({closed: null, checkDate: {$lt: moment().format('YYYY-MM-DD')}}) //, checkDate: {$gt: new Date()}
-            .populate({path: 'walletF', select: ['address', 'balance', 'seedPhrase']})
-            .populate({path: 'walletA', select: ['address', 'balance', 'seedPhrase']})
+            .populate({path: 'walletF', select: ['address', 'balanceReal', 'seedPhrase']})
+            .populate({path: 'walletA', select: ['address', 'balanceReal', 'seedPhrase']})
             .populate('user')
         for (const bet of bets) {
             console.log('BET owner refund', bet.userRefund)

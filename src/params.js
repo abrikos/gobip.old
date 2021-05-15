@@ -18,7 +18,7 @@ const params = {
     network,
     bannerPrice: process.env.BANNER_PRICE * 1,
     mixerFee: process.env.MIXER_FEE * 1,
-    lotteryPrise: process.env.LOTTERY_PRISE * 1
+    lotteryPrize: process.env.LOTTERY_PRISE * 1
 
 }
 

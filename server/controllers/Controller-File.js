@@ -36,7 +36,7 @@ module.exports.controller = function (app) {
                         })*/
                     })
                 })
-                .catch(e => res.send(app.locals.sendError({error: 500, message: JSON.stringify(e.message)})))
+                .catch(e => res.send(app.locals.sendError({error: 500, message: JSON.stringify(app.locals.adaptError(e))})))
         }
     });
 

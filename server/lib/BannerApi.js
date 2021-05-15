@@ -11,25 +11,29 @@ const obj = {
 
     async lotteryCheckAmount() {
         const res = await Mongoose.wallet.aggregate([{$group: {_id: "$type", amount: {$sum: "$balance"}}}, {$match: {"_id": "banner"}}])
-        if(!res.length) return;
+        if (!res.length) return;
         let lottery = await Mongoose.lottery.findOne({closed: false});
         if (!lottery) return;
-        lottery.amount = res[0].amount -  MinterApi.params.bannerPrice * 2;
+        lottery.amount = res[0].amount - MinterApi.params.bannerPrice * 2;
         await lottery.save();
     },
 
     async totalAmount() {
-        const res = await Mongoose.lottery.findOne({closed: false});
-        return res ? res.amount : 0
+        const res = await Mongoose.wallet.find({type: 'banner'});
+        return res.map(w => w.balance).reduce((a, b) => a + b, 0)
+    },
+
+    getLotteryStartSum(){
+        return MinterApi.params.lotteryPrize + process.env.LOTTERY_FEE * 1;
     },
 
     async checkWinner() {
-        const amount = await this.totalAmount();
-        if (amount < MinterApi.params.lotteryPrise) return //console.log('Small amount', amount);
+        const total = await this.totalAmount();
+        if (total < this.getLotteryStartSum()) return //console.log('Small amount', amount);
         let lottery = await Mongoose.lottery.findOne({closed: false}).sort({createdAt: -1});
         if (!lottery) return //console.log('no lottery');
         if (lottery.liveTime < 60) return //console.log('LiveTime', lottery.liveTime);
-        const wallets = await Mongoose.wallet.find({type: 'banner', balance: {$gt: 0}}).populate({path:'banner', populate:'user'});
+        const wallets = await Mongoose.wallet.find({type: 'banner', balanceReal: {$gt: 0}}).populate({path: 'banner', populate: 'user'});
         if (!wallets.length) return console.log('NO LOTTERY WALLETS')
         const mainWallet = await Mongoose.wallet.findOne({address: process.env.MAIN_WALLET});
         const payment = new Mongoose.payment({tx: lottery.id})
@@ -45,11 +49,11 @@ const obj = {
 
         lottery.banner = win.banner;
         //Pay to winner
-        payment.singleSends.push({saveResult: true, to: win.banner.user.address, value: MinterApi.params.lotteryPrise, fromAddress: mainWallet.address, fromSeed: mainWallet.seedPhrase})
-        //console.log({saveResult: true, to: win.addressPaymentFrom, value: MinterApi.params.lotteryPrise, fromAddress: mainWallet.address, fromSeed: mainWallet.seedPhrase})
+        payment.singleSends.push({saveResult: true, to: win.banner.user.address, value: MinterApi.params.lotteryPrize, fromAddress: mainWallet.address, fromSeed: mainWallet.seedPhrase})
+        //console.log({saveResult: true, to: win.addressPaymentFrom, value: MinterApi.params.lotteryPrize, fromAddress: mainWallet.address, fromSeed: mainWallet.seedPhrase})
         console.log('Lottery liveTime', lottery.liveTime)
         await payment.save()
-        lottery.amount = MinterApi.params.lotteryPrise;
+        lottery.amount = MinterApi.params.lotteryPrize;
         lottery.payment = payment;
         await lottery.save();
         await Mongoose.lottery.create({});
@@ -85,7 +89,7 @@ const obj = {
     async checkTransaction(tx) {
         const wallet = await Mongoose.wallet.findOne({type: 'banner', address: tx.to}).populate('banner');
         if (!wallet) return;
-        wallet.balance = await MinterApi.walletBalance(wallet.address);
+        wallet.balanceReal = await MinterApi.walletBalance(wallet.address);
         wallet.banner.payDate = new Date();
         wallet.addressPaymentFrom = tx.from;
         await wallet.banner.save();
