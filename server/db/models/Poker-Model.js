@@ -78,11 +78,9 @@ modelSchema.methods.doFold = function () {
 
 
 modelSchema.methods.makeBet = async function (bet, userId) {
-    const player = this.user.equals(userId) ? this.user : this.opponent;
-    const smallBlind = this.opponentBets.length === 0;
-    const who = this.user.equals(player) ? 'user' : 'opponent';
+    const who = this.who(userId);
+    const player = this[who];
     this[`${who}Bets`].push(bet)
-    if (smallBlind) this.playerTurn = this.opponent;
     if (this.type === 'real') {
         if (player.realBalance < 0) return {error: 500, message: 'Insufficient funds'};
         player.realBalance -= bet;
