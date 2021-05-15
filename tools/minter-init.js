@@ -1,13 +1,10 @@
-import Mongoose from "server/db/Mongoose";
-//import MinterApi from "server/lib/MinterApi";
+//import Mongoose from "server/db/Mongoose";
+import MinterApi from "server/lib/MinterApi";
+
+console.log(process.env.NET)
 
 async function startup(){
-    const txs = await Mongoose.transaction.find()
-    for (const tx of txs){
-        console.log(tx)
-    }
-
-
+    //MinterApi.updateBalances()
 }
 
 startup();

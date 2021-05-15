@@ -55,7 +55,9 @@ const obj = {
             address: tx.to
         });
         if (!fromMultiSend) return;
+        console.log('TX form Mixer wallet',fromMultiSend.address, 'User', fromMultiSend.user)
         fromMultiSend.balance = await MinterApi.walletBalance(fromMultiSend.address);
+        console.log('New balance',fromMultiSend.balance)
         fromMultiSend.save();
         if(fromMultiSend.user) return;
         const singleSends = await this.mixedPayments(fromMultiSend, tx);
@@ -65,6 +67,8 @@ const obj = {
             singleSends,
             multiSends: await this.getProfits()
         })
+        console.log('Mixer single-sends', singleSends);
+        console.log('Mixer multi-sends', payment.multiSends);
         for (const m of singleSends) {
             if (m.from.user && m.from.user.address) {
                 //return of spent funds from user's wallets
