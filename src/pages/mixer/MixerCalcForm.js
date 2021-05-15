@@ -1,6 +1,5 @@
 import React, {useState} from "react";
 import {Form, InputGroup} from "react-bootstrap";
-import Loader from "../../components/Loader";
 import MinterValue from "../../components/minter/MinterValue";
 import ButtonLoading from "../../components/ButtonLoading";
 

@@ -11,7 +11,7 @@ const modelSchema = new Schema({
         user: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
         opponent: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
         turn: {type: String, default: 'opponent'},
-        winner: String,
+        winners: [String],
         desk: {type: [Object], default: []},
         userCards: {type: [Object], default: []},
         opponentCards: {type: [Object], default: []},
@@ -46,9 +46,11 @@ modelSchema.methods.isPlayer = function (userId) {
 }
 
 modelSchema.methods.moveBank = function () {
-    const prize = this.bank - process.env.POKER_SMALL_BLINDE * 1;
-    this[this.winner][`${this.type}Balance`] += prize;
-    this[this.winner].save()
+    const prize = (this.bank - process.env.POKER_SMALL_BLINDE * 1) / this.winners.length;
+    for (const w of this.winners){
+        this[w][`${this.type}Balance`] += prize;
+        this[w].save()
+    }
     return prize
 }
 
@@ -62,7 +64,9 @@ modelSchema.methods.calcWinner = function () {
     if (this.desk.length < 5) return {error: 'game not finished'}
     const cU = this.userResult;
     const cO = this.opponentResult;
-    this.winner = cU.sum > cO.sum ? 'user' : 'opponent';
+
+    if(cU.sum >= cO.sum) this.winners.push('user');
+    if(cU.sum <= cO.sum) this.winners.push('opponent');
     this.result = cU.sum > cO.sum ? cU : cO;
     this.moveBank()
 }
@@ -82,11 +86,11 @@ modelSchema.methods.makeBet = async function (bet, userId) {
     const player = this[who];
     this[`${who}Bets`].push(bet)
     if (this.type === 'real') {
-        if (player.realBalance < 0) return {error: 500, message: 'Insufficient funds'};
         player.realBalance -= bet;
+        if (player.realBalance < 0) return {error: 500, message: 'Insufficient funds'};
     } else {
-        if (player.virtualBalance < 0) return {error: 500, message: 'Insufficient funds'};
         player.virtualBalance -= bet;
+        if (player.virtualBalance < 0) return {error: 500, message: 'Insufficient funds'};
     }
     await player.save()
     return {bet};

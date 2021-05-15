@@ -2,7 +2,6 @@ import React, {useEffect, useState} from 'react';
 import {Button} from "react-bootstrap";
 import {MinterAddressLink, MinterTxLink} from "components/minter/MinterLink";
 import Loader from "components/Loader";
-import CopyButton from "../../components/copy-button/CopyButton";
 import MinterValue from "../../components/minter/MinterValue";
 import ButtonLoading from "../../components/ButtonLoading";
 

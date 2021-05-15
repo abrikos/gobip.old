@@ -5,36 +5,36 @@ import ButtonLoading from "../../components/ButtonLoading";
 
 export default function PokerInfo(props) {
     const [data, setData] = useState({})
-    useEffect(()=>{
+    useEffect(() => {
         init();
         const timer = setInterval(init, 5000)
         return () => clearInterval(timer);
     }, [])
 
     function init() {
-        props.store.api('/poker/cabinet/info')
+        props.store.api('/poker/cabinet/info', {}, true)
             .then(setData)
     }
 
-    function changeAddress() {
-        props.store.api('/poker/cabinet/wallet/change')
-            .then(init)
-    }
 
     return (
         <div className="row">
-            <div className="col">
-                <div>Balance real: <MinterValue value={data.realBalance} {...props}/></div>
-                <div>Balance virtual: {data.virtualBalance}</div>
+            <div className="col d-flex flex-column justify-content-center ">
+                {['real', 'any'].includes(props.type) && (
+                    <div>
+                        Balance real: <MinterValue value={data.realBalance} {...props}/>{' '}
+                        {!!data.realBalance && <ButtonLoading size={'sm'} url={'/poker/cabinet/wallet/withdraw'} onFinish={init} {...props} confirmMessage={'Withdraw?'}>Withdraw</ButtonLoading>}
+                    </div>)}
+                {['virtual', 'any'].includes(props.type) && <div>Balance virtual: {data.virtualBalance}</div>}
             </div>
-            <div className="col">
+            <div className="col text-center">
                 <strong>Wallet for refill real balance</strong>{' '}
                 {data.address ? <span>
                  <MinterAddressLink address={data.address} {...props}/>
-                <ButtonLoading url={'/poker/cabinet/wallet/change'} onFinish={init} {...props}>Change</ButtonLoading>
+                <ButtonLoading size={'sm'} url={'/poker/cabinet/wallet/change'} onFinish={init} {...props}>Change</ButtonLoading>
             </span>
                     :
-                    <ButtonLoading url={'/poker/cabinet/wallet/change'} onFinish={init} {...props}>Create</ButtonLoading>}
+                    <ButtonLoading size={'sm'} url={'/poker/cabinet/wallet/change'} onFinish={init} {...props}>Create</ButtonLoading>}
             </div>
 
 

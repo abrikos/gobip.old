@@ -1,7 +1,6 @@
 import Mongoose from "server/db/Mongoose";
 import passportLib from 'server/lib/passport';
 import params from "src/params";
-import MixerApi from "server/lib/MixerApi";
 
 const nodemailer = require('nodemailer');
 const mailer = JSON.parse(process.env.mailer);

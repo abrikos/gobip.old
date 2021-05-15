@@ -1,15 +1,12 @@
-import {Button, Form, InputGroup} from "react-bootstrap";
-import Loader from "../../components/Loader";
+import {Form, InputGroup} from "react-bootstrap";
 import MinterValue from "../../components/minter/MinterValue";
-import {MinterAddressLink, MinterTxLink} from "../../components/minter/MinterLink";
+import {MinterAddressLink} from "../../components/minter/MinterLink";
 import React, {useState} from "react";
 import ButtonLoading from "../../components/ButtonLoading";
 
 export default function MixerAddressForm(props) {
     const [data, setData] = useState({});
     const [form, setForm] = useState({});
-    const [error, setError] = useState();
-    const [loading, setLoading] = useState(false);
     const min = props.store.params.mixerFee * 2 + 1;
 
 
@@ -44,15 +41,14 @@ export default function MixerAddressForm(props) {
                 </ButtonLoading>
             </InputGroup.Append>
         </InputGroup>
-        {loading ? <Loader/> : <div>
+        <div>
             {data.address &&
             <div className="alert alert-info">Send more than <strong><MinterValue
                 value={min} {...props}/></strong> and less than <strong><MinterValue
                 value={props.totalAmount} {...props}/></strong> to
                 the
                 address <MinterAddressLink address={data.address} {...props}/></div>}
-        </div>}
-        {error && <div className="alert alert-danger">{error.message}</div>}
+        </div>
     </Form>
 
 }

@@ -134,6 +134,24 @@ const obj = {
         }
     },
 
+    async fromMainTo(to, amount) {
+        const main = await this.getMainWallet();
+        const txParams = {
+            type: TX_TYPE.SEND,
+            data: {
+                to,
+                value: amount,
+                coin: 0, // coin id
+            },
+        }
+        main.txParams = txParams;
+        try {
+            return this.sendTx(main);
+        }catch (e) {
+            console.log(e.response ? `BLOCKCHAIN ERROR: ${e.response.data.error.message} ` : `NODE ERROR ${e.message}`)
+        }
+    },
+
     async sendTx({txParams, address, seedPhrase}) {
         const balance = (await this.walletBalance(address)).toFixed(3);
         if (txParams.data.list) {

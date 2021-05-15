@@ -31,5 +31,5 @@ export default function ButtonLoading(props){
             })
     }
     
-    return <Button variant={variant} onClick={post}>{loading ? <Loader/> : children}</Button>
+    return <Button variant={variant} size={props.size} onClick={post}>{loading ? <Loader/> : children}</Button>
 }

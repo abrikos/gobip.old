@@ -15,11 +15,6 @@ export default function AdminUser(props) {
         props.store.api(`/admin/user/${user._id}/change-admin`);
     }
 
-    function setEditor(user) {
-        user.editor = !user.editor;
-        props.store.api(`/admin/user/${user._id}/change-editor`);
-    }
-
     function deleteUser(user) {
         if (!window.confirm('Удалить юзера?')) return;
         props.store.api('/admin/user/delete', user)

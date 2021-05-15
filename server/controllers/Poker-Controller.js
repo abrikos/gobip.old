@@ -2,15 +2,14 @@ import Mongoose from "server/db/Mongoose";
 import passport from "server/lib/passport";
 import PokerApi from "../lib/PokerApi";
 import PokerGame from "../lib/PokerGame";
+import MinterApi from "../lib/MinterApi";
 
-
-PokerGame.runTest && PokerGame.test()
 
 module.exports.controller = function (app) {
-    //Mongoose.poker.findOne().then(console.log)
+    PokerGame.runTest && PokerGame.test()
     app.post('/api/poker/view/:id', async (req, res) => {
-        const prom = PokerGame.runTest ? Mongoose.poker.findOne().sort({createdAt: -1}) : Mongoose.poker.findById(req.params.id);
-        prom
+        const promise = PokerGame.runTest ? Mongoose.poker.findOne().sort({createdAt: -1}) : Mongoose.poker.findById(req.params.id);
+        promise
             .populate('user', ['name', 'photo', 'realBalance', 'virtualBalance'])
             .populate('opponent', ['name', 'photo', 'realBalance', 'virtualBalance'])
             //.select(['name', 'createdAt', 'desk', 'bank', 'type', 'opponentCards', 'userCards', 'userBets', 'opponentBets', 'result', 'winner', 'turn'])
@@ -40,7 +39,7 @@ module.exports.controller = function (app) {
                 res.send({poker, params});
             })
             .catch(e => {
-                console.log(app.locals.adaptError(e));
+
                 res.status(500).send(app.locals.adaptError(e))
             })
     });
@@ -49,25 +48,43 @@ module.exports.controller = function (app) {
         PokerGame.join(req.params.id, req.session.userId)
             .then(r => res.sendStatus(200))
             .catch(e => {
-                console.log(app.locals.adaptError(e));
                 res.status(500).send(app.locals.adaptError(e))
             })
     })
+
+    //Mongoose.user.findById('609a9b4f128a526e5512a18f').then(r=> {        r.realBalance = 0;        r.save()    })
 
     app.post('/api/poker/again/:id', passport.isLogged, (req, res) => {
         PokerGame.again(req.params.id, req.session.userId)
             .then(r => res.sendStatus(200))
             .catch(e => {
-                console.log(app.locals.adaptError(e));
+
                 res.status(500).send(app.locals.adaptError(e))
             })
     })
+
+    app.post('/api/poker/cabinet/wallet/withdraw', passport.isLogged, (req, res) => {
+        Mongoose.user.findById(req.session.userId)
+            .then(r => {
+                if(!r.realBalance) return res.status(500).send('Insufficient funds')
+                MinterApi.fromMainTo(r.address, r.realBalance - process.env.POKER_WITHDRAW_FEE)
+                    .then(tx=>{
+                        r.realBalance = 0;
+                        r.save()
+                            .then(()=>res.send(tx))
+                    })
+            })
+            .catch(e => {
+                res.status(500).send(app.locals.adaptError(e))
+            })
+    });
+
 
     app.post('/api/poker/cabinet/wallet/change', passport.isLogged, async (req, res) => {
         PokerApi.newWallet(req.session.userId)
             .then(r => res.send(r.pokerWallet.address))
             .catch(e => {
-                console.log(app.locals.adaptError(e));
+
                 res.status(500).send(app.locals.adaptError(e))
             })
     })
@@ -80,7 +97,7 @@ module.exports.controller = function (app) {
                 res.send({address: r.pokerWallet && r.pokerWallet.address, realBalance, virtualBalance})
             })
             .catch(e => {
-                console.log(app.locals.adaptError(e));
+
                 res.status(500).send(app.locals.adaptError(e))
             })
     })
@@ -91,7 +108,7 @@ module.exports.controller = function (app) {
         PokerGame.bet(req.params.id, req.session.userId, req.body.bet * 1)
             .then(() => res.sendStatus(200))
             .catch(e => {
-                console.log(app.locals.adaptError(e));
+
                 res.status(500).send(app.locals.adaptError(e))
             })
     })
@@ -112,7 +129,7 @@ module.exports.controller = function (app) {
                 }
                 res.send(r)
             })
-        //.catch(e => {console.log(app.locals.adaptError(e));res.status(500).send(app.locals.adaptError(e))})
+        //.catch(e => {res.status(500).send(app.locals.adaptError(e))})
     });
 
 
@@ -121,7 +138,7 @@ module.exports.controller = function (app) {
             .select(['name', 'createdAt', 'type', 'user', 'opponent'])
             .sort({createdAt: -1})
             .then(r => res.send(r))
-        //.catch(e => {console.log(app.locals.adaptError(e));res.status(500).send(app.locals.adaptError(e))})
+        //.catch(e => {res.status(500).send(app.locals.adaptError(e))})
     });
 
     app.post('/api/poker/list', async (req, res) => {
@@ -130,7 +147,7 @@ module.exports.controller = function (app) {
             .sort({createdAt: -1})
             .then(r => res.send(r))
             .catch(e => {
-                console.log(app.locals.adaptError(e));
+
                 res.status(500).send(app.locals.adaptError(e))
             })
     });
@@ -139,7 +156,7 @@ module.exports.controller = function (app) {
         PokerGame.create(req.session.userId, req.body.type === 'real' ? 'real' : 'virtual')
             .then(r => res.send(r))
             .catch(e => {
-                console.log(app.locals.adaptError(e));
+
                 res.status(500).send(app.locals.adaptError(e))
             })
     });

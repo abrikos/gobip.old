@@ -7,7 +7,6 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {Banners} from "pages/banner/Banners";
 import LoginFormGoogle from "../../components/login/LoginFormGoogle";
 import ErrorPage from "../../components/service/ErrorPage";
-import {YMInitializer} from "react-yandex-metrika";
 
 export default function ThemeMain(props) {
     const links = [

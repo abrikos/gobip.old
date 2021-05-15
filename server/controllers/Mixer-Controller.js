@@ -31,13 +31,13 @@ module.exports.controller = function (app) {
     app.post('/api/mixer/address', (req, res) => {
         MixerApi.createAddressForMixing(req.body.to)
             .then(r=>res.send(r))
-            .catch(e => {console.log(app.locals.adaptError(e));res.status(500).send(app.locals.adaptError(e))})
+            .catch(e => {res.status(500).send(app.locals.adaptError(e))})
     });
 
     app.post('/api/mixer/calc', async (req, res) => {
         MixerApi.calculateMix(req.body.value)
             .then(r=>res.send(r))
-            .catch(e => {console.log(app.locals.adaptError(e));res.status(500).send(app.locals.adaptError(e))})
+            .catch(e => {res.status(500).send(app.locals.adaptError(e))})
     });
 
     app.post('/api/cabinet/mixer/wallets', passport.isLogged, (req, res) => {
@@ -54,9 +54,9 @@ module.exports.controller = function (app) {
                     .then(r=> {
                         res.send(r)
                     })
-                    .catch(e => {console.log(app.locals.adaptError(e));res.status(500).send(app.locals.adaptError(e))})
+                    .catch(e => {res.status(500).send(app.locals.adaptError(e))})
             })
-            .catch(e => {console.log(app.locals.adaptError(e));res.status(500).send(app.locals.adaptError(e))})
+            .catch(e => {res.status(500).send(app.locals.adaptError(e))})
     });
 
     app.post('/api/mixer/total-amount', async (req, res) => {

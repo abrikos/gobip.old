@@ -2,13 +2,10 @@ import React, {useEffect, useState} from "react";
 import {A, navigate} from "hookrouter"
 import "./poker.sass"
 import {Button} from "react-bootstrap";
-import {MinterAddressLink} from "../../components/minter/MinterLink";
-import ButtonLoading from "../../components/ButtonLoading";
 import PokerInfo from "./PokerInfo";
 
 export default function PokerList(props) {
     const [pokers, setPokers] = useState([])
-    const [address, setAddress] = useState()
 
     useEffect(() => {
         loadData();
@@ -56,7 +53,7 @@ export default function PokerList(props) {
     }
 
     return <div>
-        <PokerInfo {...props}/>
+        <PokerInfo type={'any'} {...props}/>
         <h1>{props.cabinet ? 'My' : 'Available'} pokher games</h1>
 
         <div className="container">

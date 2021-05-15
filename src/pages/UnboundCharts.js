@@ -1,15 +1,12 @@
 import {useEffect, useState} from "react";
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-import TransactionsList from "pages/TransactionsList";
-import {Button} from "react-bootstrap";
 
 export default function UnboundCharts(props) {
     const [data, setData] = useState([])
     const [coins, setCoins] = useState([])
     const [days, setDays] = useState(30)
     const [coin, setCoin] = useState('BIP')
-    const [txView, setTxView] = useState(false)
 
     function init() {
         props.store.api(`/unbound/daily/${coin}/${days}`).then(setData)

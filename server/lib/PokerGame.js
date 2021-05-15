@@ -65,22 +65,23 @@ const PokerGame = {
             if (poker.opponentBets.length === 2 && poker.userBets.length === 1) {
                 poker.turn = 'user';
             } else {
-                if ((poker.userBets.length === 1 && poker.opponentBets.length === 1) || poker.userSum > 0)
+                if ((poker.opponentBets.length === 1 && poker.userBets.length === 1) || poker.userSum > 0)
                     poker.status = 'new-round';
             }
         }
 
-        if (poker.status === 'new-round') {
+        if (poker.round === 'river' && poker.status === 'new-round') {
+            poker.fillBank()
+            poker.calcWinner()
+            console.log('Winner Set',)
+        }else if (poker.status === 'new-round') {
             poker.status = 'round-started';
             poker.turn = 'user';
             poker.fillBank()
             poker.desk = poker.desk.concat(PokerApi.randomSet(poker.allCards, poker.desk.length ? 1 : 3));
             console.log('NEW ROUND', poker.round)
         }
-        if (poker.round === 'finish') {
-            poker.calcWinner()
-            console.log('EEEEEEEEEEEEEEEEEEEEEEEE',)
-        }
+
         poker.timer = moment().unix();
         return poker.save();
     },
@@ -88,19 +89,27 @@ const PokerGame = {
     runTest: false,
     async test() {
         try {
+            console.log('start test')
             const user = process.env.POKER_USER;
             const opponent = process.env.POKER_OPPONENT;
             let poker = await this.create(user, 'virtual')
             poker = await this.join(poker.id, opponent);
             //================================================
-            return
+
             poker = await this.bet(poker.id, opponent, 5);
             poker = await this.bet(poker.id, user, 0);
 
-            //return
             poker = await this.bet(poker.id, user, 0);
-            poker = await this.bet(poker.id, opponent, 20);
+            poker = await this.bet(poker.id, opponent, 0);
 
+            poker = await this.bet(poker.id, user, 0);
+            poker = await this.bet(poker.id, opponent, 0);
+
+            poker = await this.bet(poker.id, user, 10);
+            poker = await this.bet(poker.id, opponent, 20);
+            poker = await this.bet(poker.id, user, 10);
+;
+            console.log(poker.winner, poker.userResult, poker.opponentResult)
         } catch (e) {
             console.log('ERRRR', e.message)
         }

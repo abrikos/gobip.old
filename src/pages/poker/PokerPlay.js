@@ -1,7 +1,6 @@
 import PokerCard from "./PokerCard";
 import React, {useEffect, useState} from "react";
 import {Button} from "react-bootstrap";
-import MinterValue from "../../components/minter/MinterValue";
 import {navigate} from "hookrouter";
 import PokerPlayerDesk from "./PokerPlayerDesk";
 import PokerPlayerCards from "./PokerPlayerCards";
@@ -29,6 +28,7 @@ export default function PokerPlay(props) {
     function join() {
         props.store.api(`/poker/join/${data.poker.id}`)
             .then(loadData)
+            .catch(e=>alert(e.message))
     }
 
     function oneMoreTime() {
@@ -49,14 +49,14 @@ export default function PokerPlay(props) {
     }
 
     return <div>
-        <PokerInfo {...props}/>
-        <h1>{data.poker.type} Pokher "{data.poker.name}"</h1>
+        <PokerInfo type={data.poker.type} {...props}/>
+        <h1>Pokher <span className="text-info">{data.poker.name}</span> <span className={data.poker.type==='real' ? 'text-danger':''}>{data.poker.type.toUpperCase()}</span></h1>
         {data.params.canJoin && <Button onClick={join}>Join game</Button>}
 
-        {!data.poker.result && <div>Turn: {data.poker.playerTurn === props.store.authenticatedUser._id ? 'You turn' : 'Waiting for opponent'}</div>}
+        {!data.poker.result && <div>Turn: {!data.poker.opponent ? 'No opponent' : data.poker.playerTurn === props.store.authenticatedUser._id ? 'You turn' : 'Opponent`s turn'}</div>}
 
         <div className="border border-success w-100">
-            <div className={`p-2 ${data.poker.turn === other ? 'hand-turn' : ''}`}>
+            <div className={`p-2 ${data.poker.turn === other ? 'hand-turn' : ''} ${data.poker.winners.includes(other) ? 'winner':''}`}>
                 <div>{data.poker.status !== 'fold' && data.poker.result && data.poker.opponentResult.name}</div>
                 <PokerPlayerCards who={'opponent'} showTimer={otherTurn} {...data}/>
             </div>
@@ -75,7 +75,8 @@ export default function PokerPlay(props) {
                     </div>
                 </div>
             </div>
-            <div className={`p-2 ${myTurn ? 'hand-turn' : ''}`}>
+            <div className={`p-2 ${myTurn ? 'hand-turn' : ''} ${data.poker.winners.includes(iam) ? 'winner':''}`}>
+
                 <PokerPlayerCards who={'user'} showTimer={myTurn} {...data}/>
                 <div>{data.poker.status !== 'fold' && data.poker[`${iam}Result`].name}</div>
             </div>
