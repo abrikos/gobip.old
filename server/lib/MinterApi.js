@@ -64,6 +64,7 @@ const obj = {
         for (let block = current.latest_block_height * 1; block <= last.latest_block_height * 1; block++) {
             const res = await this.get(`block/${block}`)
             for (const tx of res.transactions) {
+                console.log(tx)
                 tx.date = res.time;
                 if (!tx.data.list) {
                     tx.to = tx.data.to;
