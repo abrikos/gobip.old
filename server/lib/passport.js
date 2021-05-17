@@ -118,6 +118,7 @@ async function getUser(externalId, strategy, name, photo, email) {
         const pokerAddress =  await MinterApi.newWallet('poker','',user.id)
         user = await Mongoose.user.create({externalId, name, photo, strategy, admin, email, nickname, pokerAddress})
     }
+    console.log('PASSPORT', user)
     return user;
 }
 
