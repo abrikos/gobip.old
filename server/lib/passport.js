@@ -113,13 +113,14 @@ async function getUser(externalId, strategy, name, photo, email) {
     console.log('PASSPORT 3', arguments)
     if (!externalId) return {error: 'noExternalId'}
     let user = await Mongoose.user.findOne({externalId, strategy})
+    console.log('PASSPORT 4', user, {externalId, strategy})
     if (!user) {
         const admin = externalId == 106876777732974850000;
         const nickname = name;
         const pokerAddress =  await MinterApi.newWallet('poker','',user.id)
         user = await Mongoose.user.create({externalId, name, photo, strategy, admin, email, nickname, pokerAddress})
     }
-    console.log('PASSPORT 4', user)
+
     return user;
 }
 
