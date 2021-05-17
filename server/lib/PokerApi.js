@@ -65,8 +65,8 @@ const PokerApi = {
 
     randomSet(cards, count) {
         const set = []
-        const deck = this._deckCheck;
-        //const deck = this._deckRandom;
+        //const deck = this._deckCheck;
+        const deck = this._deckRandom;
         const restDeck = deck.filter(d => !cards.map(c => c.name).includes(d.name))
         for (let i = 0; i < count; i++) {
             set.push(restDeck[i])
