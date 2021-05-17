@@ -58,26 +58,28 @@ export default function PokerPlay(props) {
         {!data.poker.result && <div>Turn: {!data.poker.opponent ? 'No opponent' : data.poker.playerTurn === props.store.authenticatedUser._id ? 'You turn' : 'Opponent`s turn'}</div>}
 
         <div className="border border-success w-100">
-            <div className={`p-2 ${data.poker.turn === other ? 'hand-turn' : ''} ${data.poker.winners.includes(other) ? 'winner':''}`}>
+            <div className={`p-2 ${!data.poker.result && !myTurn ? 'hand-turn' : ''} ${data.poker.winners.includes(other) ? 'winner':''}`}>
                 <div>{data.poker.status !== 'fold' && data.poker.result && data.poker[`${other}Result`].name}</div>
                 <PokerPlayerCards who={other} showTimer={otherTurn} {...data}/>
             </div>
             <div className="container">
                 <div className="row bg-success">
                     <div className="col-3 d-flex flex-column justify-content-center align-items-center">
-                        {data.poker.round}
+
+                        <PokerBet bet={data.poker[`${other}Sum`]}/>
                         <PokerBet bet={data.poker.bank}/>
+                        <PokerBet bet={data.poker[`${iam}Sum`]}/>
                     </div>
                     <div className="col-9 p-2">
-                        <PokerBet bet={data.poker[`${other}Sum`]}/>
+
                         <div className="d-flex justify-content-start flex-wrap">
                             {desk.map((p, i) => <PokerCard {...p} key={i}/>)}
                         </div>
-                        <PokerBet bet={data.poker[`${iam}Sum`]}/>
+                        {data.poker.round}
                     </div>
                 </div>
             </div>
-            <div className={`p-2 ${myTurn ? 'hand-turn' : ''} ${data.poker.winners.includes(iam) ? 'winner':''}`}>
+            <div className={`p-2 ${!data.poker.result &&  myTurn ? 'hand-turn' : ''} ${data.poker.winners.includes(iam) ? 'winner':''}`}>
 
                 <PokerPlayerCards who={iam} showTimer={myTurn} {...data}/>
                 <div>{data.poker.status !== 'fold' && data.poker[`${iam}Result`].name}</div>
