@@ -137,7 +137,7 @@ module.exports.controller = function (app) {
     app.get('/api/poker/share/:id', (req, res) => {
         Mongoose.poker.findById(req.params.id)
             .then(post => res.render('share', {
-                header: `${process.env.REACT_APP_SITE_TITLE} - POKER: ${post.name}`,
+                header: `${process.env.REACT_APP_SITE_TITLE} - POKHER: ${post.name}`,
                 text: post.name,
                 image: req.protocol + '://' + req.get('host') + '/logo.svg',
                 url: req.protocol + '://' + req.get('host') + '/poker/play/' + post.id
