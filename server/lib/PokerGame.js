@@ -106,7 +106,7 @@ const PokerGame = {
             let poker = await this.create(user, 'virtual')
             poker = await this.join(poker.id, opponent);
             //================================================
-
+return
             poker = await this.bet(poker.id, opponent, 5);
             poker = await this.bet(poker.id, user, 0);
 

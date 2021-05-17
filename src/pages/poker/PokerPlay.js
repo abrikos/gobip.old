@@ -59,12 +59,12 @@ export default function PokerPlay(props) {
 
         <div className="border border-success w-100">
             <div className={`p-2 ${data.poker.turn === other ? 'hand-turn' : ''} ${data.poker.winners.includes(other) ? 'winner':''}`}>
-                <div>{data.poker.status !== 'fold' && data.poker.result && data.poker.opponentResult.name}</div>
-                <PokerPlayerCards who={'opponent'} showTimer={otherTurn} {...data}/>
+                <div>{data.poker.status !== 'fold' && data.poker.result && data.poker[`${other}Result`].name}</div>
+                <PokerPlayerCards who={other} showTimer={otherTurn} {...data}/>
             </div>
             <div className="container">
                 <div className="row bg-success">
-                    <div className="col-3 d-flex flex-column justify-content-center ">
+                    <div className="col-3 d-flex flex-column justify-content-center align-items-center">
                         {data.poker.round}
                         <PokerBet bet={data.poker.bank}/>
                     </div>
@@ -79,7 +79,7 @@ export default function PokerPlay(props) {
             </div>
             <div className={`p-2 ${myTurn ? 'hand-turn' : ''} ${data.poker.winners.includes(iam) ? 'winner':''}`}>
 
-                <PokerPlayerCards who={'user'} showTimer={myTurn} {...data}/>
+                <PokerPlayerCards who={iam} showTimer={myTurn} {...data}/>
                 <div>{data.poker.status !== 'fold' && data.poker[`${iam}Result`].name}</div>
             </div>
         </div>

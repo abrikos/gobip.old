@@ -33,9 +33,9 @@ const PokerApi = {
 
     _cards: {suits: ['S', 'C', 'D', 'H'], values: ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']},
 
-    d: ['D5', 'HA', 'S5', 'H8', 'C4'],
-    u: ['H9', 'S8'],
-    o: ['S4', 'D8'],
+    d: ['D5', 'CK', 'D8', 'C5', 'C2'],
+    u: ['H6', 'D10'],
+    o: ['S3', 'SK'],
 
     get _deckCheck() {
         const deck = this.o.concat(this.u).concat(this.d);
@@ -65,8 +65,8 @@ const PokerApi = {
 
     randomSet(cards, count) {
         const set = []
-        //const deck = this._deckCheck;
-        const deck = this._deckRandom;
+        const deck = this._deckCheck;
+        //const deck = this._deckRandom;
         const restDeck = deck.filter(d => !cards.map(c => c.name).includes(d.name))
         for (let i = 0; i < count; i++) {
             set.push(restDeck[i])
