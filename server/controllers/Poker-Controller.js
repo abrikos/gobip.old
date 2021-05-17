@@ -3,7 +3,6 @@ import passport from "server/lib/passport";
 import PokerApi from "../lib/PokerApi";
 import PokerGame from "../lib/PokerGame";
 import MinterApi from "../lib/MinterApi";
-import CryptoApi from "../lib/CryptoApi";
 
 const CronJob = require('cron').CronJob;
 module.exports.controller = function (app) {
@@ -135,10 +134,21 @@ module.exports.controller = function (app) {
         //.catch(e => {res.status(500).send(app.locals.adaptError(e))})
     });
 
+    app.get('/api/poker/share/:id', (req, res) => {
+        Mongoose.poker.findById(req.params.id)
+            .then(post => res.render('share', {
+                header: `${process.env.REACT_APP_SITE_TITLE} - ${post.name}`,
+                text: post.name,
+                image: req.protocol + '://' + req.get('host') + '/logo.svg',
+                url: req.protocol + '://' + req.get('host') + '/poker/play/' + post.id
+            }))
+            .catch(e => res.send(app.locals.sendError(e)))
+    });
+
 
     app.post('/api/poker/cabinet/list', passport.isLogged, async (req, res) => {
         Mongoose.poker.find({$or: [{user: req.session.userId}, {opponent: req.session.userId}], type: {$ne: null}})
-            .select(['name', 'createdAt', 'type', 'user', 'opponent'])
+            .select(['name', 'createdAt', 'type', 'user', 'opponent', 'result'])
             .sort({createdAt: -1})
             .then(r => res.send(r))
         //.catch(e => {res.status(500).send(app.locals.adaptError(e))})
@@ -146,7 +156,7 @@ module.exports.controller = function (app) {
 
     app.post('/api/poker/list', async (req, res) => {
         Mongoose.poker.find({user: {$ne: req.session.userId}, type: {$ne: null}})
-            .select(['name', 'createdAt', 'user', 'opponent', 'type'])
+            .select(['name', 'createdAt', 'user', 'opponent', 'type', 'result'])
             .sort({createdAt: -1})
             .then(r => res.send(r))
             .catch(e => {

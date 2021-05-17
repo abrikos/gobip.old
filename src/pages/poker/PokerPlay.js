@@ -7,6 +7,7 @@ import PokerPlayerCards from "./PokerPlayerCards";
 import PokerBet from "./PokerBet";
 import audioFile from "../../sounds/beep-07.mp3"
 import PokerInfo from "./PokerInfo";
+import CopyButton from "../../components/copy-button/CopyButton";
 
 export default function PokerPlay(props) {
     const [data, setData] = useState();
@@ -48,6 +49,7 @@ export default function PokerPlay(props) {
             .catch(console.log)
     }
 
+    const shareLink = `${document.location.origin}/api/poker/share/${data.poker.id}`;
     return <div>
         <PokerInfo type={data.poker.type} {...props}/>
         <h1>Pokher <span className="text-info">{data.poker.name}</span> <span className={data.poker.type==='real' ? 'text-danger':''}>{data.poker.type.toUpperCase()}</span></h1>
@@ -62,16 +64,16 @@ export default function PokerPlay(props) {
             </div>
             <div className="container">
                 <div className="row bg-success">
-                    <div className="col-2">
-                        <PokerBet bet={data.poker[`${other}Sum`]}/>
-                        <PokerBet bet={data.poker.bank}/>
-                        <PokerBet bet={data.poker[`${iam}Sum`]}/>
-                    </div>
-                    <div className="col-10 p-2 text-center">
+                    <div className="col-3 d-flex flex-column justify-content-center ">
                         {data.poker.round}
+                        <PokerBet bet={data.poker.bank}/>
+                    </div>
+                    <div className="col-9 p-2">
+                        <PokerBet bet={data.poker[`${other}Sum`]}/>
                         <div className="d-flex justify-content-start flex-wrap">
                             {desk.map((p, i) => <PokerCard {...p} key={i}/>)}
                         </div>
+                        <PokerBet bet={data.poker[`${iam}Sum`]}/>
                     </div>
                 </div>
             </div>
@@ -83,5 +85,6 @@ export default function PokerPlay(props) {
         </div>
         {data.poker.result && (data.poker[`${iam}Again`] ? <Button variant="warning">Wait opponent</Button> : <Button onClick={oneMoreTime}>One more time?</Button>)}
         <PokerPlayerDesk data={data} who={iam} loadData={loadData} balance={balance} {...props}/>
+        <code>{shareLink}</code> <CopyButton text={shareLink}/>
     </div>
 }

@@ -68,8 +68,8 @@ export default function PokerList(props) {
             </div>
         </div>
         <div>
-            {drawList('closed')}
-            {drawList('opponent')}
+            {/*{drawList('closed')}
+            {drawList('opponent')}*/}
         </div>
     </div>
 }

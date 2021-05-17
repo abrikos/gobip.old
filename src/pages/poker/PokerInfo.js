@@ -19,7 +19,7 @@ export default function PokerInfo(props) {
     if(!props.store.authenticatedUser) return <div/>;
     return (
         <div className="row">
-            <div className="col d-flex flex-column justify-content-center ">
+            <div className="col-sm d-flex flex-column justify-content-center ">
                 {['real', 'any'].includes(props.type) && (
                     <div>
                         Balance real: <MinterValue value={data.realBalance} {...props}/>{' '}
@@ -27,7 +27,7 @@ export default function PokerInfo(props) {
                     </div>)}
                 {['virtual', 'any'].includes(props.type) && <div>Balance virtual: {data.virtualBalance}</div>}
             </div>
-            <div className="col text-center">
+            {['real', 'any'].includes(props.type) &&<div className="col-sm text-center">
                 <strong>Wallet for refill real balance</strong>{' '}
                 {data.address ? <span>
                  <MinterAddressLink address={data.address} {...props}/>
@@ -35,7 +35,7 @@ export default function PokerInfo(props) {
             </span>
                     :
                     <ButtonLoading size={'sm'} url={'/poker/cabinet/wallet/change'} onFinish={init} {...props}>Create</ButtonLoading>}
-            </div>
+            </div>}
 
 
         </div>
