@@ -32,7 +32,7 @@ passport.use(new LocalStrategy({passReqToCallback: true},
 
 passport.use('custom', new CustomStrategy(async function (req, done) {
     if (!strategyFunctions[req.params.strategy]) return done(null, null, {error: 'Wrong strategy: ' + req.params.strategy})
-    console.log('PASSPORT',req.params)
+    console.log('PASSPORT 1',req.params)
     const user = await strategyFunctions[req.params.strategy](req);
     if (!user.error) {
         req.session.userId = user.id;
@@ -93,7 +93,7 @@ const strategyFunctions = {
         if (!req.body.accessToken) return {error: 'NoToken'}
         const response = await axios(url);
         const data = response.data;
-        console.log('PASSPORT', data)
+        console.log('PASSPORT 2', data)
         return getUser(data.user_id, req.params.strategy, req.body.profileObj.name, req.body.profileObj.imageUrl, data.email)
     },
 
@@ -110,6 +110,7 @@ const strategyFunctions = {
 
 
 async function getUser(externalId, strategy, name, photo, email) {
+    console.log('PASSPORT 3', arguments)
     if (!externalId) return {error: 'noExternalId'}
     let user = await Mongoose.user.findOne({externalId, strategy})
     if (!user) {
@@ -118,7 +119,7 @@ async function getUser(externalId, strategy, name, photo, email) {
         const pokerAddress =  await MinterApi.newWallet('poker','',user.id)
         user = await Mongoose.user.create({externalId, name, photo, strategy, admin, email, nickname, pokerAddress})
     }
-    console.log('PASSPORT', user)
+    console.log('PASSPORT 4', user)
     return user;
 }
 
