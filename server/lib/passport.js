@@ -32,6 +32,7 @@ passport.use(new LocalStrategy({passReqToCallback: true},
 
 passport.use('custom', new CustomStrategy(async function (req, done) {
     if (!strategyFunctions[req.params.strategy]) return done(null, null, {error: 'Wrong strategy: ' + req.params.strategy})
+    console.log(req.params)
     const user = await strategyFunctions[req.params.strategy](req);
     if (!user.error) {
         req.session.userId = user.id;
