@@ -26,8 +26,11 @@ export default function PokerList(props) {
     }
 
     function filter(type, p) {
+        if (type!=='opponent' && props.store.authenticatedUser && p.opponent === props.store.authenticatedUser.id) return false
+        if (p.opponent === props.store.authenticatedUser.id && type === 'opponent') return true;
         if (p.result && type === 'closed') return true;
         if (!p.result && type === p.type) return true;
+
         return false;
     }
 
@@ -59,11 +62,14 @@ export default function PokerList(props) {
         <div className="container">
             <div className="row">
                 <div className="col-sm">{drawList('virtual')}</div>
-                <div className="col-sm">                    {drawList('real')}                </div>
+                <div className="col-sm">
+                    {drawList('real')}
+                </div>
             </div>
         </div>
         <div>
             {drawList('closed')}
+            {drawList('opponent')}
         </div>
     </div>
 }

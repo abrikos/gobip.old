@@ -47,6 +47,7 @@ modelSchema.methods.isPlayer = function (userId) {
 
 modelSchema.methods.moveBank = function () {
     const prize = (this.bank - process.env.POKER_SMALL_BLINDE * 1) / this.winners.length;
+
     for (const w of this.winners){
         this[w][`${this.type}Balance`] += prize;
         this[w].save()
@@ -72,12 +73,12 @@ modelSchema.methods.calcWinner = function () {
 }
 
 modelSchema.methods.doFold = function () {
-    this.winner = this.otherPlayer;
+    this.winners = [this.otherPlayer];
     this.fillBank();
     const prize = this.moveBank()
-    this.result = this[`${this.winner}Result`]
+    this.result = this[`${this.otherPlayer}Result`]
     this.status = 'fold'
-    console.log(this.turn, 'FOLD', prize, this.winner);
+    console.log(this.turn, 'FOLD', prize, this.winners);
 }
 
 

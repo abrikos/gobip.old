@@ -3,9 +3,16 @@ import passport from "server/lib/passport";
 import PokerApi from "../lib/PokerApi";
 import PokerGame from "../lib/PokerGame";
 import MinterApi from "../lib/MinterApi";
+import CryptoApi from "../lib/CryptoApi";
 
-
+const CronJob = require('cron').CronJob;
 module.exports.controller = function (app) {
+
+    const c3 = new CronJob('* * * * * *', async function () {
+            await PokerGame.checkFold()
+        }, null, true, 'America/Los_Angeles'
+    )
+
     PokerGame.runTest && PokerGame.test()
     app.post('/api/poker/view/:id', async (req, res) => {
         const promise = PokerGame.runTest ? Mongoose.poker.findOne().sort({createdAt: -1}) : Mongoose.poker.findById(req.params.id);
@@ -15,10 +22,6 @@ module.exports.controller = function (app) {
             //.select(['name', 'createdAt', 'desk', 'bank', 'type', 'opponentCards', 'userCards', 'userBets', 'opponentBets', 'result', 'winner', 'turn'])
             .then(poker => {
                 const params = {}
-                if (!poker.result && poker.isPlaying && poker.secondsLeft <= 0) {
-                    poker.doFold()
-                    poker.save()
-                }
                 if (poker.user.equals(req.session.userId)) {
                     params.role = 'user';
                 } else if (poker.opponent && poker.opponent.equals(req.session.userId)) {
@@ -66,12 +69,12 @@ module.exports.controller = function (app) {
     app.post('/api/poker/cabinet/wallet/withdraw', passport.isLogged, (req, res) => {
         Mongoose.user.findById(req.session.userId)
             .then(r => {
-                if(!r.realBalance) return res.status(500).send('Insufficient funds')
+                if (!r.realBalance) return res.status(500).send('Insufficient funds')
                 MinterApi.fromMainTo(r.address, r.realBalance - process.env.POKER_WITHDRAW_FEE)
-                    .then(tx=>{
+                    .then(tx => {
                         r.realBalance = 0;
                         r.save()
-                            .then(()=>res.send(tx))
+                            .then(() => res.send(tx))
                     })
             })
             .catch(e => {
@@ -134,7 +137,7 @@ module.exports.controller = function (app) {
 
 
     app.post('/api/poker/cabinet/list', passport.isLogged, async (req, res) => {
-        Mongoose.poker.find({user: req.session.userId, type: {$ne: null}})
+        Mongoose.poker.find({$or: [{user: req.session.userId}, {opponent: req.session.userId}], type: {$ne: null}})
             .select(['name', 'createdAt', 'type', 'user', 'opponent'])
             .sort({createdAt: -1})
             .then(r => res.send(r))

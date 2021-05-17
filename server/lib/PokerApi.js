@@ -39,7 +39,6 @@ const PokerApi = {
 
     get _deckCheck() {
         const deck = this.o.concat(this.u).concat(this.d);
-        console.log(deck)
         const rnd = this._deckRandom;
         const ret = []
         for (const d of deck) {
@@ -66,8 +65,8 @@ const PokerApi = {
 
     randomSet(cards, count) {
         const set = []
-        const deck = this._deckCheck;
-        //const deck = this._deckRandom;
+        //const deck = this._deckCheck;
+        const deck = this._deckRandom;
         const restDeck = deck.filter(d => !cards.map(c => c.name).includes(d.name))
         for (let i = 0; i < count; i++) {
             set.push(restDeck[i])
@@ -75,28 +74,26 @@ const PokerApi = {
         return set;
     },
 
-    finishPoker(poker) {
-        const walletWinner = this.result(poker);
-        //TODO send funds
-    },
-
-
     calc: function (hand, table) {
-        const sorted = hand.concat(table).sort((a, b) => b.idx - a.idx);
-        const flush = this._getFlush(sorted);
-        if (flush && flush.straight) return flush;
-        const care = this._getByValues(4, sorted);
-        if (care) return care;
-        if (flush) return flush;
-        const straight = this._getStraight(sorted);
-        if (straight) return straight;
-        const set = this._getByValues(3, sorted);
-        if (set) return set;
-        const double = this._getDouble(sorted);
-        if (double) return double;
-        const pair = this._getByValues(2, sorted);
-        if (pair) return pair;
-        return this._getHighCard(sorted);
+        try {
+            const sorted = hand.concat(table).sort((a, b) => b.idx - a.idx);
+            const flush = this._getFlush(sorted);
+            if (flush && flush.straight) return flush;
+            const care = this._getByValues(4, sorted);
+            if (care) return care;
+            if (flush) return flush;
+            const straight = this._getStraight(sorted);
+            if (straight) return straight;
+            const set = this._getByValues(3, sorted);
+            if (set) return set;
+            const double = this._getDouble(sorted);
+            if (double) return double;
+            const pair = this._getByValues(2, sorted);
+            if (pair) return pair;
+            return this._getHighCard(sorted);
+        }catch (e) {
+            return e
+        }
     },
 
     _combinationSum: function (combination) {

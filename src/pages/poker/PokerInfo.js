@@ -16,7 +16,7 @@ export default function PokerInfo(props) {
             .then(setData)
     }
 
-
+    if(!props.store.authenticatedUser) return <div/>;
     return (
         <div className="row">
             <div className="col d-flex flex-column justify-content-center ">

@@ -33,12 +33,23 @@ const PokerGame = {
         poker[`${who}Again`] = true;
         await poker.save();
         if (!poker.result) throw {message: "Game online"};
-        console.log('again?', poker.userAgain, poker.opponentAgain)
+        //console.log('again?', poker.userAgain, poker.opponentAgain)
         if (poker.userAgain && poker.opponentAgain) {
             const newPoker = await this.create(poker.opponent, poker.type);
             await this.join(newPoker.id, poker.user);
             poker.pokerAgainId = newPoker.id;
             poker.save()
+        }
+    },
+
+    async checkFold(){
+        const pokers = await Mongoose.poker.find({opponent:{$ne: null}, result:null})
+            .populate(['user', 'opponent'])
+        for(const poker of pokers){
+            if (poker.isPlaying && poker.secondsLeft <= 0) {
+                poker.doFold()
+                poker.save()
+            }
         }
     },
 
