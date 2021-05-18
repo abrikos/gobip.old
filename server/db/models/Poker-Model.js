@@ -45,12 +45,12 @@ modelSchema.methods.isPlayer = function (userId) {
     return this.user.equals(userId) || (this.opponent && this.opponent.equals(userId)) || false
 }
 
-modelSchema.methods.moveBank = function () {
+modelSchema.methods.moveBank = async function () {
     const prize = (this.bank - process.env.POKER_SMALL_BLINDE * 1) / this.winners.length;
 
     for (const w of this.winners){
         this[w][`${this.type}Balance`] += prize;
-        this[w].save()
+        await this[w].save()
     }
     return prize
 }
@@ -60,6 +60,7 @@ modelSchema.methods.fillBank = function () {
     this.userBets = [];
     this.opponentBets = [];
 }
+
 
 modelSchema.methods.calcWinner = function () {
     if (this.desk.length < 5) return {error: 'game not finished'}
@@ -72,10 +73,10 @@ modelSchema.methods.calcWinner = function () {
     this.moveBank()
 }
 
-modelSchema.methods.doFold = function () {
+modelSchema.methods.doFold = async function () {
     this.winners = [this.otherPlayer];
     this.fillBank();
-    const prize = this.moveBank()
+    const prize = await this.moveBank()
     this.result = this[`${this.otherPlayer}Result`]
     this.status = 'fold'
     console.log(this.turn, 'FOLD', prize, this.winners);
@@ -105,6 +106,11 @@ modelSchema.virtual('isPlaying')
 modelSchema.virtual('timerEnabled')
     .get(function () {
         return this.secondsLeft >=0 && this.secondsLeft <= process.env.POKER_TURN_TIMER;
+    });
+
+modelSchema.virtual('userCardsOpen')
+    .get(function () {
+        return this[`userCards`].map(c=>c.value).reduce((a,b)=>a+b,0)
     });
 
 modelSchema.virtual('secondsLeft')

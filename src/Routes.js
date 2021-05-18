@@ -25,12 +25,13 @@ export default function Routes(store) {
         "/lottery/winners": (params) => <BannerLottery store={store}  {...params}/>,
         "/poker": (params) => <PokerList store={store} {...params}/>,
         "/poker/view/:id": (params) => <PokerPlay store={store} {...params}/>,
+        "/poker/play/:id": (params) => <PokerPlay store={store} {...params}/>,
         "/login": () => <Login store={store}/>,
     };
 
     const routesLogged = {
 
-        "/poker/play/:id": (params) => <PokerPlay store={store} {...params}/>,
+
         "/cabinet/:control": (params) => <Cabinet store={store} {...params}/>,
         "/cabinet/:control/:id": (params) => <Cabinet store={store} {...params}/>,
         "/logout": () => <Logout store={store}/>,

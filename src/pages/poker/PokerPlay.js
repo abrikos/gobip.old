@@ -40,7 +40,7 @@ export default function PokerPlay(props) {
     if (!data) return <div>Loading PokerPlay</div>
     if (data.poker.pokerAgainId) navigate(`/poker/play/${data.poker.pokerAgainId}`)
     const desk = data.poker.desk.length ? data.poker.desk : [1, 2, 3]
-    const iam = props.store.authenticatedUser._id === data.poker.user.id ? 'user' : 'opponent';
+    const iam = props.store.authenticatedUser ? props.store.authenticatedUser._id === data.poker.user.id ? 'user' : 'opponent' : 'user';
     const other = iam === 'user' ? 'opponent' : 'user';
     const myTurn = data.poker.turn === iam;
     const otherTurn = data.poker.turn === other;
@@ -86,7 +86,7 @@ export default function PokerPlay(props) {
             </div>
         </div>
         {data.poker.result && (data.poker[`${iam}Again`] ? <Button variant="warning">Wait opponent</Button> : <Button onClick={oneMoreTime}>One more time?</Button>)}
-        <PokerPlayerDesk data={data} who={iam} loadData={loadData} balance={balance} {...props}/>
+        {props.store.authenticatedUser && <PokerPlayerDesk data={data} who={iam} loadData={loadData} balance={balance} {...props}/>}
         <code>{shareLink}</code> <CopyButton text={shareLink}/>
     </div>
 }

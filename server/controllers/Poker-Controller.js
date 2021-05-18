@@ -31,8 +31,8 @@ module.exports.controller = function (app) {
 
                 //if (!(isUser || isOpponent)) return res.status(403).send('Wrong user')
                 if (!poker.result && !PokerApi.testing) {
-                    if (['user', 'viewer'].includes(params.role)) poker.opponentCards = [0, 1];
-                    if (['opponent', 'viewer'].includes(params.role)) poker.userCards = [0, 1];
+                    if (['user', 'viewer'].includes(params.role)) poker.opponentCards = [0, 0];
+                    if (['opponent', 'viewer'].includes(params.role)) poker.userCards = [0, 0];
                 }
 
                 params.canJoin = params.role === 'viewer' && req.session.userId
@@ -115,7 +115,7 @@ module.exports.controller = function (app) {
             })
     })
 
-    app.post('/api/poker/player/cards/:id', passport.isLogged, async (req, res) => {
+    /*app.post('/api/poker/player/cards/:id', passport.isLogged, async (req, res) => {
         Mongoose.poker.findById(req.params.id)
             .populate('user', ['name', 'photo'])
             .populate('opponent', ['name', 'photo'])
@@ -132,7 +132,7 @@ module.exports.controller = function (app) {
                 res.send(r)
             })
         //.catch(e => {res.status(500).send(app.locals.adaptError(e))})
-    });
+    });*/
 
     app.get('/api/poker/share/:id', (req, res) => {
         Mongoose.poker.findById(req.params.id)
