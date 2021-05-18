@@ -15,6 +15,12 @@ export default function PokerBetForm(props) {
             .then(props.onBet)
     }
 
+    function doFold(e) {
+        e.preventDefault()
+        props.store.api(`/poker/bet/${poker.id}`, {bet:-1})
+            .then(props.onBet)
+    }
+
     function doCall() {
         props.store.api(`/poker/bet/${poker.id}`, {bet: poker.minBet})
             .then(props.onBet)
@@ -46,7 +52,7 @@ export default function PokerBetForm(props) {
             </InputGroup>
 
 
-            {poker.availableActions.includes('fold') && <Button variant="danger">Fold</Button>}
+            {poker.availableActions.includes('fold') && <Button variant="danger" onClick={doFold}>Fold</Button>}
         </Form>
     )
 }

@@ -43,11 +43,11 @@ export default function InputDatePicker(props){
             onChange={changeDate}
         />}
         <InputGroup>
-            <InputGroup.Prepend>
-                <Button variant="secondary" onClick={setShow}><FontAwesomeIcon size="sm" icon={faCalendar}/></Button>
-            </InputGroup.Prepend>
-            <Form.Control value={date} readOnly  name={props.name} className="form-control" id={`picker-${props.name}`} onClick={setShow}/>
 
+            <Form.Control value={date} readOnly  name={props.name} className="form-control" id={`picker-${props.name}`} onClick={setShow}/>
+            <InputGroup.Append>
+                <Button variant="secondary" onClick={setShow}><FontAwesomeIcon size="sm" icon={faCalendar}/></Button>
+            </InputGroup.Append>
         </InputGroup>
 
 

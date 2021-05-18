@@ -1,6 +1,4 @@
 import moment from "moment";
-import MinterApi from "../../lib/MinterApi";
-
 
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;

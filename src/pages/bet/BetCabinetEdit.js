@@ -55,7 +55,7 @@ export default function BetCabinetEdit(props) {
             .then(r => {
                 setBet(r)
                 setLoading(false)
-                navigate('/cabinet/bet/' + r.id)
+                props.id === 'create' && navigate('/cabinet/bet/' + r.id)
             })
             .catch(r => {
                 setLoading(false)
@@ -99,12 +99,12 @@ export default function BetCabinetEdit(props) {
             {errors.checkDate && <div className="text-danger">{errors.checkDate}</div>}
             <hr/>
             <div className="d-flex justify-content-between">
-                <Button type="submit">{bet.id ? 'Save' : 'Create'}</Button>
+                <Button type="submit">{loading ? <Loader/> : bet.id ? 'Save' : 'Create'}</Button>
                 {bet.id && <Button variant="danger" onClick={deleteBet}><FontAwesomeIcon icon={faTrash}/></Button>}
             </div>
         </Form>}
         <A href={'/cabinet/bet'}> &lt;Back to the my list</A>
-        {loading && <Loader/>}
+
         {/*<div className="col-sm-4"><Mixer {...props}/></div>*/}
         {bet.id && <div className="p-0">
             <hr/>

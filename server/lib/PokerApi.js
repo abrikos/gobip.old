@@ -1,17 +1,44 @@
 import Mongoose from "../db/Mongoose";
+import MinterApi from "./MinterApi";
 
 const PokerApi = {
-    testing: false,
+    async checkTransaction(tx) {
+        const pokerWallet = await Mongoose.wallet.findOne({address: tx.to});
+        if (!pokerWallet) return;
+        pokerWallet.balance = await MinterApi.walletBalance(tx.to);
+        pokerWallet.save()
+    },
 
+    async setBalances() {
+        const wallets = await Mongoose.wallet.find({type: 'poker', balanceReal: {$gt: 1}});
+        for (const pokerWallet of wallets) {
+            const user = await Mongoose.user.findOne({pokerWallet: pokerWallet.id})
+            if (!user) continue
+            const main = await MinterApi.getMainWallet()
+            await MinterApi.walletMoveFunds(pokerWallet, main.address)
+            user.realBalance += pokerWallet.balance;
+            pokerWallet.balance = 0;
+            await user.save();
+            await pokerWallet.save()
+        }
+    },
+
+    async newWallet(userId) {
+        const user = await Mongoose.user.findById(userId)
+        user.pokerWallet = await MinterApi.newWallet('poker', '', userId);
+        ;
+        await user.save()
+        return user;
+    },
 
     _cards: {suits: ['S', 'C', 'D', 'H'], values: ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']},
 
-    d: ['SA', 'SQ', 'S10', 'C8', 'C6'],
-    u: ['SK', 'SJ'],
-    o: ['D2', 'H4'],
+    d: ['D5', 'CK', 'D8', 'C5', 'C2'],
+    u: ['H6', 'D10'],
+    o: ['S3', 'SK'],
 
     get _deckCheck() {
-        const deck = this.d.concat(this.u).concat(this.o);
+        const deck = this.o.concat(this.u).concat(this.d);
         const rnd = this._deckRandom;
         const ret = []
         for (const d of deck) {
@@ -47,28 +74,26 @@ const PokerApi = {
         return set;
     },
 
-    finishPoker(poker) {
-        const walletWinner = this.result(poker);
-        //TODO send funds
-    },
-
-
     calc: function (hand, table) {
-        const sorted = hand.concat(table).sort((a, b) => b.idx - a.idx);
-        const flush = this._getFlush(sorted);
-        if (flush && flush.straight) return flush;
-        const care = this._getByValues(4, sorted);
-        if (care) return care;
-        if (flush) return flush;
-        const straight = this._getStraight(sorted);
-        if (straight) return straight;
-        const set = this._getByValues(3, sorted);
-        if (set) return set;
-        const double = this._getDouble(sorted);
-        if (double) return double;
-        const pair = this._getByValues(2, sorted);
-        if (pair) return pair;
-        return this._getHighCard(sorted);
+        try {
+            const sorted = hand.concat(table).sort((a, b) => b.idx - a.idx);
+            const flush = this._getFlush(sorted);
+            if (flush && flush.straight) return flush;
+            const care = this._getByValues(4, sorted);
+            if (care) return care;
+            if (flush) return flush;
+            const straight = this._getStraight(sorted);
+            if (straight) return straight;
+            const set = this._getByValues(3, sorted);
+            if (set) return set;
+            const double = this._getDouble(sorted);
+            if (double) return double;
+            const pair = this._getByValues(2, sorted);
+            if (pair) return pair;
+            return this._getHighCard(sorted);
+        }catch (e) {
+            return e
+        }
     },
 
     _combinationSum: function (combination) {

@@ -1,5 +1,4 @@
 import moment from "moment";
-import params from "src/params";
 
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;

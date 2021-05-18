@@ -1,5 +1,6 @@
 import Mongoose from "server/db/Mongoose";
 import passportLib from 'server/lib/passport';
+import MinterApi from "../lib/MinterApi";
 //const passport = require('passport');
 
 //Mongoose.Meeting.find({}).then(console.log)
@@ -22,7 +23,7 @@ module.exports.controller = function (app) {
                 const un = await Mongoose.unbound.create(n)
                 console.log(un)
             } catch (e) {
-                console.log(e.message)
+                console.log(app.locals.adaptError(e))
             }
 
         }
@@ -32,6 +33,11 @@ module.exports.controller = function (app) {
     app.post('/api/admin/users', passportLib.isAdmin, (req, res) => {
         Mongoose.user.find()
             .then(r => res.send(r))
+    });
+
+    app.post('/api/admin/balances/update', passportLib.isAdmin, (req, res) => {
+        MinterApi.updateBalances()
+        res.sendStatus(200)
     });
 
     app.post('/api/admin/user/delete', passportLib.isAdmin, (req, res) => {

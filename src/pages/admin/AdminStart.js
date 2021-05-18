@@ -12,14 +12,14 @@ export default function AdminStart(props) {
         props.store.api('/admin/treasures').then(setTreasures)
     }
 
-    function unbound(){
-        props.store.api('/admin/migrate/unbound')
+    function balances(){
+        props.store.api('/admin/balances/update')
     }
 
 
 
     return <div>
-        <Button onClick={unbound}>Migrate unbound</Button>
+        <Button onClick={balances}>Update balances</Button>
         <h3>Treasure</h3>
         {treasures.map(t=><div key={t.id}>{JSON.stringify(t)}</div>)}
 

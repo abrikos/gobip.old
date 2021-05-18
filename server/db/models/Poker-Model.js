@@ -11,17 +11,21 @@ const modelSchema = new Schema({
         user: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
         opponent: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
         turn: {type: String, default: 'opponent'},
-        winner: String,
+        winners: [String],
         desk: {type: [Object], default: []},
         userCards: {type: [Object], default: []},
         opponentCards: {type: [Object], default: []},
         userBets: {type: [Number], default: []},
         opponentBets: {type: [Number], default: []},
         bank: {type: Number, default: 0},
+        timer: {type: Number, default: 0},
         status: {type: String, default: 'round-started'},
         result: Object,
         userCheck: Boolean,
         opponentCheck: Boolean,
+        userAgain: Boolean,
+        opponentAgain: Boolean,
+        pokerAgainId: String,
         type: {type: String, default: 'virtual'},
     },
     {
@@ -41,38 +45,82 @@ modelSchema.methods.isPlayer = function (userId) {
     return this.user.equals(userId) || (this.opponent && this.opponent.equals(userId)) || false
 }
 
-modelSchema.methods.setWinner = function () {
+modelSchema.methods.moveBank = function () {
+    const prize = (this.bank - process.env.POKER_SMALL_BLINDE * 1) / this.winners.length;
+
+    for (const w of this.winners){
+        this[w][`${this.type}Balance`] += prize;
+        this[w].save()
+    }
+    return prize
+}
+
+modelSchema.methods.fillBank = function () {
+    this.bank += this.userSum + this.opponentSum;
+    this.userBets = [];
+    this.opponentBets = [];
+}
+
+modelSchema.methods.calcWinner = function () {
     if (this.desk.length < 5) return {error: 'game not finished'}
     const cU = this.userResult;
     const cO = this.opponentResult;
-    this.winner = cU.sum > cO.sum ? 'user' : 'opponent';
+
+    if(cU.sum >= cO.sum) this.winners.push('user');
+    if(cU.sum <= cO.sum) this.winners.push('opponent');
     this.result = cU.sum > cO.sum ? cU : cO;
+    this.moveBank()
+}
 
-
+modelSchema.methods.doFold = function () {
+    this.winners = [this.otherPlayer];
+    this.fillBank();
+    const prize = this.moveBank()
+    this.result = this[`${this.otherPlayer}Result`]
+    this.status = 'fold'
+    console.log(this.turn, 'FOLD', prize, this.winners);
 }
 
 
 modelSchema.methods.makeBet = async function (bet, userId) {
-    const player = this.user.equals(userId) ? this.user : this.opponent;
-    const smallBlind = this.opponentBets.length === 0;
-    const who = this.user.equals(player) ? 'user' : 'opponent';
+    const who = this.who(userId);
+    const player = this[who];
     this[`${who}Bets`].push(bet)
-    if (smallBlind) this.playerTurn = this.opponent;
     if (this.type === 'real') {
-        if (player.balanceReal < 0) return {error: 500, message: 'Insufficient funds'};
-        player.balanceReal -= bet;
+        player.realBalance -= bet;
+        if (player.realBalance < 0) return {error: 500, message: 'Insufficient funds'};
     } else {
-        if (player.balanceVirtual < 0) return {error: 500, message:'Insufficient funds'};
-        player.balanceVirtual -= bet;
+        player.virtualBalance -= bet;
+        if (player.virtualBalance < 0) return {error: 500, message: 'Insufficient funds'};
     }
     await player.save()
     return {bet};
-
 }
+
+modelSchema.virtual('isPlaying')
+    .get(function () {
+        return this.opponent && this.user;
+    });
+
+modelSchema.virtual('timerEnabled')
+    .get(function () {
+        return this.secondsLeft >=0 && this.secondsLeft <= process.env.POKER_TURN_TIMER;
+    });
+
+modelSchema.virtual('secondsLeft')
+    .get(function () {
+        if(this.result) return 10000;
+        return this.timer + process.env.POKER_TURN_TIMER * 1 - moment().unix();
+    });
 
 modelSchema.virtual('playerTurn')
     .get(function () {
         return this[this.turn] && this[this.turn].id
+    });
+
+modelSchema.virtual('turnUser')
+    .get(function () {
+        return this[this.turn]
     });
 
 modelSchema.virtual('otherPlayer')
@@ -82,6 +130,7 @@ modelSchema.virtual('otherPlayer')
 
 modelSchema.virtual('round')
     .get(function () {
+        if(this.status==='fold') return 'fold'
         if (!this.desk) return '-'
         const a = ['pre-flop', '', '', 'flop', 'turn', 'river', 'finish']
         return a[this.desk.length]
@@ -144,7 +193,6 @@ modelSchema.virtual('opponentSum')
     .get(function () {
         return this.opponentBets ? this.opponentBets.reduce((a, b) => a + b, 0) : 0
     });
-
 
 
 export default mongoose.model(name, modelSchema)

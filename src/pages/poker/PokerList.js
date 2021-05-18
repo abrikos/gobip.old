@@ -1,15 +1,15 @@
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {A, navigate} from "hookrouter"
 import "./poker.sass"
 import {Button} from "react-bootstrap";
-import Loader from "../../components/Loader";
+import PokerInfo from "./PokerInfo";
 
 export default function PokerList(props) {
     const [pokers, setPokers] = useState([])
-    const [loader, setLoader] = useState(false)
 
     useEffect(() => {
-        loadData()
+        loadData();
+
         const timer = setInterval(loadData, 5000)
         return () => clearInterval(timer);
     }, [])
@@ -25,27 +25,29 @@ export default function PokerList(props) {
         return [p.user, p.owner].includes(u.id)
     }
 
-    function filter(type, p){
-        if(p.result && type==='closed') return true;
-        if(!p.result && type===p.type) return true;
+    function filter(type, p) {
+        if (type!=='opponent' && props.store.authenticatedUser && p.opponent === props.store.authenticatedUser.id) return false
+        if (p.opponent === props.store.authenticatedUser.id && type === 'opponent') return true;
+        if (p.result && type === 'closed') return true;
+        if (!p.result && type === p.type) return true;
+
         return false;
     }
 
     function create(type) {
-        setLoader(true)
-        props.store.api('/poker/game/start',{type})
+        props.store.api('/poker/game/start', {type})
             .then(r => {
                 navigate(`/poker/play/${r.id}`)
-                setLoader(false)
 
                 //loadData()
             })
     }
 
+
     function drawList(type) {
-        return <div className={`alert alert-${type === 'real' ? 'warning' : type==='closed' ? '' : 'success'}`}>
+        return <div className={`alert alert-${type === 'real' ? 'warning' : type === 'closed' ? '' : 'success'}`}>
             <h3>{type}</h3>
-            {props.cabinet && type!=='closed' && <Button onClick={()=>create(type)}>Start {type} pokher</Button>}
+            {props.cabinet && type !== 'closed' && <Button onClick={() => create(type)}>Start {type} pokher</Button>}
             <div>
                 {pokers.filter(p => filter(type, p))
                     .map(p => <div key={p.id}><A href={`/poker/${checkIsPlayer(p) ? 'play' : 'view'}/${p.id}`}>{p.date} {p.name}</A></div>)}
@@ -54,15 +56,20 @@ export default function PokerList(props) {
     }
 
     return <div>
-        <h1>{props.cabinet ? 'My':'Available'} pokher games</h1>
+        <PokerInfo type={'any'} {...props}/>
+        <h1>{props.cabinet ? 'My' : 'Available'} pokher games</h1>
+
         <div className="container">
             <div className="row">
                 <div className="col-sm">{drawList('virtual')}</div>
-                <div className="col-sm">{drawList('real')}</div>
+                <div className="col-sm">
+                    {drawList('real')}
+                </div>
             </div>
         </div>
         <div>
-            {drawList('closed')}
+            {/*{drawList('closed')}
+            {drawList('opponent')}*/}
         </div>
     </div>
 }

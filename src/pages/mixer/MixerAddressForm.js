@@ -1,27 +1,20 @@
-import {Button, Form, InputGroup} from "react-bootstrap";
-import Loader from "../../components/Loader";
+import {Form, InputGroup} from "react-bootstrap";
 import MinterValue from "../../components/minter/MinterValue";
 import {MinterAddressLink} from "../../components/minter/MinterLink";
 import React, {useState} from "react";
+import ButtonLoading from "../../components/ButtonLoading";
 
 export default function MixerAddressForm(props) {
     const [data, setData] = useState({});
-    const [error, setError] = useState();
-    const [loading, setLoading] = useState(false);
+    const [form, setForm] = useState({});
     const min = props.store.params.mixerFee * 2 + 1;
 
-    function getAddress(e) {
-        setLoading(true)
-        setError(null)
-        e.preventDefault()
-        const form = props.store.formToObject(e.target)
-        props.store.api('/mixer/address', form)
-            .then(setData)
-            .catch(setError)
-        setLoading(false)
+
+    function fto(e){
+        setForm({to:e.target.value})
     }
 
-    return <Form onSubmit={getAddress} className="border p-3 my-2 block">
+    return <Form onChange={fto} className="border p-3 my-2 block">
         <h3>Get address</h3>
         <div className="alert alert-info">
             Transfer funds using intermediary wallets
@@ -39,18 +32,23 @@ export default function MixerAddressForm(props) {
         <InputGroup>
             <Form.Control name="to" placeholder={'Enter your address to receive the mix'}/>
             <InputGroup.Append>
-                <Button type="submit">Go</Button>
+                <ButtonLoading
+                    onFinish={setData}
+                    url={'/mixer/address'}
+                    data={form}
+                    {...props}>
+                    Go
+                </ButtonLoading>
             </InputGroup.Append>
         </InputGroup>
-        {loading ? <Loader/> : <div>
+        <div>
             {data.address &&
             <div className="alert alert-info">Send more than <strong><MinterValue
                 value={min} {...props}/></strong> and less than <strong><MinterValue
                 value={props.totalAmount} {...props}/></strong> to
                 the
                 address <MinterAddressLink address={data.address} {...props}/></div>}
-        </div>}
-        {error && <div className="alert alert-danger">{error.message}</div>}
+        </div>
     </Form>
 
 }

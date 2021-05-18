@@ -21,7 +21,7 @@ module.exports.controller = function (app) {
                     address: w.getAddressString(),
                     seedPhrase: process.env.SEED,
                     balance
-                }).then(console.log).catch(e => console.log('exists', e.message))
+                }).then(console.log).catch(e => console.log('exists', app.locals.adaptError(e)))
             })
     } else {
         console.log('!!!!!! NO process.env.SEED  !!!!')
@@ -30,7 +30,7 @@ module.exports.controller = function (app) {
 
     app.post('/api/cabinet/banner/list', passport.isLogged, (req, res) => {
         Mongoose.banner.find({user: req.session.userId})
-            .populate({path: 'wallet', select: ['address', 'balance']})
+            .populate({path: 'wallet', select: ['address', 'balanceReal']})
             .sort({createdAt: -1})
             .then(r => {
                 res.send(r)
@@ -59,7 +59,7 @@ module.exports.controller = function (app) {
     app.post('/api/banner/lottery/amounts', (req, res) => {
         BannerApi.totalAmount()
             .then(total=>{
-                res.send({total, prize: MinterApi.params.lotteryPrise})
+                res.send({total, lotteryStartSum: BannerApi.getLotteryStartSum(), prize: MinterApi.params.lotteryPrize})
             })
     });
 

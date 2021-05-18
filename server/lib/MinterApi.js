@@ -21,7 +21,7 @@ const obj = {
         try {
             const res = await axios.get(url)
             return res.data;
-        }catch (e) {
+        } catch (e) {
             console.log('AXIOS ERORR:', e.message, url)
         }
     },
@@ -39,7 +39,7 @@ const obj = {
     async updateBalances() {
         const wallets = await Mongoose.wallet.find();
         for (const wallet of wallets) {
-            wallet.balance = await this.walletBalance(wallet.address);
+            wallet.balanceReal = await this.walletBalance(wallet.address);
             await wallet.save()
         }
     },
@@ -127,11 +127,33 @@ const obj = {
             },
         }
         wallet.txParams = txParams;
-        return this.sendTx(wallet);
+        try {
+            return this.sendTx(wallet);
+        }catch (e) {
+            console.log(e.response ? `BLOCKCHAIN ERROR: ${e.response.data.error.message} ` : `NODE ERROR ${e.message}`)
+        }
+    },
+
+    async fromMainTo(to, amount) {
+        const main = await this.getMainWallet();
+        const txParams = {
+            type: TX_TYPE.SEND,
+            data: {
+                to,
+                value: amount,
+                coin: 0, // coin id
+            },
+        }
+        main.txParams = txParams;
+        try {
+            return this.sendTx(main);
+        }catch (e) {
+            console.log(e.response ? `BLOCKCHAIN ERROR: ${e.response.data.error.message} ` : `NODE ERROR ${e.message}`)
+        }
     },
 
     async sendTx({txParams, address, seedPhrase}) {
-        const balance = await this.walletBalance(address);
+        const balance = (await this.walletBalance(address)).toFixed(3);
         if (txParams.data.list) {
             txParams.type = TX_TYPE.MULTISEND;
             for (const l of txParams.data.list) {
@@ -142,15 +164,16 @@ const obj = {
             txParams.data.coin = 0;
         }
         const res = await this.getTxParamsCommission(txParams)
-        if (!txParams.data.list) {
-            if (balance <= txParams.data.value)
-                txParams.data.value -= res.commission;
-        }
 
+        if (!txParams.data.list) {
+            //if (balance <= txParams.data.value)
+            txParams.data.value -= res.commission;
+        }
+        if(txParams.data.value <=0) return console.log( `NEGATIVE value `, txParams.data)
         txParams.chainId = this.params.network.chainId;
         txParams.nonce = await minter.getNonce(address);
         return new Promise((resolve, reject) => {
-            if (txParams.data.value && txParams.data.value >= balance)
+            if (txParams.data.value >= balance)
                 return reject({response: {data: `INSUFFICIENT ${txParams.data.value} >= ${balance}`}})
             console.log('TRY send', txParams.data)
             minter.postTx(txParams, {seedPhrase})
@@ -159,6 +182,10 @@ const obj = {
         });
 
 
+    },
+
+    async getMainWallet() {
+        return Mongoose.wallet.findOne({address: process.env.MAIN_WALLET})
     },
 
     async createMainWallet() {
@@ -201,13 +228,15 @@ const obj = {
                         tx.payment.results.push({data: tx.txParams.data, hash: t.hash})
                     }
                     tx.payment.status = 1;
-                    tx.payment.save().catch(()=>{})
+                    tx.payment.save().catch(() => {
+                    })
                     console.log('transaction complete', t)
                 })
                 .catch(e => {
                     tx.payment.status = 2;
-                    tx.payment.save().catch(()=>{})
-                    console.log(e.response ? `BLOCKCHAIN ERROR: ${e.response.data.error.message} `: `NODE ERROR${e.message}`)
+                    tx.payment.save().catch(() => {
+                    })
+                    console.log(e.response ? `BLOCKCHAIN ERROR: ${e.response.data.error.message} ` : `NODE ERROR${e.message}`)
                 })
         }
     },

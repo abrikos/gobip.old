@@ -5,6 +5,7 @@ import BannerApi from "server/lib/BannerApi";
 import MixerApi from "server/lib/MixerApi";
 import CryptoApi from "../lib/CryptoApi";
 import BetApi from "../lib/BetApi";
+import PokerApi from "../lib/PokerApi";
 
 const CronJob = require('cron').CronJob;
 
@@ -14,13 +15,16 @@ module.exports.controller = function (app) {
             BetApi.checkDates();
             BannerApi.cronJob();
             const txs = await MinterApi.getTransactions();
+
             for (const tx of txs) {
+                PokerApi.checkTransaction(tx);
                 BetApi.checkTransaction(tx);
                 BannerApi.checkTransaction(tx);
                 UnboundApi.checkTransaction(tx);
                 MixerApi.checkTransaction(tx);
                 MinterApi.checkWithdrawals(tx);
             }
+            PokerApi.setBalances()
             MinterApi.sendPayments();
         }, null, true, 'America/Los_Angeles'
     )

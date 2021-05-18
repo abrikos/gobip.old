@@ -59,6 +59,11 @@ export default function ThemeMain(props) {
                     </div>
 
                     <div className="d-sm-block d-none">
+                        <a href="https://metrika.yandex.ru/stat/?id=75689170&amp;from=informer"
+                           target="_blank" rel="nofollow">
+                            <img src="https://informer.yandex.ru/informer/75689170/3_1_FFFFFFFF_EFEFEFFF_0_pageviews"
+                                                       alt="Яндекс.Метрика" title="Яндекс.Метрика: данные за сегодня (просмотры, визиты и уникальные посетители)"
+                                                   className="ym-advanced-informer" data-cid="75689170" data-lang="ru" /></a>
 
                     </div>
 

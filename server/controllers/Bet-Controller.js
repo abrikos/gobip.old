@@ -1,7 +1,6 @@
 import Mongoose from "server/db/Mongoose";
 import passport from "server/lib/passport";
 import MinterApi from "server/lib/MinterApi";
-import BetApi from "../lib/BetApi";
 import CryptoApi from "../lib/CryptoApi";
 
 const CronJob = require('cron').CronJob;
@@ -20,7 +19,7 @@ module.exports.controller = function (app) {
                 if (!r) return res.status(404).send('Bet not found')
                 res.send(r)
             })
-            .catch(e => res.status(500).send(e.message))
+            .catch(e => {res.status(500).send(app.locals.adaptError(e))})
     });
 
 
@@ -32,7 +31,7 @@ module.exports.controller = function (app) {
             .then(r => {
                 res.send(r)
             })
-            .catch(e => res.status(500).send(e.message))
+            .catch(e => {res.status(500).send(app.locals.adaptError(e))})
     });
 
     //Mongoose.wallet.find({address:'Mx7d34060e7679bf8f2cf5a2f8e7663c1c25c588dd'}).then(console.log)
@@ -45,7 +44,7 @@ module.exports.controller = function (app) {
             .then(r => {
                 res.send(r)
             })
-            .catch(e => res.status(500).send(e.message))
+            .catch(e => {res.status(500).send(app.locals.adaptError(e))})
     });
 
     app.post('/api/cabinet/bet/view/:id', passport.isLogged, (req, res) => {
@@ -57,7 +56,7 @@ module.exports.controller = function (app) {
                 if (!r) return res.status(404).send('Bet not found')
                 res.send(r)
             })
-            .catch(e => res.status(500).send(e.message))
+            .catch(e => {res.status(500).send(app.locals.adaptError(e))})
     });
 
     //Mongoose.bet.deleteMany({}).then(console.log)
@@ -71,7 +70,7 @@ module.exports.controller = function (app) {
                 if (r.sum) return res.status(500).send('The bet has been paid. Removal prohibited')
                 res.status(200).send('Ok')
             })
-            .catch(e => res.status(500).send(e.message))
+            .catch(e => {res.status(500).send(app.locals.adaptError(e))})
 
     });
 
@@ -89,9 +88,9 @@ module.exports.controller = function (app) {
                 r.checkDate = req.body.checkDate;
                 r.save()
                     .then(r => res.send(r))
-                    .catch(e => res.status(500).send(e.message))
+                    .catch(e => {res.status(500).send(app.locals.adaptError(e))})
             })
-            .catch(e => res.status(500).send(e.message))
+            .catch(e => {res.status(500).send(app.locals.adaptError(e))})
     });
 
     app.post('/api/cabinet/bet/create/new', passport.isLogged, (req, res) => {
@@ -103,14 +102,14 @@ module.exports.controller = function (app) {
                 r.save()
                     .then(r => res.send(r))
             })
-        //.catch(e => res.status(500).send(e.message))
+        //.catch(e => {res.status(500).send(app.locals.adaptError(e))})
     });
 
     //BetApi.aggregatePairData('BTC-USD').then(console.log)
     app.post('/api/crypto/pairs', (req, res) => {
         CryptoApi.getPairs()
             .then(p => res.send(p))
-            .catch(e => res.status(500).send(e.message))
+            .catch(e => {res.status(500).send(app.locals.adaptError(e))})
     });
 
 }

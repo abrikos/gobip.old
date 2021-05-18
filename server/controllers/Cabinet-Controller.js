@@ -17,7 +17,7 @@ module.exports.controller = function (app) {
     app.post('/api/cabinet/user/balance', passportLib.isLogged, (req, res) => {
         Mongoose.user.findById(req.session.userId)
             .then(user => {
-                res.send({real: user.balanceReal, virtual: user.balanceVirtual})
+                res.send({real: user.realBalance, virtual: user.virtualBalance})
             })
     });
 

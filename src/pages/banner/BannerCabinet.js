@@ -83,7 +83,7 @@ export default function BannerCabinet(props) {
     if (!banners) return <div/>
     return <div>
         <h1>My banners</h1>
-        <div className="alert alert-success"> <MinterValue value={amounts.prize - amounts.total} {...props}/> left until the next round of the lottery. Lottery
+        <div className="alert alert-success"> <MinterValue value={amounts.lotteryStartSum - amounts.total} {...props}/> left until the next round of the lottery. Lottery
             prize: <MinterValue value={amounts.prize} {...props}/></div>
         <div className="alert alert-info">
             <ul>

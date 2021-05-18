@@ -1,6 +1,5 @@
 import {useEffect, useState} from "react";
 import "./banner.sass"
-import ErrorPage from "components/service/ErrorPage";
 
 export function Banners(props) {
     const [banners, setBanners] = useState([]);

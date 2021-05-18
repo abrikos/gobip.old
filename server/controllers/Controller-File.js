@@ -1,8 +1,8 @@
 import Mongoose from "server/db/Mongoose";
+import passportLib from 'server/lib/passport';
 
 const fs = require('fs')
 
-import passportLib from 'server/lib/passport';
 //Mongoose.Post.findOne({_id:'5e6b377260ee8707805367b6'})    .populate('token')    .then(console.log)
 
 module.exports.controller = function (app) {
@@ -36,7 +36,7 @@ module.exports.controller = function (app) {
                         })*/
                     })
                 })
-                .catch(e => res.send(app.locals.sendError({error: 500, message: JSON.stringify(e.message)})))
+                .catch(e => res.send(app.locals.sendError({error: 500, message: JSON.stringify(app.locals.adaptError(e))})))
         }
     });
 
