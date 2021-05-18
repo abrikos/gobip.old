@@ -34,7 +34,7 @@ const obj = {
         if (!lottery) return //console.log('no lottery');
         if (lottery.liveTime < 60) return //console.log('LiveTime', lottery.liveTime);
         const wallets = await Mongoose.wallet.find({type: 'banner', balanceReal: {$gt: 0}}).populate({path: 'banner', populate: 'user'});
-        if (!wallets.length) return console.log('NO LOTTERY WALLETS')
+        if (!wallets.length) return
         const mainWallet = await Mongoose.wallet.findOne({address: process.env.MAIN_WALLET});
         const payment = new Mongoose.payment({tx: lottery.id})
         const items = [];
