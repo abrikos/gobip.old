@@ -1,3 +1,4 @@
+export {default as d0} from "./0.svg"
 export {default as d1} from "./1.svg"
 export {default as d2} from "./2.svg"
 export {default as d3} from "./3.svg"

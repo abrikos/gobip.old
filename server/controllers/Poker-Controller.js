@@ -91,20 +91,6 @@ module.exports.controller = function (app) {
             })
     })
 
-    app.post('/api/poker/cabinet/info', passport.isLogged, async (req, res) => {
-        Mongoose.user.findById(req.session.userId)
-            .populate('pokerWallet')
-            .then(async r => {
-                const {realBalance, virtualBalance} = r;
-                res.send({address: r.pokerWallet && r.pokerWallet.address, realBalance, virtualBalance})
-            })
-            .catch(e => {
-
-                res.status(500).send(app.locals.adaptError(e))
-            })
-    })
-
-
 //Mongoose.poker.deleteMany({}).then(console.log)
     app.post('/api/poker/bet/:id', passport.isLogged, async (req, res) => {
         PokerGame.bet(req.params.id, req.session.userId, req.body.bet * 1)

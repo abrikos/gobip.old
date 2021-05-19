@@ -6,11 +6,14 @@ export default function Dices(props) {
     const {game} = props;
     const myId = props.store.authenticatedUser && props.store.authenticatedUser.id
     function drawPlayer(p) {
-        const hand = game.data.hands.find(ch => ch.userId === p.id)
         return <div key={p.id} className={`${p.id === myId ? 'bg-success' : ''} row`}>
-            <div className="col"><UserAvatar {...p}/></div>
-            <div className="col">
-                {hand && hand.dices.map(h=><Dice value={h} key={h}/>)}
+            <div className="col-2"><UserAvatar {...p}/></div>
+            <div className="col-2">
+                {game.data.hands[p.id] && game.data.hands[p.id].map((h,i)=><Dice value={h} key={i}/>)}
+            </div>
+            <div className="col-8">
+                Bet: {game.data.bets[game.data.round][p.id]}
+                {game.activePlayer.id === p.id && <span>TURN</span>}
             </div>
         </div>
     }

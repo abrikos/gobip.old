@@ -13,8 +13,7 @@ const modelSchema = new Schema({
         module: String,
         type: String,
         dataStr: String,
-        iam: Object,
-        //data: {type: Object},
+        history: [{type: Object}],
         //wallet: {type: mongoose.Schema.Types.ObjectId, ref: 'Wallet'},
     },
     {
@@ -25,24 +24,27 @@ const modelSchema = new Schema({
         toJSON: {virtuals: true}
     });
 
+modelSchema.methods.doModelBet = async function (req) {
+    const data = Games[this.module].doBet(this, req);
+    if(data.error) {
+        console.log(data)
+        throw data;
+    }
+    this.data = data;
+    await this.save()
+}
+
 modelSchema.methods.joinUser = async function (req) {
     this.players.push(req.session.userId);
+    await this.populate('players',['name','photo','realBalance','virtualBalance']).execPopulate()
     this.data = Games[this.module].onJoin(this, req);
-    return this.save();
+    return  this.save();
 }
 
 modelSchema.methods.adaptGameForClients = async function (req) {
     return Games[this.module].adaptGameForClients(this, req);
 }
 
-modelSchema.methods.doModelTurn = async function (req) {
-    this.data = Games[this.module].doTurn(this, req);
-    return this.save();
-}
-
-modelSchema.methods.iamPlayer = function (req) {
-    return this.players.map(p => p.id).indexOf(req.session.userId);
-}
 
 modelSchema.statics.modules = Object.keys(Games)
 
@@ -54,6 +56,11 @@ modelSchema.statics.start = async function (req) {
     return g.save();
 }
 
+modelSchema.virtual('activePlayer')
+    .get(function () {
+        return this.players[this.data.activePlayer];
+    });
+
 modelSchema.virtual('link')
     .get(function () {
         return `/game/${this.module}/${this.id}`;
@@ -63,7 +70,7 @@ modelSchema.virtual('data')
     .get(function () {
         return this.dataStr ? JSON.parse(this.dataStr) : {};
     })
-    .set(function (v){
+    .set(function (v) {
         this.dataStr = JSON.stringify(v);
     });
 

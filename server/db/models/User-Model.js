@@ -10,7 +10,7 @@ const modelSchema = new Schema({
         address: String,
         photo: String,
         email: String,
-        pokerWallet: {type: mongoose.Schema.Types.ObjectId, ref: 'wallet'},
+        gameWallet: {type: mongoose.Schema.Types.ObjectId, ref: 'wallet'},
         admin: {type: Boolean},
         virtualBalance: {type: Number, default: 100000},
         realBalance: {type: Number, default: 0},
