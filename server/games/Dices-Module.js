@@ -7,13 +7,10 @@ const DicesModule = {
         roundName: 'pre-flop',
         finish: false,
         bets: [{}, {}, {}, {}],
-        /*preBets: [],
-        flopBets: [],
-        turnBets: [],
-        riverBets: [],
-        results: [],*/
+        results: {},
         betActions: ['call', 'bet', 'check', 'ford'],
-        minBet: process.env.GAME_MIN_BET
+        minBet: process.env.GAME_MIN_BET,
+        initialStake: 1000
     },
     rounds: ['pre-flop', 'flop', 'turn', 'river', 'finish'],
 

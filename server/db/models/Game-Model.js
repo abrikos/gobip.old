@@ -1,6 +1,7 @@
 import moment from "moment";
 import randomWords from "random-words";
 import * as Games from "server/games";
+import {Error} from "mongoose";
 
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
@@ -13,6 +14,8 @@ const modelSchema = new Schema({
         module: String,
         type: String,
         dataStr: String,
+        stakesStr: String,
+        stakes: Object,
         history: [{type: Object}],
         //wallet: {type: mongoose.Schema.Types.ObjectId, ref: 'Wallet'},
     },
@@ -24,27 +27,30 @@ const modelSchema = new Schema({
         toJSON: {virtuals: true}
     });
 
-modelSchema.methods.playerCanPay = function (req) {
-    let bet = req.body.bet * 1;
+modelSchema.methods.fundStake = function (req) {
+    let amount = req.body.amount * 1 || this.data.initialStake;
     const player = this.players.find(p => p.id === req.session.userId);
-    if (player[`${this.type}Balance`] < bet) return {error: 500, message: 'Insufficient funds'}
-    player[`${this.type}Balance`] -= bet;
+    if (player[`${this.type}Balance`] < amount) return {error: 500, message: 'Insufficient funds'}
+    player[`${this.type}Balance`] -= amount;
     player.save();
+    this.stakes[req.saession.userId] += amount;
     return {}
 }
 
 modelSchema.methods.doModelBet = async function (req) {
+    const bet = req.body.bet * 1;
     await this.populate('players', ['name', 'photo', 'realBalance', 'virtualBalance']).execPopulate()
-    const canPay = this.playerCanPay(req);
-    if (canPay.error) {
-        console.log(canPay);
-        throw canPay
-    }
     const data = Games[this.module].doBet(this, req);
     if (data.error) {
         console.log(data);
         throw data;
     }
+    if(this.stakes[req.session.userId] < bet){
+        const message = 'Stake is 0';
+        console.log('model bet error:',message);
+        throw new Error( message);
+    }
+    this.stakes[req.session.userId] -= bet;
     this.data = data;
     await this.save()
 }
@@ -52,9 +58,10 @@ modelSchema.methods.doModelBet = async function (req) {
 modelSchema.methods.joinUser = async function (req) {
     this.players.push(req.session.userId);
     await this.populate('players', ['name', 'photo', 'realBalance', 'virtualBalance']).execPopulate()
-    const canPay = this.playerCanPay(req);
+    this.stakes[req.session.userId] = 0;
+    const canPay = this.fundStake(req);
     if (canPay.error) {
-        console.log(canPay);
+        console.log('Join error:',canPay);
         throw canPay
     }
     this.data = Games[this.module].onJoin(this, req);
@@ -92,6 +99,14 @@ modelSchema.virtual('data')
     })
     .set(function (v) {
         this.dataStr = JSON.stringify(v);
+    });
+
+modelSchema.virtual('stakesX')
+    .get(function () {
+        return this.stakesStr ? JSON.parse(this.stakesStr) : {};
+    })
+    .set(function (v) {
+        this.stakesStr = JSON.stringify(v);
     });
 
 modelSchema.virtual('date')
