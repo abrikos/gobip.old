@@ -32,8 +32,6 @@ const DicesModule = {
         }else{
             data.bets[data.round][req.session.userId] = 0;
         }
-        const canPay = this._playerCanPay(game, req)
-        if (canPay.error) return canPay
         data.hands[req.session.userId] = [1, 2, 3, 4, 5, 6].sort(() => Math.random() - 0.5).slice(0, 2);
         return data;
     },
@@ -61,14 +59,6 @@ const DicesModule = {
         return data;
     },
 
-    _playerCanPay(game, req) {
-        let bet = req.body.bet * 1;
-        const player = game.players[this._iamPlayer(game, req)];
-        if (player[`${game.type}Balance`] < bet) return {error: 500, message: 'Insufficient funds'}
-        player[`${this.type}Balance`] -= bet;
-        player.save();
-        return {}
-    },
 
     _iamPlayer(game, req) {
         return game.players.map(p => p.id).indexOf(req.session.userId);

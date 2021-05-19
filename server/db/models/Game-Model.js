@@ -24,10 +24,25 @@ const modelSchema = new Schema({
         toJSON: {virtuals: true}
     });
 
+modelSchema.methods.playerCanPay = function (req) {
+    let bet = req.body.bet * 1;
+    const player = this.players.find(p => p.id === req.session.userId);
+    if (player[`${this.type}Balance`] < bet) return {error: 500, message: 'Insufficient funds'}
+    player[`${this.type}Balance`] -= bet;
+    player.save();
+    return {}
+}
+
 modelSchema.methods.doModelBet = async function (req) {
+    await this.populate('players', ['name', 'photo', 'realBalance', 'virtualBalance']).execPopulate()
+    const canPay = this.playerCanPay(req);
+    if (canPay.error) {
+        console.log(canPay);
+        throw canPay
+    }
     const data = Games[this.module].doBet(this, req);
-    if(data.error) {
-        console.log(data)
+    if (data.error) {
+        console.log(data);
         throw data;
     }
     this.data = data;
@@ -36,9 +51,14 @@ modelSchema.methods.doModelBet = async function (req) {
 
 modelSchema.methods.joinUser = async function (req) {
     this.players.push(req.session.userId);
-    await this.populate('players',['name','photo','realBalance','virtualBalance']).execPopulate()
+    await this.populate('players', ['name', 'photo', 'realBalance', 'virtualBalance']).execPopulate()
+    const canPay = this.playerCanPay(req);
+    if (canPay.error) {
+        console.log(canPay);
+        throw canPay
+    }
     this.data = Games[this.module].onJoin(this, req);
-    return  this.save();
+    return this.save();
 }
 
 modelSchema.methods.adaptGameForClients = async function (req) {
