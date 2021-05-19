@@ -7,7 +7,6 @@ const modelSchema = new Schema({
         externalId: {type: Number},
         strategy: String,
         name: {type: String},
-        nickname: String,
         address: String,
         photo: String,
         email: String,
@@ -31,18 +30,6 @@ modelSchema.virtual('date')
     .get(function () {
         return moment(this.createdAt).format('YYYY-MM-DD HH:mm:ss')
     });
-
-modelSchema.virtual('displayName')
-    .get(function () {
-        return this.nickname || this.name || this.username;
-    });
-
-modelSchema.virtual('quizzes', {
-    ref: 'quiz',
-    localField: '_id',
-    foreignField: 'user',
-    justOne: false // set true for one-to-one relationship
-});
 
 
 export default mongoose.model("User", modelSchema)

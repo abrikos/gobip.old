@@ -30,7 +30,7 @@ export default function CabinetUser(props) {
 
                 <div>
                     Nickname
-                    <FormControl name="nickname" defaultValue={user.nickname}/>
+                    <FormControl name="name" defaultValue={user.name}/>
                 </div>
                 <div>Photo
                     <FormControl name="photo" defaultValue={user.photo}/>

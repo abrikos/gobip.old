@@ -1,8 +1,7 @@
 import Mongoose from "../db/Mongoose";
 import PokerApi from "./PokerApi";
 import moment from "moment";
-
-const randomWords = require('random-words');
+import randomWords from 'random-words';
 const PokerGame = {
     async create(userId, type) {
         const poker = new Mongoose.poker({user: userId})

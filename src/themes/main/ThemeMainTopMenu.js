@@ -12,7 +12,7 @@ export default function ThemeMainTopMenu(props) {
         //{label: "Home", href: "/"},
         //{label: "Видео", items: [{label: "Level 1", href: "/zzz"}, {label: "Level 2", href: "/zzz"}]},
         //{label: "АДМИН", href: "/admin/start", hidden: !(props.store.authenticatedUser && props.store.authenticatedUser.admin)},
-        //{label: "Cabinet", href: "/cabinet/user", hidden: !(props.store.authenticatedUser)},
+        {label: props.store.authenticatedUser && props.store.authenticatedUser.name, href: "/cabinet/user", hidden: !(props.store.authenticatedUser)},
 
     ];
     return <Navbar bg="dark" expand="lg">

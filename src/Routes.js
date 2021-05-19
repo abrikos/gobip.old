@@ -13,6 +13,8 @@ import BetList from "./pages/bet/BetList";
 import BetView from "./pages/bet/BetView";
 import PokerPlay from "./pages/poker/PokerPlay";
 import PokerList from "./pages/poker/PokerList";
+import GameList from "./games/GameList";
+import GamePlay from "./games/GamePlay";
 
 export default function Routes(store) {
     const routes = {
@@ -26,6 +28,8 @@ export default function Routes(store) {
         "/poker": (params) => <PokerList store={store} {...params}/>,
         "/poker/view/:id": (params) => <PokerPlay store={store} {...params}/>,
         "/poker/play/:id": (params) => <PokerPlay store={store} {...params}/>,
+        "/games": (params) => <GameList store={store} {...params}/>,
+        "/game/:module/:id": (params) => <GamePlay store={store} {...params}/>,
         "/login": () => <Login store={store}/>,
     };
 

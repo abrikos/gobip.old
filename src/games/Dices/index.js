@@ -1,0 +1,6 @@
+export {default as d1} from "./1.svg"
+export {default as d2} from "./2.svg"
+export {default as d3} from "./3.svg"
+export {default as d4} from "./4.svg"
+export {default as d5} from "./5.svg"
+export {default as d6} from "./6.svg"

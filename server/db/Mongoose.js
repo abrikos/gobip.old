@@ -12,6 +12,7 @@ import lottery from "server/db/models/BannerLottery-Model";
 import crypto from "server/db/models/Crypto-Model";
 import bet from "server/db/models/Bet-Model";
 import poker from "server/db/models/Poker-Model";
+import game from "server/db/models/Game-Model";
 
 const mongoose = require("mongoose");
 require('dotenv').config();
@@ -40,7 +41,7 @@ const Mongoose = {
     isValidId: function (id) {
         return mongoose.Types.ObjectId.isValid(id)
     },
-    user, unbound, ethereum, training, wallet, payment, status, treasure, banner, lottery, crypto, bet, transaction, poker
+    user, unbound, ethereum, training, wallet, payment, status, treasure, banner, lottery, crypto, bet, transaction, poker, game
 
 };
 export default Mongoose;
