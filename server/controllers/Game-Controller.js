@@ -25,16 +25,26 @@ module.exports.controller = function (app) {
         let game = await Mongoose.game.start(req);
         console.log('TESTING', game.name)
 
-
         req.session.userId = process.env.USER2
-        await game.joinUser(req);
-        req.session.userId = process.env.USER3
-        await game.joinUser(req);
-        req.body = {bet:10}
-        await game.doModelBet(req)
-        console.log(game.data.activePlayer)
+        await game.doModelJoin(req);
 
-        Mongoose.game.findOne().sort({createdAt:-1}).then(r=>console.log('FIND DATA',r.activePlayer))
+        req.body = {bet:10}
+        req.session.userId = process.env.USER2
+        console.log('Active player:', game.activePlayer.name, game.activePlayer.id)
+        await game.doModelBet(req)
+
+        req.session.userId = process.env.USER3
+        delete req.body.bet;
+        await game.doModelJoin(req);
+        console.log('Active player:', game.activePlayer.name, game.activePlayer.id)
+
+        req.body = {bet:10}
+        req.session.userId = process.env.USER1
+        await game.doModelBet(req)
+        console.log('Active player:', game.activePlayer.name, game.activePlayer.id)
+
+
+        //Mongoose.game.findOne().populate('players').sort({createdAt:-1}).then(r=>console.log('FIND DATA',r.data.waitList))
 
     }
     //Mongoose.user.find().then(r=>console.log(r.map(r=>r.id)))

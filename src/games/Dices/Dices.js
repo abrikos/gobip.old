@@ -12,8 +12,8 @@ export default function Dices(props) {
                 {game.data.hands[p.id] && game.data.hands[p.id].map((h,i)=><Dice value={h} key={i}/>)}
             </div>
             <div className="col-8">
-                Bet: {game.data.bets[game.data.round][p.id]}
-                {game.activePlayer.id === p.id && <span>TURN</span>}
+                Stake: {game.stakes[p.id]}                Bet: {game.data.bets[game.data.round][p.id]}
+                {game.activePlayer.id === p.id && <span> TURN</span>}
             </div>
         </div>
     }

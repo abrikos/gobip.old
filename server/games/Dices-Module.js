@@ -2,46 +2,66 @@ const DicesModule = {
     defaultData: {
         hands: {},
         desk: [],
-        activePlayer: 0,
         round: 0,
+        waitList:[],
         roundName: 'pre-flop',
         finish: false,
         bets: [{}, {}, {}, {}],
         results: {},
         betActions: ['call', 'bet', 'check', 'ford'],
         minBet: process.env.GAME_MIN_BET,
-        initialStake: 1000
+        initialStake: 100
     },
     rounds: ['pre-flop', 'flop', 'turn', 'river', 'finish'],
 
     onJoin(game, req) {
         const data = game.data;
-        let bet = req.body.bet * 1;
-        if (Object.keys(data.bets[0]).length === 0) {
+        if (game.players.length === 1) {
             //BIG blind
-            bet = data.minBet * 2;
-            data.bets[0][req.session.userId] = bet;
-            data.activePlayer++;
-        } else if (Object.keys(data.bets[0]).length === 1) {
+            req.body.bet = data.minBet * 2;
+            //console.log('BIG BLIND', req.body)
+        } else if (game.players.length === 2) {
             //SMALL blind
-            bet = data.minBet * 1;
-            data.bets[0][req.session.userId] = bet;
-        }else{
-            data.bets[data.round][req.session.userId] = 0;
+            req.body.bet = data.minBet * 1;
+            //console.log('SMALL BLIND', req.body)
         }
+        data.bets[data.round][req.session.userId] = 0;
         data.hands[req.session.userId] = [1, 2, 3, 4, 5, 6].sort(() => Math.random() - 0.5).slice(0, 2);
-        return data;
+        game.data = data;
     },
 
-    doBet(game, req) {
-        if(!game.activePlayer.equals( req.session.userId)) return {error:500, message:'Not you turn'}
+    nextTurn(game,req){
+        const data = game.data;
+        game.activePlayerIdx++;
+        if (game.activePlayerIdx >= game.players.length - data.waitList.length && game.players.length >= 2) {
+            game.activePlayerIdx = 0;
+        }
+        const sumBets = Object.values(data.bets[data.round]).reduce((a,b)=>a+b,0);
+        const smallBlindSum = data.minBet * 3;
+        if(sumBets === smallBlindSum) game.activePlayerIdx = 1;
+        game.data = data;
+    },
+
+    checkTurn(game, req) {
+        if (!game.activePlayer.equals(req.session.userId)) return {error: 500, message: 'Not you turn'}
+        return {}
+    },
+
+    canJoin(game, req){
+        const data = game.data;
+        const canJoin = data.round === 0 && !(Object.keys(data.bets[0]).length>1 && game.activePlayerIdx ===0);
+        if(!canJoin) data.waitList.push(req.session.userId);
+        game.data = data;
+        return canJoin;
+
+    },
+
+    onBet(game, req) {
         const data = game.data;
         //const roundName = this.defaultData.rounds[data.round];
         //data[`${roundName}Bets`].push({userId, bet});
         data.bets[data.round][req.session.userId] = req.body.bet * 1 + data.bets[data.round][req.session.userId] * 1;
-        data.activePlayer = data.activePlayer >= game.players.length - 1 ? 0 : data.activePlayer + 1;
-        if (this._isCall(game)) {
-            data.activePlayer = 0;
+        /*if (this._isCall(game)) {
             if (!data.round) {
 
             }
@@ -50,18 +70,15 @@ const DicesModule = {
             if (data.round >= 4) {
                 data.finish = true;
             }
-        }
+        }*/
         //data.choices.push({choice, userId: req.session.userId})
         //return {status:502, message:'aaaaaa', error:true}
-        return data;
+        game.data = data;
     },
 
-
-    _iamPlayer(game, req) {
-        return game.players.map(p => p.id).indexOf(req.session.userId);
-    },
 
     adaptGameForClients(game, req) {
+        return game;
         const data = game.data;
         for (const k of Object.keys(data.hands)) {
             if (k !== req.session.userId) {
@@ -74,8 +91,9 @@ const DicesModule = {
         return game;
     },
 
-
-
+    roundName(game){
+        return this.rounds[game.data.round];
+    },
 
     _fillDesk(game, roundName) {
 
