@@ -1,6 +1,6 @@
 import Mongoose from "server/db/Mongoose";
 import passport from "server/lib/passport";
-import PokerApi from "../lib/PokerApi";
+import PokerApi from "../games/PokerApi";
 import PokerGame from "../lib/PokerGame";
 import MinterApi from "../lib/MinterApi";
 

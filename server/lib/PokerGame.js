@@ -1,5 +1,5 @@
 import Mongoose from "../db/Mongoose";
-import PokerApi from "./PokerApi";
+import PokerApi from "../games/PokerApi";
 import moment from "moment";
 import randomWords from 'random-words';
 const PokerGame = {

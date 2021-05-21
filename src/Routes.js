@@ -11,8 +11,8 @@ import {Banners} from "pages/banner/Banners";
 import BannerLottery from "./pages/banner/BannerLottery";
 import BetList from "./pages/bet/BetList";
 import BetView from "./pages/bet/BetView";
-import PokerPlay from "./pages/poker/PokerPlay";
-import PokerList from "./pages/poker/PokerList";
+import PokerPlay from "./pages/Poker/PokerPlay";
+import PokerList from "./pages/Poker/PokerList";
 import GameList from "./games/GameList";
 import GamePlay from "./games/GamePlay";
 

@@ -9,6 +9,7 @@ const name = 'game';
 
 const modelSchema = new Schema({
         players: [{type: mongoose.Schema.Types.ObjectId, ref: 'User'}],
+        waitList: [{type: mongoose.Schema.Types.ObjectId, ref: 'User'}],
         name: String,
         module: String,
         type: String,
@@ -41,13 +42,14 @@ modelSchema.methods.fundStake = function (req) {
 modelSchema.methods.doModelBet = async function (req) {
     const bet = req.body.bet * 1;
     await this.populate('players', ['name', 'photo', 'realBalance', 'virtualBalance']).execPopulate()
-    console.log('BET', this.iamPlayer(req).name, req.session.userId)
+    console.log('BET', this.iamPlayer(req).name, bet)
     const check = Games[this.module].checkTurn(this, req);
     if (check && check.error) {
         console.log(check);
         throw check;
     }
-    Games[this.module].onBet(this, req);
+    const betResult =Games[this.module].onBet(this, req);
+    if(betResult.error){console.log(betResult); throw betResult}
     if (this.stakes[req.session.userId] < bet) {
         const message = 'Stake too low';
         console.log('model bet error:', message);
@@ -63,21 +65,23 @@ modelSchema.methods.doModelJoin = async function (req) {
     await this.populate('players', ['name', 'photo', 'realBalance', 'virtualBalance']).execPopulate()
     console.log('JOIN', this.iamPlayer(req).name, req.session.userId)
     this.stakes[req.session.userId] = 0;
-    const canPay = this.fundStake(req);
-
-    if (canPay.error) {
-        console.log('Join error:', canPay);
-        throw canPay
-    }
     if (Games[this.module].canJoin(this, req)) {
+        const canPay = this.fundStake(req);
+        if (canPay.error) {
+            console.log('Join error:', canPay);
+            throw canPay
+        }
         Games[this.module].onJoin(this, req);
         if (req.body.bet) await this.doModelBet(req);
+    }else{
+        this.waitList.push(req.session.userId);
     }
     return this.save();
 }
 
-modelSchema.methods.adaptGameForClients = async function (req) {
-    return Games[this.module].adaptGameForClients(this, req);
+modelSchema.methods.adaptGameForClients = function (req) {
+    Games[this.module].adaptGameForClients(this, req);
+    return this;
 }
 
 modelSchema.methods.iamPlayer = function (req) {
@@ -88,11 +92,12 @@ modelSchema.methods.iamPlayer = function (req) {
 modelSchema.statics.modules = Object.keys(Games)
 
 modelSchema.statics.start = async function (req) {
-    console.log('MODEL start game')
     const {module, type} = req.body;
     const g = new this({module, type, data: Games[module].defaultData});
-    await g.doModelJoin(req);
     g.name = randomWords({exactly: 1, wordsPerString: 3, formatter: (word, i) => i ? word : word.slice(0, 1).toUpperCase().concat(word.slice(1))})[0];
+    console.log(g.module, ' ========START GAME=======',  g.name)
+    await g.doModelJoin(req);
+
     return g.save();
 }
 

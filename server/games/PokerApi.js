@@ -1,5 +1,5 @@
 import Mongoose from "../db/Mongoose";
-import MinterApi from "./MinterApi";
+import MinterApi from "../lib/MinterApi";
 
 const PokerApi = {
     async checkTransaction(tx) {

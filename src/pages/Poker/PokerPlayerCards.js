@@ -1,4 +1,4 @@
-import PokerCard from "./PokerCard";
+import PokerCard from "../../games/Poker/PokerCard";
 import React from "react";
 import UserAvatar from "../cabinet/UserAvatar";
 import {CountdownCircleTimer} from "react-countdown-circle-timer";

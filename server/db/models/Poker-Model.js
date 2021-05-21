@@ -1,5 +1,5 @@
 import moment from "moment";
-import PokerApi from "../../lib/PokerApi";
+import PokerApi from "../../games/PokerApi";
 
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;

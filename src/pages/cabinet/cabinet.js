@@ -6,7 +6,7 @@ import MixerCabinet from "pages/mixer/MixerCabinet";
 import BannerCabinet from "pages/banner/BannerCabinet";
 import BetCabinet from "../bet/BetCabinet";
 import CabinetUser from "./CabinetUser";
-import PokerList from "../poker/PokerList";
+import PokerList from "../Poker/PokerList";
 
 export default function Cabinet(props) {
     const pages = {

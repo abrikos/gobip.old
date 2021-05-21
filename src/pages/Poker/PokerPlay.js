@@ -1,4 +1,4 @@
-import PokerCard from "./PokerCard";
+import PokerCard from "../../games/Poker/PokerCard";
 import React, {useEffect, useState} from "react";
 import {Button} from "react-bootstrap";
 import {navigate} from "hookrouter";

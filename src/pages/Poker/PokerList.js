@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {A, navigate} from "hookrouter"
-import "./poker.sass"
+import "../../games/Poker/poker.sass"
 import {Button} from "react-bootstrap";
 import PokerInfo from "./PokerInfo";
 

@@ -4,6 +4,7 @@ import Reversi from "./Reversi/Reversi";
 import Dices from "./Dices/Dices";
 import GameUserInfo from "./GameUserInfo";
 import GameBetForm from "./GameBetForm";
+import Poker from "./Poker/Poker";
 
 export default function GamePlay(props){
     const [game,setGame] = useState()
@@ -32,6 +33,7 @@ export default function GamePlay(props){
             {game.module === 'RoPaSci' && <RoPaSci game={game} {...props}/>}
             {game.module === 'Reversi' && <Reversi game={game} {...props}/>}
             {game.module === 'Dices' && <Dices game={game} {...props}/>}
+            {game.module === 'Poker' && <Poker game={game} {...props}/>}
             {props.store.authenticatedUser && props.store.authenticatedUser.id === game.activePlayer.id &&  <GameBetForm userInfo={userInfo} game={game} {...props}/>}
         </div>
     )
