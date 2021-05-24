@@ -12,6 +12,8 @@ import PokerGame from "../lib/PokerGame";
 module.exports.controller = function (app) {
     const test = true;
     doTest();
+    //Mongoose.game.clearGames();
+
     async function doBet(game, bet,userId){
         const req = {body:{bet}, session:{userId}};
         await game.doModelBet(req);
@@ -37,8 +39,13 @@ module.exports.controller = function (app) {
         //Join player 3
         req.session.userId = process.env.USER3
         delete req.body.bet;
-        await game.doModelJoin(req);
+        //await game.doModelJoin(req);
         //console.log('....... Active player:', game.activePlayer.name)
+
+        await doBet(game, 0, USER1)
+        await doBet(game, 10, USER1)
+        await doBet(game, 10, USER2)
+        //await doBet(game, 0, USER2)
         console.log(game.stakes)
         Mongoose.game.findOne().populate('players').sort({createdAt:-1}).then(r=>console.log('FIND DATA',r.stakes))
 

@@ -7,7 +7,7 @@ const PokerModule = {
         round: 0,
         roundName: 'pre-flop',
         finish: false,
-        bets: [{}, {}, {}, {}],
+        bets: [{}, {}, {}, {}, {}, {}],
         results: {},
         betActions: ['call', 'bet', 'check', 'ford'],
         minBet: process.env.GAME_MIN_BET,
@@ -47,30 +47,16 @@ const PokerModule = {
         return game.activePlayerIdx === 0 && data.round === 1 && !data.bets[data.round][req.session.userId]
     },
 
-    nextTurn(game, req) {
-        const data = game.data;
-        if (this._bigBlindCheck(game, game.data, req)) {
-            game.activePlayerIdx = 0;
-        } else {
-
-            game.activePlayerIdx++;
-            if (game.activePlayerIdx >= game.players.length - game.waitList.length && game.players.length >= 2) {
-                game.activePlayerIdx = 0;
-            }
-            const sumBets = this._sumBets(data.bets[data.round]);
-            const smallBlindSum = data.minBet * 3;
-            if (sumBets === smallBlindSum && data.round === 0) game.activePlayerIdx = 1;
-        }
-        game.data = data;
-    },
-
     _sumBets(bets) {
         return Object.values(bets).reduce((a, b) => a + b, 0);
     },
 
-    checkTurn(game, req) {
-        if (!game.activePlayer.equals(req.session.userId)) return {error: 500, message: 'Not you turn'}
-        return {}
+    getBank(game){
+        let bank = 0;
+        for(const round of game.data.bets){
+            bank +=this._sumBets(round)
+        }
+        return bank;
     },
 
     canJoin(game, req) {
@@ -81,27 +67,41 @@ const PokerModule = {
         const data = game.data;
         const maxBet = Math.max.apply(null, Object.values(data.bets[data.round]));
         const beforeBet = data.bets[data.round][req.session.userId];
-        //if (!beforeBet) data.bets[data.round][req.session.userId] = 0;
+        if (!beforeBet) data.bets[data.round][req.session.userId] = 0;
         data.bets[data.round][req.session.userId] += req.body.bet * 1;
         if (data.bets[data.round][req.session.userId] < maxBet && !(game.activePlayerIdx === 1 && data.round === 0))
             return {error: 'Bet too small. Min: ' + (maxBet - beforeBet) + ' Curr: ' + data.bets[data.round][req.session.userId]}
         if ((this._isCall(data) && this._betsCount(data) > 1) || this._bigBlindCheck(game, data, req)) {
             game.activePlayerIdx = 0;
             data.round++;
-            this._fillDesk(game);
-            for (const p of game.players.filter(p => !game.waitList.includes(p.id))) {
+            this._fillDesk(game, data);
+            /*for (const p of game.players.filter(p => !game.waitList.includes(p.id))) {
                 data.bets[data.round][p.id] = 0;
-            }
-            console.log('========', this._roundName(data), data.round)
+            }*/
+            console.log('======== NEW ROUND ', this._roundName(data), data.round)
             data.roundName = this._roundName(data);
             if (data.round >= 4) {
                 data.finish = true;
+            }
+        }else if(data.round===0 && game.activePlayerIdx===1) {
+            game.activePlayerIdx = 1;
+        }else{
+            game.activePlayerIdx++;
+            if (game.activePlayerIdx >= game.players.length && game.players.length >= 2) {
+                game.activePlayerIdx = 0;
             }
         }
         game.data = data;
         return {}
     },
 
+    doFold(game){
+        game.waitList.push(game.players.splice(game.activePlayerIdx,1));
+        if(game.players.length===1){
+            game.winners = game.players;
+            game.finish()
+        }
+    },
 
     adaptGameForClients(game, req) {
         return game;
@@ -128,15 +128,16 @@ const PokerModule = {
         return this.rounds[data.round];
     },
 
-    _fillDesk(game) {
-        const data = game.data;
+    _fillDesk(game, data) {
         if (data.round < 2) return;
         const amountOfCards = data.round === 2 ? 3 : 1;
+        let newCards;
         if (game.module === 'Poker') {
-            data.desk = PokerApi.randomSet(this._allCards(data), amountOfCards);
+            newCards = PokerApi.randomSet(this._allCards(data), amountOfCards);
         } else {
-            data.desk = [1, 2, 3, 4, 5, 6].sort(() => Math.random() - 0.5).slice(0, amountOfCards);
+            newCards = [1, 2, 3, 4, 5, 6].sort(() => Math.random() - 0.5).slice(0, amountOfCards);
         }
+        data.desk = data.desk.concat(newCards)
         game.data = data;
     },
 

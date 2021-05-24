@@ -1,6 +1,7 @@
 import UserAvatar from "pages/cabinet/UserAvatar";
 import "./poker.sass"
 import PokerCard from "./PokerCard";
+import React from "react";
 
 export default function Poker(props) {
     const {game} = props;
@@ -21,6 +22,8 @@ export default function Poker(props) {
     return (
         <div className='dices'>
             <div>
+                {game.data.round}
+                {game.data.desk.map((p, i) => <PokerCard {...p} key={i}/>)}
                 {game.players.map(drawPlayer)}
             </div>
         </div>

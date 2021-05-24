@@ -10,6 +10,7 @@ const name = 'game';
 const modelSchema = new Schema({
         players: [{type: mongoose.Schema.Types.ObjectId, ref: 'User'}],
         waitList: [{type: mongoose.Schema.Types.ObjectId, ref: 'User'}],
+        winners: [{type: mongoose.Schema.Types.ObjectId, ref: 'User'}],
         name: String,
         module: String,
         type: String,
@@ -17,6 +18,7 @@ const modelSchema = new Schema({
         stakesStr: String,
         started: {type: Boolean, default: false},
         activePlayerIdx: {type: Number, default: 0},
+        activePlayerTime: {type: Number, default: 0},
         //stakes: {type: Object, default: {}},
         history: [{type: Object}],
         //wallet: {type: mongoose.Schema.Types.ObjectId, ref: 'Wallet'},
@@ -35,7 +37,7 @@ modelSchema.methods.fundStake = function (req) {
     if (player[`${this.type}Balance`] < amount) return {error: 500, message: 'Insufficient funds'}
     player[`${this.type}Balance`] -= amount;
     player.save();
-    this.changeStake(req,this.stakes[req.session.userId] + amount)
+    this.changeStake(req, this.stakes[req.session.userId] + amount)
     return {}
 }
 
@@ -43,10 +45,9 @@ modelSchema.methods.doModelBet = async function (req) {
     const bet = req.body.bet * 1;
     await this.populate('players', ['name', 'photo', 'realBalance', 'virtualBalance']).execPopulate()
     console.log('BET', this.iamPlayer(req).name, bet)
-    const check = Games[this.module].checkTurn(this, req);
-    if (check && check.error) {
-        console.log(check);
-        throw check;
+    if (!this.activePlayer.equals(req.session.userId)) {
+        console.log('Not you turn');
+        throw {error: 500, message: 'Not you turn'}
     }
     const betResult = Games[this.module].onBet(this, req);
     if (betResult.error) {
@@ -58,9 +59,8 @@ modelSchema.methods.doModelBet = async function (req) {
         console.log('model bet error:', message);
         throw new Error(message);
     }
-
-    this.changeStake(req,this.stakes[req.session.userId] - bet)
-    Games[this.module].nextTurn(this, req)
+    this.activePlayerTime = moment().unix();
+    this.changeStake(req, this.stakes[req.session.userId] - bet)
     await this.save()
 }
 
@@ -71,12 +71,11 @@ modelSchema.methods.changeStake = function (req, amount) {
 }
 
 modelSchema.methods.doModelJoin = async function (req) {
-    this.players.push(req.session.userId);
-    await this.populate('players', ['name', 'photo', 'realBalance', 'virtualBalance']).execPopulate()
-    console.log('JOIN', this.iamPlayer(req).name, req.session.userId)
-    this.changeStake(req,0);
-
     if (Games[this.module].canJoin(this, req)) {
+        this.players.push(req.session.userId);
+        await this.populate('players', ['name', 'photo', 'realBalance', 'virtualBalance']).execPopulate()
+        console.log('JOIN', this.iamPlayer(req).name, req.session.userId)
+        this.changeStake(req, 0);
         const canPay = this.fundStake(req);
         if (canPay.error) {
             console.log('Join error:', canPay);
@@ -85,6 +84,7 @@ modelSchema.methods.doModelJoin = async function (req) {
         Games[this.module].onJoin(this, req);
         if (req.body.bet) await this.doModelBet(req);
     } else {
+        console.log('WAIT LIST')
         this.waitList.push(req.session.userId);
     }
     return this.save();
@@ -99,8 +99,24 @@ modelSchema.methods.iamPlayer = function (req) {
     return this.players.find(p => p.equals(req.session.userId));
 }
 
+modelSchema.methods.finish = async function (req) {
+    const bank = Games[this.module].getBank(this)
+    for (const p of this.winners) {
+        p[`${this.type}Balance`] += bank / this.winners.length;
+    }
+}
 
 modelSchema.statics.modules = Object.keys(Games)
+
+modelSchema.statics.clearGames = function () {
+    this.find({activePlayerTime: {$lt: moment().unix() - process.env.GAME_TURN_TIME}})
+        .then(async games => {
+            for (const g of games) {
+                Games[g.module].doFold(g);
+                await g.save();
+            }
+        })
+}
 
 modelSchema.statics.start = async function (req) {
     const {module, type} = req.body;
