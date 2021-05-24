@@ -26,16 +26,15 @@ const PokerApi = {
     async newWallet(userId) {
         const user = await Mongoose.user.findById(userId)
         user.pokerWallet = await MinterApi.newWallet('poker', '', userId);
-        ;
         await user.save()
         return user;
     },
 
     _cards: {suits: ['S', 'C', 'D', 'H'], values: ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']},
 
-    d: ['D5', 'CK', 'D8', 'C5', 'C2'],
+    d: ['D5', 'CK', 'DK', 'C5', 'CA'],
     u: ['H6', 'D10'],
-    o: ['S3', 'SK'],
+    o: ['S3', 'SQ'],
 
     get _deckCheck() {
         const deck = this.o.concat(this.u).concat(this.d);

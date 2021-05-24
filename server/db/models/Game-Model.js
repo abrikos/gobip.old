@@ -43,6 +43,11 @@ modelSchema.methods.fundStake = function (req) {
 
 modelSchema.methods.doModelBet = async function (req) {
     const bet = req.body.bet * 1;
+    if(this.winners.length){
+        const message = 'Game ended'
+        console.log(message);
+        throw {error:500, message}
+    }
     await this.populate('players', ['name', 'photo', 'realBalance', 'virtualBalance']).execPopulate()
     console.log('BET', this.iamPlayer(req).name, bet)
     if (!this.activePlayer.equals(req.session.userId)) {
@@ -99,20 +104,27 @@ modelSchema.methods.iamPlayer = function (req) {
     return this.players.find(p => p.equals(req.session.userId));
 }
 
-modelSchema.methods.finish = async function (req) {
+modelSchema.methods.finish = function () {
     const bank = Games[this.module].getBank(this)
     for (const p of this.winners) {
         p[`${this.type}Balance`] += bank / this.winners.length;
     }
 }
 
+modelSchema.methods.reload = function () {
+    this.data = Games[this.module].defaultData;
+    this.activePlayerTime = 0;
+    this.activePlayerIdx = 0;
+}
+
 modelSchema.statics.modules = Object.keys(Games)
 
 modelSchema.statics.clearGames = function () {
-    this.find({activePlayerTime: {$lt: moment().unix() - process.env.GAME_TURN_TIME}})
+    this.find({activePlayerTime: {$lt: moment().unix() - process.env.GAME_TURN_TIME, $gt:0}})
         .then(async games => {
             for (const g of games) {
                 Games[g.module].doFold(g);
+                this.activePlayerTime = moment().unix();
                 await g.save();
             }
         })

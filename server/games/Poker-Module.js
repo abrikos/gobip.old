@@ -51,10 +51,10 @@ const PokerModule = {
         return Object.values(bets).reduce((a, b) => a + b, 0);
     },
 
-    getBank(game){
+    getBank(game) {
         let bank = 0;
-        for(const round of game.data.bets){
-            bank +=this._sumBets(round)
+        for (const round of game.data.bets) {
+            bank += this._sumBets(round)
         }
         return bank;
     },
@@ -74,18 +74,26 @@ const PokerModule = {
         if ((this._isCall(data) && this._betsCount(data) > 1) || this._bigBlindCheck(game, data, req)) {
             game.activePlayerIdx = 0;
             data.round++;
-            this._fillDesk(game, data);
-            /*for (const p of game.players.filter(p => !game.waitList.includes(p.id))) {
-                data.bets[data.round][p.id] = 0;
-            }*/
             console.log('======== NEW ROUND ', this._roundName(data), data.round)
             data.roundName = this._roundName(data);
-            if (data.round >= 4) {
-                data.finish = true;
+            if (data.round > 4) {
+                console.log('FINISH');
+                let max = 0;
+                for (const c in data.hands) {
+                    const h = data.hands[c];
+                    const res = PokerApi.calc(h, data.desk);
+                    if (res.sum > max) max = res.sum;
+                    data.results[c] = res;
+                }
+                game.winners = Object.keys(data.results).filter(k => data.results[k].sum >= max);
+                console.log(game.winners)
+                game.finish();
+            } else {
+                this._fillDesk(game, data);
             }
-        }else if(data.round===0 && game.activePlayerIdx===1) {
+        } else if (data.round === 0 && game.activePlayerIdx === 1) {
             game.activePlayerIdx = 1;
-        }else{
+        } else {
             game.activePlayerIdx++;
             if (game.activePlayerIdx >= game.players.length && game.players.length >= 2) {
                 game.activePlayerIdx = 0;
@@ -95,9 +103,9 @@ const PokerModule = {
         return {}
     },
 
-    doFold(game){
-        game.waitList.push(game.players.splice(game.activePlayerIdx,1));
-        if(game.players.length===1){
+    doFold(game) {
+        game.waitList.push(game.players.splice(game.activePlayerIdx, 1));
+        if (game.players.length === 1) {
             game.winners = game.players;
             game.finish()
         }

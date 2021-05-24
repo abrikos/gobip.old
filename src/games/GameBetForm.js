@@ -32,6 +32,7 @@ export default function GameBetForm(props) {
             .then(props.onBet)
     }
 
+    if(game.winners.length || (props.store.authenticatedUser && props.store.authenticatedUser.id === game.activePlayer.id)) return <div/>
     return (
         <Form onSubmit={doBet} className="d-flex">
             {/*{game.data.betActions && game.data.betActions.includes('check') && <Button onClick={doCheck}>Check</Button>}*/}

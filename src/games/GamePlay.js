@@ -30,11 +30,11 @@ export default function GamePlay(props){
             <h1>PLAY {game.type} {game.module} "{game.name}"</h1>
             <GameUserInfo userInfo={userInfo} type={game.type} {...props}/>
             <hr/>
-            {game.module === 'RoPaSci' && <RoPaSci game={game} {...props}/>}
-            {game.module === 'Reversi' && <Reversi game={game} {...props}/>}
-            {game.module === 'Dices' && <Dices game={game} {...props}/>}
-            {game.module === 'Poker' && <Poker game={game} {...props}/>}
-            {props.store.authenticatedUser && props.store.authenticatedUser.id === game.activePlayer.id &&  <GameBetForm userInfo={userInfo} game={game} {...props}/>}
+            {game.module === 'RoPaSci' && <RoPaSci game={game} userInfo={userInfo} {...props}/>}
+            {game.module === 'Reversi' && <Reversi game={game} userInfo={userInfo} {...props}/>}
+            {game.module === 'Dices' && <Dices game={game} userInfo={userInfo} {...props}/>}
+            {game.module === 'Poker' && <Poker game={game} userInfo={userInfo} {...props}/>}
+            <GameBetForm userInfo={userInfo} game={game} {...props}/>
         </div>
     )
 }
