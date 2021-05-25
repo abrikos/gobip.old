@@ -42,11 +42,9 @@ module.exports.controller = function (app) {
         await game.doModelJoin(req);
         //console.log('....... Active player:', game.activePlayer.name)
         await doBet(game, 10, USER2)
-        await doBet(game, 20, USER3)
-        await doBet(game, 0, USER1)
-        await doBet(game, 10, USER1)
-        await doBet(game, 20, USER2)
         await doBet(game, 30, USER3)
+        await doBet(game, -1, USER1)
+
         console.log(game.data.results)
         Mongoose.game.findOne().populate('players').sort({createdAt:-1}).then(r=>console.log('FIND DATA',r.stakes))
 

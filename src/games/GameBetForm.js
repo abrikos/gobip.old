@@ -3,7 +3,7 @@ import React, {useState} from "react";
 
 export default function GameBetForm(props) {
     const {userInfo, game, callBet} = props;
-    const [value, setValue] = useState(game.data.minBet)
+    const [value, setValue] = useState(game.maxBet*1)
     const balance = userInfo[`${game.type}Balance`]
 
 
@@ -36,20 +36,20 @@ export default function GameBetForm(props) {
     return (
         <Form onSubmit={doBet} className="d-flex">
             {/*{game.data.betActions && game.data.betActions.includes('check') && <Button onClick={doCheck}>Check</Button>}*/}
-            {!game.maxBet && <Button onClick={doCheck} variant="default">Check</Button>}
-            {callBet && <Button onClick={doCall} variant="success">Call {callBet}</Button>}
+            {!game.maxBet && <Button onClick={doCheck} variant="success">Check</Button>}
+            {!!callBet && <Button onClick={doCall} variant="success">Call&nbsp;{callBet}</Button>}
             <InputGroup>
                 <InputGroup.Prepend>
                     <Button onClick={()=>setValue(value+50)}>+50</Button>
                 </InputGroup.Prepend>
-                <FormControl name="bet" value={value} onChange={e=>setValue(e.target.value * 1)} type="number" min={game.minBet} max={balance}/>
+                <FormControl name="bet" value={value} onChange={e=>setValue(e.target.value * 1)} type="number" min={game.maxBet} max={balance}/>
                 <InputGroup.Append>
                     <Button type="submit" >Bet</Button>
                 </InputGroup.Append>
             </InputGroup>
 
 
-            {/*{game.availableActions.includes('fold') && <Button variant="danger" onClick={doFold}>Fold</Button>}*/}
+            {game.maxBet && <Button variant="danger" onClick={doFold}>Fold</Button>}
         </Form>
     )
 }

@@ -70,10 +70,12 @@ const PokerModule = {
         const data = game.data;
         const maxBet = Math.max.apply(null, Object.values(data.bets[data.round]));
         const beforeBet = data.bets[data.round][req.session.userId];
-        if (!beforeBet) data.bets[data.round][req.session.userId] = 0;
-        data.bets[data.round][req.session.userId] += req.body.bet * 1;
-        if (data.bets[data.round][req.session.userId] < maxBet && !(game.activePlayerIdx === 1 && data.round === 0))
-            return {error: 'Bet too small. Min: ' + (maxBet - beforeBet) + ' Curr: ' + data.bets[data.round][req.session.userId]}
+        if(req.body.bet>=0) {
+            if (!beforeBet) data.bets[data.round][req.session.userId] = 0;
+            data.bets[data.round][req.session.userId] += req.body.bet * 1;
+            if (data.bets[data.round][req.session.userId] < maxBet && !(game.activePlayerIdx === 1 && data.round === 0))
+                return {error: 'Bet too small. Min: ' + (maxBet - beforeBet) + ' Curr: ' + data.bets[data.round][req.session.userId]}
+        }
         if ((this._isCall(data) && this._betsCount(data) > 1) || this._bigBlindCheck(game, data, req)) {
             game.activePlayerIdx = 0;
             data.round++;
@@ -94,7 +96,7 @@ const PokerModule = {
                 if (winners.length > 1)
                     winners = winners.filter(k => data.results[k].sum === maxSum);
                 game.winners = winners;
-                game.finish();
+                game.payToWInners();
             } else {
                 this._fillDesk(game, data);
             }
@@ -109,14 +111,6 @@ const PokerModule = {
         }
         game.data = data;
         return {}
-    },
-
-    doFold(game) {
-        game.waitList.push(game.players.splice(game.activePlayerIdx, 1));
-        if (game.players.length === 1) {
-            game.winners = game.players;
-            game.finish()
-        }
     },
 
     adaptGameForClients(game, req) {
