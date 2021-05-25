@@ -32,9 +32,9 @@ const PokerApi = {
 
     _cards: {suits: ['S', 'C', 'D', 'H'], values: ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']},
 
-    d: ['D5', 'CK', 'DK', 'C5', 'CA'],
-    u: ['H6', 'D10'],
-    o: ['S3', 'SQ'],
+    d: ['C9', 'C10', 'CJ', 'CQ', 'S9'],
+    u: ['C2', 'CK'],
+    o: ['C8', 'H5'],
 
     get _deckCheck() {
         const deck = this.o.concat(this.u).concat(this.d);
@@ -64,8 +64,8 @@ const PokerApi = {
 
     randomSet(cards, count) {
         const set = []
-        //const deck = this._deckCheck;
-        const deck = this._deckRandom;
+        const deck = this._deckCheck;
+        //const deck = this._deckRandom;
         const restDeck = deck.filter(d => !cards.map(c => c.name).includes(d.name))
         for (let i = 0; i < count; i++) {
             set.push(restDeck[i])
@@ -80,6 +80,8 @@ const PokerApi = {
             if (flush && flush.straight) return flush;
             const care = this._getByValues(4, sorted);
             if (care) return care;
+            const fullhouse = this._getFullHouse(sorted);
+            if (fullhouse) return fullhouse;
             if (flush) return flush;
             const straight = this._getStraight(sorted);
             if (straight) return straight;
@@ -90,7 +92,7 @@ const PokerApi = {
             const pair = this._getByValues(2, sorted);
             if (pair) return pair;
             return this._getHighCard(sorted);
-        }catch (e) {
+        } catch (e) {
             return e
         }
     },
@@ -115,6 +117,16 @@ const PokerApi = {
         if (combination.length !== 4) return;
         combination.push(kickers[0])
         return combination && {combination, sum: this._combinationSum(combination), name: "Two pairs", priority: 2.5}
+    },
+
+    _getFullHouse: function (sorted) {
+        const combination = [];
+        for (const s of sorted) {
+            //if (combination.length === 4) break;
+            //console.log('zzzzzzz',s, sorted.filter(s2 => s2.idx === s.idx))
+            if (sorted.filter(s2 => s2.idx === s.idx).length >= 2) combination.push(s)
+        }
+        return combination.length === 5 && {combination, sum: this._combinationSum(combination), name: "Full house", priority: 6.5}
     },
 
 

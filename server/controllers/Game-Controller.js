@@ -51,7 +51,7 @@ module.exports.controller = function (app) {
         await doBet(game, 0, USER2)
         //await doBet(game, 0, USER1)
         //await doBet(game, 0, USER2)
-        console.log(game.stakes)
+        console.log(game.data.results)
         Mongoose.game.findOne().populate('players').sort({createdAt:-1}).then(r=>console.log('FIND DATA',r.stakes))
 
     }

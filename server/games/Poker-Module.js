@@ -78,15 +78,19 @@ const PokerModule = {
             data.roundName = this._roundName(data);
             if (data.round > 4) {
                 console.log('FINISH');
-                let max = 0;
+                let maxPriority = 0;
+                let maxSum = 0;
                 for (const c in data.hands) {
                     const h = data.hands[c];
                     const res = PokerApi.calc(h, data.desk);
-                    if (res.sum > max) max = res.sum;
+                    if (res.priority > maxPriority) maxPriority = res.priority;
+                    if (res.sum > maxSum) maxSum = res.sum;
                     data.results[c] = res;
                 }
-                game.winners = Object.keys(data.results).filter(k => data.results[k].sum >= max);
-                console.log(game.winners)
+                let winners = Object.keys(data.results).filter(k => data.results[k].priority === maxPriority)
+                if (winners.length > 1)
+                    winners = winners.filter(k => data.results[k].sum === maxSum);
+                game.winners = winners;
                 game.finish();
             } else {
                 this._fillDesk(game, data);
