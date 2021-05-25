@@ -1,4 +1,4 @@
-import * as Cards from "../../pages/Poker/cards";
+import * as Cards from "./cards";
 import React from "react";
 
 export default function PokerCard(props) {

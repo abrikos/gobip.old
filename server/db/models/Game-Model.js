@@ -19,6 +19,7 @@ const modelSchema = new Schema({
         started: {type: Boolean, default: false},
         activePlayerIdx: {type: Number, default: 0},
         activePlayerTime: {type: Number, default: 0},
+        minBet: {type: Number, default: process.env.GAME_MIN_BET},
         //stakes: {type: Object, default: {}},
         history: [{type: Object}],
         //wallet: {type: mongoose.Schema.Types.ObjectId, ref: 'Wallet'},
@@ -139,6 +140,11 @@ modelSchema.statics.start = async function (req) {
 
     return g.save();
 }
+
+modelSchema.virtual('maxBet')
+    .get(function () {
+        return Games[this.module].getMaxBet(this);
+    });
 
 modelSchema.virtual('activePlayer')
     .get(function () {

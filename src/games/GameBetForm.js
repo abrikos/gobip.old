@@ -2,7 +2,7 @@ import {Button, Form, FormControl, InputGroup} from "react-bootstrap";
 import React, {useState} from "react";
 
 export default function GameBetForm(props) {
-    const {userInfo, game} = props;
+    const {userInfo, game, callBet} = props;
     const [value, setValue] = useState(game.data.minBet)
     const balance = userInfo[`${game.type}Balance`]
 
@@ -23,7 +23,7 @@ export default function GameBetForm(props) {
     }
 
     function doCall() {
-        props.store.api(`/game/bet/${game.id}`, {bet: game.minBet})
+        props.store.api(`/game/bet/${game.id}`, {bet: callBet})
             .then(props.onBet)
     }
 
@@ -32,16 +32,17 @@ export default function GameBetForm(props) {
             .then(props.onBet)
     }
 
-    if(game.winners.length || (props.store.authenticatedUser && props.store.authenticatedUser.id === game.activePlayer.id)) return <div/>
+    if(game.winners.length || !(props.store.authenticatedUser && props.store.authenticatedUser.id === game.activePlayer.id)) return <div/>
     return (
         <Form onSubmit={doBet} className="d-flex">
             {/*{game.data.betActions && game.data.betActions.includes('check') && <Button onClick={doCheck}>Check</Button>}*/}
-            <Button onClick={doCall} variant="success">Call</Button>
+            {!game.maxBet && <Button onClick={doCheck} variant="default">Check</Button>}
+            {callBet && <Button onClick={doCall} variant="success">Call {callBet}</Button>}
             <InputGroup>
                 <InputGroup.Prepend>
                     <Button onClick={()=>setValue(value+50)}>+50</Button>
                 </InputGroup.Prepend>
-                <FormControl name="bet" value={value} onChange={e=>setValue(e.target.value * 1)} type="number" min={game.data.minBet} max={balance}/>
+                <FormControl name="bet" value={value} onChange={e=>setValue(e.target.value * 1)} type="number" min={game.minBet} max={balance}/>
                 <InputGroup.Append>
                     <Button type="submit" >Bet</Button>
                 </InputGroup.Append>

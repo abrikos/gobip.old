@@ -1,10 +1,11 @@
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import RoPaSci from "./RoPaSci/RoPaSci";
 import Reversi from "./Reversi/Reversi";
 import Dices from "./Dices/Dices";
 import GameUserInfo from "./GameUserInfo";
 import GameBetForm from "./GameBetForm";
 import Poker from "./Poker/Poker";
+import UserAvatar from "../pages/cabinet/UserAvatar";
 
 export default function GamePlay(props){
     const [game,setGame] = useState()
@@ -35,6 +36,9 @@ export default function GamePlay(props){
             {game.module === 'Dices' && <Dices game={game} userInfo={userInfo} {...props}/>}
             {game.module === 'Poker' && <Poker game={game} userInfo={userInfo} {...props}/>}
             <GameBetForm userInfo={userInfo} game={game} {...props}/>
+            {!!game.waitList.length && <div>Wait list
+                {game.waitList.map(p => <UserAvatar key={p.id} {...p}/>)}
+            </div>}
         </div>
     )
 }

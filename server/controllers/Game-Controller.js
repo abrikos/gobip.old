@@ -3,7 +3,6 @@ import passportLib from 'server/lib/passport';
 import passport from "../lib/passport";
 import MinterApi from "../lib/MinterApi";
 import PokerApi from "../games/PokerApi";
-import PokerGame from "../lib/PokerGame";
 
 //Mongoose.User.find().then(console.log)
 //Mongoose.User.updateMany({},{group:null}).then(console.log).catch(console.error)
@@ -31,26 +30,23 @@ module.exports.controller = function (app) {
         }
         //START
         let game = await Mongoose.game.start(req);
+
         //JOIN small blind
         req.session.userId = USER2
         await game.doModelJoin(req);
-        await doBet(game, 10, USER2)
+
 
         //Join player 3
         req.session.userId = process.env.USER3
         delete req.body.bet;
-        //await game.doModelJoin(req);
+        await game.doModelJoin(req);
         //console.log('....... Active player:', game.activePlayer.name)
-
+        await doBet(game, 10, USER2)
+        await doBet(game, 20, USER3)
         await doBet(game, 0, USER1)
         await doBet(game, 10, USER1)
-        await doBet(game, 10, USER2)
-        await doBet(game, 0, USER1)
-        await doBet(game, 0, USER2)
-        await doBet(game, 0, USER1)
-        await doBet(game, 0, USER2)
-        //await doBet(game, 0, USER1)
-        //await doBet(game, 0, USER2)
+        await doBet(game, 20, USER2)
+        await doBet(game, 30, USER3)
         console.log(game.data.results)
         Mongoose.game.findOne().populate('players').sort({createdAt:-1}).then(r=>console.log('FIND DATA',r.stakes))
 
@@ -67,6 +63,7 @@ module.exports.controller = function (app) {
         const promise = test ? Mongoose.game.findOne().sort({createdAt:-1}) :        Mongoose.game.findById(req.params.id);
         promise
             .populate('players', ['name','photo','realBalance','virtualBalance'])
+            .populate('waitList', ['name','photo','realBalance','virtualBalance'])
             .then(async r=> {
                 res.send(r.adaptGameForClients(req))
             })

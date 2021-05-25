@@ -10,7 +10,6 @@ const PokerModule = {
         bets: [{}, {}, {}, {}, {}, {}],
         results: {},
         betActions: ['call', 'bet', 'check', 'ford'],
-        minBet: process.env.GAME_MIN_BET,
         initialStake: 100
     },
     rounds: ['blinds', 'pre-flop', 'flop', 'turn', 'river', 'finish'],
@@ -19,11 +18,11 @@ const PokerModule = {
         const data = game.data;
         if (game.players.length === 1) {
             //BIG blind
-            req.body.bet = data.minBet * 2;
+            req.body.bet = game.minBet * 2;
             //console.log('BIG BLIND', req.body)
         } else if (game.players.length === 2) {
             //SMALL blind
-            req.body.bet = data.minBet * 1;
+            req.body.bet = game.minBet * 1;
             //console.log('SMALL BLIND', req.body)
         }
         data.bets[data.round][req.session.userId] = 0;
@@ -49,6 +48,10 @@ const PokerModule = {
 
     _sumBets(bets) {
         return Object.values(bets).reduce((a, b) => a + b, 0);
+    },
+
+    getMaxBet(game) {
+        return Math.max.apply(null,Object.values(game.data.bets[game.data.round]));
     },
 
     getBank(game) {
@@ -95,7 +98,8 @@ const PokerModule = {
             } else {
                 this._fillDesk(game, data);
             }
-        } else if (data.round === 0 && game.activePlayerIdx === 1) {
+        } else if (data.round === 0 && game.activePlayerIdx === 1 && game.players.length === 2) {
+            console.log('smmmm')
             game.activePlayerIdx = 1;
         } else {
             game.activePlayerIdx++;
@@ -116,13 +120,14 @@ const PokerModule = {
     },
 
     adaptGameForClients(game, req) {
-        return game;
+        //return game;
         const data = game.data;
         for (const k of Object.keys(data.hands)) {
             if (k !== req.session.userId) {
                 data.hands[k] = [0, 0]
             }
         }
+        data.desk = Array(data.desk.length).fill(0)
         //data.hands = data.hands.filter(h=>h[req.session.userId])
         //game.data.hands = game.data.hands.map(h=>h.userId===req.session.userId? h :[0,0])
         game.data = data;
