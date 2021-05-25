@@ -45,7 +45,7 @@ modelSchema.methods.fundStake = function (req) {
 modelSchema.methods.doModelBet = async function (req) {
     const bet = req.body.bet * 1;
     if (this.winners.length) {
-        const message = 'Game ended'
+        const message = 'Game ended ' + this.name
         console.log(message);
         throw {error: 500, message}
     }
@@ -55,32 +55,35 @@ modelSchema.methods.doModelBet = async function (req) {
         console.log('Not you turn');
         throw {error: 500, message: 'Not you turn'}
     }
-    if (bet < 0) {
-        this.doFold()
-    } else {
-        const betResult = Games[this.module].onBet(this, req);
-        if (betResult.error) {
-            console.log(betResult);
-            throw betResult
-        }
-        if (this.stakes[req.session.userId] < bet) {
-            const message = 'Stake too low';
-            console.log('model bet error:', message);
-            throw new Error(message);
-        }
-        this.changeStake(req, this.stakes[req.session.userId] - bet)
+    if (this.stakes[req.session.userId] < bet) {
+        const message = 'Stake too low';
+        console.log('model bet error:', message);
+        throw new Error(message);
     }
+    if(bet<0) this.doFold();
+    const betResult = Games[this.module].onBet(this, req);
+    if (betResult.error) {
+        console.log(betResult);
+        throw betResult
+    }
+    this.changeStake(req, this.stakes[req.session.userId] - bet)
+
     this.activePlayerTime = moment().unix();
     await this.save()
 }
 
 modelSchema.methods.doFold = function () {
     const spliced = this.players.splice(this.activePlayerIdx, 1);
+    if (!spliced[0]) {
+        this.delete();
+        return;
+    }
     this.waitList.push(spliced[0].id);
     if (this.players.length === 1) {
         this.winners = this.players;
         this.payToWInners()
     }
+    this.activePlayerTime = moment().unix();
 }
 
 modelSchema.methods.changeStake = function (req, amount) {
@@ -123,6 +126,7 @@ modelSchema.methods.payToWInners = function () {
     for (const p of this.winners) {
         p[`${this.type}Balance`] += bank / this.winners.length;
     }
+    this.activePlayerTime = 0;
 }
 
 modelSchema.methods.reload = function () {
@@ -133,13 +137,16 @@ modelSchema.methods.reload = function () {
 
 modelSchema.statics.modules = Object.keys(Games)
 
-modelSchema.statics.clearGames = function () {
+modelSchema.statics.timeFoldPlayers = function () {
     this.find({activePlayerTime: {$lt: moment().unix() - process.env.GAME_TURN_TIME, $gt: 0}})
         .then(async games => {
             for (const g of games) {
-                g.doFold();
-                this.activePlayerTime = moment().unix();
-                await g.save();
+                if (g.winners.length) continue;
+                const req = {
+                    session: {userId: g.players[g.activePlayerIdx]},
+                    body: {bet: -1}
+                };
+                await g.doModelBet(req);
             }
         })
 }
@@ -162,6 +169,11 @@ modelSchema.virtual('maxBet')
 modelSchema.virtual('activePlayer')
     .get(function () {
         return this.players[this.activePlayerIdx];
+    });
+
+modelSchema.virtual('timeLeft')
+    .get(function () {
+        return this.activePlayerTime + process.env.GAME_TURN_TIME * 1 - moment().unix();
     });
 
 modelSchema.virtual('link')

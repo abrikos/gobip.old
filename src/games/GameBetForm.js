@@ -3,7 +3,7 @@ import React, {useState} from "react";
 
 export default function GameBetForm(props) {
     const {userInfo, game, callBet} = props;
-    const [value, setValue] = useState(game.maxBet*1)
+    const [value, setValue] = useState(callBet || game.minBet)
     const balance = userInfo[`${game.type}Balance`]
 
 

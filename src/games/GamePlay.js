@@ -13,7 +13,7 @@ export default function GamePlay(props){
 
     useEffect(() => {
         loadGame();
-        const timer = setInterval(loadGame, 10000)
+        const timer = setInterval(loadGame, 1000)
         return () => clearInterval(timer);
     }, [])
 
@@ -31,10 +31,10 @@ export default function GamePlay(props){
             <h1>PLAY {game.type} {game.module} "{game.name}"</h1>
             <GameUserInfo userInfo={userInfo} type={game.type} {...props}/>
             <hr/>
-            {game.module === 'RoPaSci' && <RoPaSci game={game} userInfo={userInfo} {...props}/>}
-            {game.module === 'Reversi' && <Reversi game={game} userInfo={userInfo} {...props}/>}
-            {game.module === 'Dices' && <Dices game={game} userInfo={userInfo} {...props}/>}
-            {game.module === 'Poker' && <Poker game={game} userInfo={userInfo} {...props}/>}
+            {game.module === 'RoPaSci' && <RoPaSci game={game} userInfo={userInfo} onBet={loadGame} {...props}/>}
+            {game.module === 'Reversi' && <Reversi game={game} userInfo={userInfo} onBet={loadGame} {...props}/>}
+            {game.module === 'Dices' && <Dices game={game} userInfo={userInfo} onBet={loadGame} {...props}/>}
+            {game.module === 'Poker' && <Poker game={game} userInfo={userInfo} onBet={loadGame} {...props}/>}
             <GameBetForm userInfo={userInfo} game={game} {...props}/>
             {!!game.waitList.length && <div>Wait list
                 {game.waitList.map(p => <UserAvatar key={p.id} {...p}/>)}

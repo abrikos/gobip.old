@@ -6,9 +6,14 @@ import PokerApi from "../games/PokerApi";
 
 //Mongoose.User.find().then(console.log)
 //Mongoose.User.updateMany({},{group:null}).then(console.log).catch(console.error)
-
+//Mongoose.game.deleteMany({}).then(console.log)
+const CronJob = require('cron').CronJob;
 
 module.exports.controller = function (app) {
+    const c2 = new CronJob('* * * * * *', async function () {
+        Mongoose.game.timeFoldPlayers();
+    }, null, true, 'America/Los_Angeles')
+
     const test = true;
     doTest();
     //Mongoose.game.clearGames();
@@ -43,7 +48,8 @@ module.exports.controller = function (app) {
         //console.log('....... Active player:', game.activePlayer.name)
         await doBet(game, 10, USER2)
         await doBet(game, 30, USER3)
-        await doBet(game, -1, USER1)
+        await doBet(game, -10, USER1)
+        await doBet(game, -10, USER2)
 
         console.log(game.data.results)
         Mongoose.game.findOne().populate('players').sort({createdAt:-1}).then(r=>console.log('FIND DATA',r.stakes))

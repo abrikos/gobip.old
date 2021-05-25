@@ -18,7 +18,7 @@ export default function Poker(props) {
                 Bet: {game.data.bets[game.data.round][p.id]}
 
                 {game.activePlayer.id === p.id && <GameBetForm callBet={game.maxBet - game.data.bets[game.data.round][p.id]} userInfo={userInfo} game={game} {...props}/>}
-                {game.activePlayer.id === p.id && <span> TURN</span>}
+                {game.activePlayer.id === p.id && <span> TURN: {game.timeLeft}</span>}
                 {!!game.winners.length && <div>{game.data.results[p.id].name}</div>}
                 {game.winners.includes(p.id) && 'WINNER'}
             </div>
