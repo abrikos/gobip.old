@@ -124,7 +124,9 @@ modelSchema.methods.iamPlayer = function (req) {
 modelSchema.methods.payToWInners = function () {
     const bank = Games[this.module].getBank(this)
     for (const p of this.winners) {
-        p[`${this.type}Balance`] += bank / this.winners.length;
+        const amount = bank / this.winners.length;
+        console.log('winner',p.name, amount)
+        p[`${this.type}Balance`] += amount;
     }
     this.activePlayerTime = 0;
 }
@@ -142,6 +144,7 @@ modelSchema.statics.timeFoldPlayers = function () {
         .then(async games => {
             for (const g of games) {
                 if (g.winners.length) continue;
+                if(!g.players.length) continue;
                 const req = {
                     session: {userId: g.players[g.activePlayerIdx]},
                     body: {bet: -1}
@@ -160,6 +163,11 @@ modelSchema.statics.start = async function (req) {
 
     return g.save();
 }
+
+modelSchema.virtual('getBank')
+    .get(function () {
+        return Games[this.module].getBank(this);
+    });
 
 modelSchema.virtual('maxBet')
     .get(function () {

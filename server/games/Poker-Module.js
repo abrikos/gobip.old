@@ -101,10 +101,10 @@ const PokerModule = {
                 this._fillDesk(game, data);
             }
         } else if (data.round === 0 && game.activePlayerIdx === 1 && game.players.length === 2) {
-            console.log('smmmm')
+            console.log('small blind')
             game.activePlayerIdx = 1;
         } else {
-            game.activePlayerIdx++;
+            if(req.body.bet>=0) game.activePlayerIdx++;
             if (game.activePlayerIdx >= game.players.length && game.players.length >= 2) {
                 game.activePlayerIdx = 0;
             }
@@ -125,14 +125,6 @@ const PokerModule = {
         //data.hands = data.hands.filter(h=>h[req.session.userId])
         //game.data.hands = game.data.hands.map(h=>h.userId===req.session.userId? h :[0,0])
         game.data = data;
-    },
-
-    _calcBank(data) {
-        let bank = 0;
-        for (const b of data.bets) {
-            bank += this._sumBets(b);
-        }
-        return bank;
     },
 
     _roundName(data) {
