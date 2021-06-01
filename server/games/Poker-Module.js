@@ -56,6 +56,7 @@ const PokerModule = {
 
     getBank(game) {
         let bank = 0;
+        if(!game.data.bets)  return;
         for (const round of game.data.bets) {
             bank += this._sumBets(round)
         }

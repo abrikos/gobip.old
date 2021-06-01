@@ -20,7 +20,7 @@ module.exports.controller = function (app) {
 
     async function doBet(game, bet,userId){
         const req = {body:{bet}, session:{userId}};
-        await game.doModelBet(req);
+        return game.doModelBet(req);
     }
 
     async function doTest(){
@@ -48,13 +48,15 @@ module.exports.controller = function (app) {
         //console.log('....... Active player:', game.activePlayer.name)
         await doBet(game, 10, USER2)
         await doBet(game, 30, USER3)
-        await doBet(game, -10, USER1)
-        await doBet(game, 10, USER2)
+        await doBet(game, 10, USER1)
+        await doBet(game, 40, USER2)
 
-        console.log('RESULTS',game.data.results)
-        Mongoose.game.findOne().populate('players').sort({createdAt:-1}).then(r=>console.log('FIND DATA',r.stakes))
+
+        Mongoose.game.findOne().populate('players').sort({createdAt:-1}).then(r=>console.log('FIND DATA',r.data.bets))
 
     }
+    //Mongoose.game.findById('60b5c1549388f9bd6a527225').then(console.log)
+    Mongoose.game.deleteMany({}).then(console.log)
     //Mongoose.user.find().then(r=>console.log(r.map(r=>r.id)))
 
     app.post('/api/game/start', passportLib.isLogged, (req, res) => {
@@ -78,6 +80,7 @@ module.exports.controller = function (app) {
     app.post('/api/game/modules',  (req, res) => {
         res.send(Mongoose.game.modules)
     });
+
 
     app.post('/api/game/list',  (req, res) => {
         const {module} = req.body;

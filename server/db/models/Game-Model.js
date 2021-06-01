@@ -21,6 +21,7 @@ const modelSchema = new Schema({
         activePlayerTime: {type: Number, default: 0},
         minBet: {type: Number, default: process.env.GAME_MIN_BET},
         //stakes: {type: Object, default: {}},
+        //data: {type: Object, default: {}},
         history: [{type: Object}],
         //wallet: {type: mongoose.Schema.Types.ObjectId, ref: 'Wallet'},
     },
@@ -67,9 +68,9 @@ modelSchema.methods.doModelBet = async function (req) {
         throw betResult
     }
     this.changeStake(req, this.stakes[req.session.userId] - bet)
-
     this.activePlayerTime = moment().unix();
-    await this.save()
+    console.log('RESULTS', this.data.results)
+    return this.save()
 }
 
 modelSchema.methods.doFold = function () {
@@ -163,20 +164,23 @@ modelSchema.statics.start = async function (req) {
 
     return g.save();
 }
+/*
+modelSchema.methods.getBank = function (){
+    return Games[this.module].getBank(this);
+}
+*/
 
-modelSchema.virtual('getBank')
-    .get(function () {
-        return Games[this.module].getBank(this);
-    });
-
-modelSchema.virtual('maxBet')
-    .get(function () {
+/*
+modelSchema.methods.maxBet= function () {
+        console.log('zzzzzzz',Object.keys(this))
         return Games[this.module].getMaxBet(this);
-    });
+    };
+*/
 
 modelSchema.virtual('activePlayer')
     .get(function () {
-        return this.players[this.activePlayerIdx];
+
+        return this.players ? this.players[this.activePlayerIdx] : {};
     });
 
 modelSchema.virtual('timeLeft')
@@ -189,6 +193,7 @@ modelSchema.virtual('link')
         return `/game/${this.module}/${this.id}`;
     });
 
+
 modelSchema.virtual('data')
     .get(function () {
         return this.dataStr ? JSON.parse(this.dataStr) : {};
@@ -197,6 +202,8 @@ modelSchema.virtual('data')
         this.dataStr = JSON.stringify(v);
     });
 
+
+
 modelSchema.virtual('stakes')
     .get(function () {
         return this.stakesStr ? JSON.parse(this.stakesStr) : {};
@@ -204,6 +211,7 @@ modelSchema.virtual('stakes')
     .set(function (v) {
         this.stakesStr = JSON.stringify(v);
     });
+
 
 modelSchema.virtual('date')
     .get(function () {
