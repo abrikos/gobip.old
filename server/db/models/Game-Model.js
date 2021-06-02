@@ -61,7 +61,7 @@ modelSchema.methods.doModelBet = async function (req) {
         console.log('model bet error:', message);
         throw new Error(message);
     }
-    if(bet<0) this.doFold();
+    if(bet<0) await this.doFold();
     const betResult = Games[this.module].onBet(this, req);
     if (betResult.error) {
         console.log(betResult);
@@ -73,7 +73,7 @@ modelSchema.methods.doModelBet = async function (req) {
     return this.save()
 }
 
-modelSchema.methods.doFold = function () {
+modelSchema.methods.doFold = async function () {
     const spliced = this.players.splice(this.activePlayerIdx, 1);
     if (!spliced[0]) {
         this.delete();
@@ -82,11 +82,12 @@ modelSchema.methods.doFold = function () {
     this.waitList.push(spliced[0].id);
     if (this.players.length === 1) {
         this.winners = this.players;
-        this.payToWInners()
-            .catch(e=>console.log(e))
+        await this.payToWInners()
+
     }else {
         this.activePlayerTime = moment().unix();
     }
+    await this.save();
 }
 
 modelSchema.methods.changeStake = function (req, amount) {
