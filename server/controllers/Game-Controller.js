@@ -55,8 +55,9 @@ module.exports.controller = function (app) {
         Mongoose.game.findOne().populate('players').sort({createdAt:-1}).then(r=>console.log('FIND DATA',r.data.bets))
 
     }
+
     //Mongoose.game.findById('60b5c1549388f9bd6a527225').then(console.log)
-    Mongoose.game.deleteMany({}).then(console.log)
+    //Mongoose.game.deleteMany({}).then(console.log)
     //Mongoose.user.find().then(r=>console.log(r.map(r=>r.id)))
 
     app.post('/api/game/start', passportLib.isLogged, (req, res) => {

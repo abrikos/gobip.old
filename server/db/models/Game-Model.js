@@ -20,7 +20,7 @@ const modelSchema = new Schema({
         activePlayerIdx: {type: Number, default: 0},
         activePlayerTime: {type: Number, default: 0},
         minBet: {type: Number, default: process.env.GAME_MIN_BET},
-        //stakes: {type: Object, default: {}},
+        stakes2: {type: Object, default: {}},
         //data: {type: Object, default: {}},
         history: [{type: Object}],
         //wallet: {type: mongoose.Schema.Types.ObjectId, ref: 'Wallet'},
@@ -46,7 +46,7 @@ modelSchema.methods.fundStake = function (req) {
 modelSchema.methods.doModelBet = async function (req) {
     const bet = req.body.bet * 1;
     if (this.winners.length) {
-        const message = 'Game ended ' + this.name
+        const message = `Cannot bet. There is winners "${this.name}"`
         console.log(message);
         throw {error: 500, message}
     }
@@ -83,8 +83,10 @@ modelSchema.methods.doFold = function () {
     if (this.players.length === 1) {
         this.winners = this.players;
         this.payToWInners()
+            .catch(e=>console.log(e))
+    }else {
+        this.activePlayerTime = moment().unix();
     }
-    this.activePlayerTime = moment().unix();
 }
 
 modelSchema.methods.changeStake = function (req, amount) {
@@ -122,20 +124,34 @@ modelSchema.methods.iamPlayer = function (req) {
     return this.players.find(p => p.equals(req.session.userId));
 }
 
-modelSchema.methods.payToWInners = function () {
+modelSchema.methods.payToWInners = async function () {
     const bank = Games[this.module].getBank(this)
     for (const p of this.winners) {
         const amount = bank / this.winners.length;
         console.log('winner',p.name, amount)
         p[`${this.type}Balance`] += amount;
     }
-    this.activePlayerTime = 0;
+    await this.reload();
 }
 
-modelSchema.methods.reload = function () {
+modelSchema.methods.reload = async function () {
+    this.history.push({data:this.data, winners:this.winners, date:new Date()});
+    this.winners = [];
     this.data = Games[this.module].defaultData;
+    await this.populate('waitList', ['name', 'photo', 'realBalance', 'virtualBalance']).execPopulate()
+    const players = this.players.concat(this.waitList);
+    players.push(players.shift());
+    console.log(players.map(p=>p.name))
+    this.players = [];
     this.activePlayerTime = 0;
     this.activePlayerIdx = 0;
+    for(const p of players){
+        const req = {
+            body:{},
+            session: {userId: p.id},
+        }
+        await this.doModelJoin(req)
+    }
 }
 
 modelSchema.statics.modules = Object.keys(Games)
