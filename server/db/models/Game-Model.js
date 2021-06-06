@@ -170,6 +170,7 @@ modelSchema.statics.timeFoldPlayers = function () {
                 await g.doModelBet(req);
             }
         })
+        .catch(console.log)
 }
 
 modelSchema.statics.start = async function (req) {
