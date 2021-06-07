@@ -1,6 +1,6 @@
 import Mongoose from "server/db/Mongoose";
 import passportLib from 'server/lib/passport';
-import params from "src/params";
+import MinterApi from "../lib/MinterApi";
 
 const nodemailer = require('nodemailer');
 const mailer = JSON.parse(process.env.mailer);
@@ -62,7 +62,7 @@ module.exports.controller = function (app) {
     });
 
     app.post('/api/params', (req, res) => {
-        res.send(params)
+        res.send(MinterApi.params)
     });
 
 

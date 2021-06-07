@@ -14,7 +14,7 @@ module.exports.controller = function (app) {
         Mongoose.game.timeFoldPlayers();
     }, null, true, 'America/Los_Angeles')
 
-    const test = true;
+    const test = false;
     doTest();
     //Mongoose.game.clearGames();
 
@@ -72,6 +72,7 @@ module.exports.controller = function (app) {
             .populate('players', ['name','photo','realBalance','virtualBalance'])
             .populate('waitList', ['name','photo','realBalance','virtualBalance'])
             .then(async r=> {
+
                 res.send(r.adaptGameForClients(req))
             })
             //.catch(e => {res.status(500).send(app.locals.adaptError(e))})

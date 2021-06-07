@@ -2,7 +2,29 @@ import axios from "axios";
 import Mongoose from "server/db/Mongoose";
 import {Minter, TX_TYPE} from "minter-js-sdk";
 import {generateWallet, walletFromMnemonic} from 'minterjs-wallet';
-import params from "src/params";
+const networks = {
+    main: {
+        url: 'https://api.minter.one',
+        coin: 'BIP',
+        explorer: 'https://explorer.minter.network/',
+        chainId: 1
+    },
+    test: {
+        url: 'https://node-api.testnet.minter.network',
+        coin: 'MNT',
+        explorer: 'https://explorer.testnet.minter.network/',
+        chainId: 2
+    }
+}
+
+const network = networks[process.env.NET];
+const params = {
+    network,
+    bannerPrice: process.env.BANNER_PRICE * 1,
+    mixerFee: process.env.MIXER_FEE * 1,
+    lotteryPrize: process.env.LOTTERY_PRISE * 1
+
+}
 
 const minter = new Minter({apiType: 'node', baseURL: `${params.network.url}/v2/`});
 const obj = {

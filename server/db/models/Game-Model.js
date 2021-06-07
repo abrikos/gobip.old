@@ -11,6 +11,7 @@ const modelSchema = new Schema({
         players: [{type: mongoose.Schema.Types.ObjectId, ref: 'User'}],
         waitList: [{type: mongoose.Schema.Types.ObjectId, ref: 'User'}],
         winners: [{type: mongoose.Schema.Types.ObjectId, ref: 'User'}],
+        autoFold: [{type: mongoose.Schema.Types.ObjectId, ref: 'User'}],
         name: String,
         module: String,
         type: String,
@@ -69,7 +70,6 @@ modelSchema.methods.doModelBet = async function (req) {
     }
     this.changeStake(req, this.stakes[req.session.userId] - bet)
     this.activePlayerTime = moment().unix();
-    console.log('RESULTS', this.data.results)
     return this.save()
 }
 
@@ -142,10 +142,10 @@ modelSchema.methods.reload = async function () {
     await this.populate('waitList', ['name', 'photo', 'realBalance', 'virtualBalance']).execPopulate()
     const players = this.players.concat(this.waitList);
     players.push(players.shift());
-    console.log(players.map(p=>p.name))
     this.players = [];
     this.activePlayerTime = 0;
     this.activePlayerIdx = 0;
+    this.waitList = [];
     for(const p of players){
         const req = {
             body:{},
@@ -167,10 +167,20 @@ modelSchema.statics.timeFoldPlayers = function () {
                     session: {userId: g.players[g.activePlayerIdx]},
                     body: {bet: -1}
                 };
+                g.autoFold.push(req.session.userId);
                 await g.doModelBet(req);
+                if(g.autoFold.filter(u=>u.equals(req.session.userId)).length>2){
+                    g.waitList = g.waitList.filter(u=>!u.equals(req.session.userId))
+                    g.autoFold = g.autoFold.filter(u=>!u.equals(req.session.userId))
+                    console.log('USER', req.session.userId)
+                    console.log('AUTOFOLD', g.autoFold)
+                    console.log('WAIT LIST', g.waitList)
+                    console.log('AUTOFOLD LENGTH', g.autoFold.filter(u=>u.equals(req.session.userId)).length)
+
+                    await g.save()
+                }
             }
         })
-        .catch(console.log)
 }
 
 modelSchema.statics.start = async function (req) {
