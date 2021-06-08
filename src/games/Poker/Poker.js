@@ -8,6 +8,7 @@ export default function Poker(props) {
     const {game, userInfo} = props;
     const myId = props.store.authenticatedUser && props.store.authenticatedUser.id
     function drawPlayer(p) {
+        //return <div>{p.id}</div>
         if(!game.data.hands[p.id]) game.data.hands[p.id] = [0,0]
         return <div key={p.id} className="row">
 
@@ -18,8 +19,8 @@ export default function Poker(props) {
                 MaxBet: {game.maxBet} <br/>
                 Bet: {game.data.bets[game.data.round][p.id]}
 
-                {game.activePlayer.id === p.id && <GameBetForm callBet={game.maxBet - game.data.bets[game.data.round][p.id]} userInfo={userInfo} game={game} {...props}/>}
-                {game.activePlayer.id === p.id && <span> TURN: {game.timeLeft}</span>}
+                {game.activePlayer && game.activePlayer.id === p.id && <GameBetForm callBet={game.maxBet - game.data.bets[game.data.round][p.id]} userInfo={userInfo} game={game} {...props}/>}
+                {game.activePlayer && game.activePlayer.id === p.id && <span> TURN: {game.timeLeft}</span>}
                 {!!game.winners.length && game.data.results && <div>{game.data.results[p.id].name}</div>}
                 {game.winners.includes(p.id) && 'WINNER'}
             </div>

@@ -52,6 +52,7 @@ modelSchema.methods.doModelBet = async function (req) {
         throw {error: 500, message}
     }
     await this.populate('players', ['name', 'photo', 'realBalance', 'virtualBalance']).execPopulate()
+    if(!this.iamPlayer(req)) return this;
     console.log('BET', this.iamPlayer(req).name, bet)
     if (!this.activePlayer.equals(req.session.userId)) {
         console.log('Not you turn');
@@ -161,6 +162,7 @@ modelSchema.statics.timeFoldPlayers = function () {
     this.find({activePlayerTime: {$lt: moment().unix() - process.env.GAME_TURN_TIME, $gt: 0}})
         .then(async games => {
             for (const g of games) {
+                if(g.players.length <2 || !g.players[g.activePlayerIdx]) continue
                 if (g.winners.length) continue;
                 if(!g.players.length) continue;
                 const req = {
@@ -170,13 +172,13 @@ modelSchema.statics.timeFoldPlayers = function () {
                 g.autoFold.push(req.session.userId);
                 await g.doModelBet(req);
                 if(g.autoFold.filter(u=>u.equals(req.session.userId)).length>2){
-                    g.waitList = g.waitList.filter(u=>!u.equals(req.session.userId))
-                    g.autoFold = g.autoFold.filter(u=>!u.equals(req.session.userId))
+                    g.players = g.players.filter(u=>u.equals(req.session.userId))
                     console.log('USER', req.session.userId)
                     console.log('AUTOFOLD', g.autoFold)
                     console.log('WAIT LIST', g.waitList)
                     console.log('AUTOFOLD LENGTH', g.autoFold.filter(u=>u.equals(req.session.userId)).length)
-
+                    g.waitList = g.waitList.filter(u=>!u.equals(req.session.userId))
+                    g.autoFold = g.autoFold.filter(u=>!u.equals(req.session.userId))
                     await g.save()
                 }
             }

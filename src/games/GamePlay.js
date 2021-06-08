@@ -20,8 +20,10 @@ export default function GamePlay(props){
     function loadGame(){
         props.store.api(`/game/play/${props.id}`,{},true)
             .then(setGame)
-        props.store.api('/game/cabinet/user/info', {}, true)
-            .then(setUserInfo)
+        if(props.authenticatedUser) {
+            props.store.api('/game/cabinet/user/info', {}, true)
+                .then(setUserInfo)
+        }
     }
 
     if(!game) return <div/>
