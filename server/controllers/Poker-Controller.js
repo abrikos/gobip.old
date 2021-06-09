@@ -8,7 +8,7 @@ const CronJob = require('cron').CronJob;
 module.exports.controller = function (app) {
 
     const c3 = new CronJob('* * * * * *', async function () {
-            await PokerGame.checkFold()
+            //await PokerGame.checkFold()
         }, null, true, 'America/Los_Angeles'
     )
 

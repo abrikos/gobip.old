@@ -46,19 +46,6 @@ module.exports.controller = function (app) {
             .then(r => res.send(r))
     });
 
-    app.post('/api/cabinet/mixer/wallet/withdraw/:id', passport.isLogged, (req, res) => {
-        Mongoose.wallet.findOne({_id:req.params.id, user: req.session.userId, type:'mixer'})
-            .populate('user')
-            .then(r => {
-                MinterApi.walletMoveFunds(r,r.user.address)
-                    .then(r=> {
-                        res.send(r)
-                    })
-                    .catch(e => {res.status(500).send(app.locals.adaptError(e))})
-            })
-            .catch(e => {res.status(500).send(app.locals.adaptError(e))})
-    });
-
     app.post('/api/mixer/total-amount', async (req, res) => {
         res.send({amount: await MixerApi.totalAmount()})
     });

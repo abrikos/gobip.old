@@ -6,6 +6,7 @@ import MixerApi from "server/lib/MixerApi";
 import CryptoApi from "../lib/CryptoApi";
 import BetApi from "../lib/BetApi";
 import PokerApi from "../games/PokerApi";
+import SwapBotApi from "../lib/SwapBotApi";
 
 const CronJob = require('cron').CronJob;
 
@@ -22,6 +23,7 @@ module.exports.controller = function (app) {
                 BannerApi.checkTransaction(tx);
                 UnboundApi.checkTransaction(tx);
                 MixerApi.checkTransaction(tx);
+                SwapBotApi.checkTransaction(tx);
                 MinterApi.checkWithdrawals(tx);
             }
             PokerApi.setBalances()

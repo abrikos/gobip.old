@@ -1,11 +1,25 @@
 import Mongoose from "server/db/Mongoose";
 import passportLib from 'server/lib/passport';
+import passport from "../lib/passport";
+import MinterApi from "../lib/MinterApi";
 
 //Mongoose.User.find().then(console.log)
 //Mongoose.User.updateMany({},{group:null}).then(console.log).catch(console.error)
 
 
 module.exports.controller = function (app) {
+    app.post('/api/cabinet/:type/wallet/withdraw/:id', passport.isLogged, (req, res) => {
+        Mongoose.wallet.findOne({_id:req.params.id, user: req.session.userId, type:req.params.type})
+            .populate('user')
+            .then(r => {
+                MinterApi.walletMoveFunds(r,r.user.address)
+                    .then(r=> {
+                        res.send(r)
+                    })
+                    .catch(e => {res.status(500).send(app.locals.adaptError(e))})
+            })
+            .catch(e => {res.status(500).send(app.locals.adaptError(e))})
+    });
 
     app.post('/api/cabinet/user', passportLib.isLogged, (req, res) => {
         Mongoose.user.findById(req.session.userId)
@@ -13,6 +27,7 @@ module.exports.controller = function (app) {
                 res.send(user)
             })
     });
+
 
     app.post('/api/cabinet/user/balance', passportLib.isLogged, (req, res) => {
         Mongoose.user.findById(req.session.userId)

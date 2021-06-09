@@ -2,7 +2,19 @@ import React from "react";
 import "themes/main/theme-main.sass"
 import ThemeMainTopMenu from "./ThemeMainTopMenu";
 import {A} from "hookrouter";
-import {faBlender, faCoins, faCrown, faGamepad, faHeart, faHome, faImages, faSignInAlt, faSignOutAlt, faUserCog} from "@fortawesome/free-solid-svg-icons";
+import {
+    faBlender,
+    faCoins,
+    faCrown,
+    faGamepad,
+    faHeart,
+    faHome,
+    faImages,
+    faRobot,
+    faSignInAlt,
+    faSignOutAlt,
+    faUserCog
+} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {Banners} from "pages/banner/Banners";
 import LoginFormGoogle from "../../components/login/LoginFormGoogle";
@@ -11,8 +23,8 @@ import ErrorPage from "../../components/service/ErrorPage";
 export default function ThemeMain(props) {
     const links = [
         {path: '/', label: 'Home', icon: faHome},
-        {path: '/games', label: 'Games', icon: faGamepad},
-        {path: '/poker', label: 'Pokher', icon: faHeart},
+        {path: '/swap-bot', label: 'Swap bot', icon: faRobot},
+        //{path: '/games', label: 'Games', icon: faGamepad},
         {path: '/mixer', label: props.store.network.coin + ' Mixer', icon: faBlender},
         {path: '/lottery/winners', label: 'Banner lottery', icon: faImages},
         {path: '/bet', label: 'Crypto bets', icon: faCoins},

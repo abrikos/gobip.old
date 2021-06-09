@@ -2,15 +2,18 @@ import axios from "axios";
 import Mongoose from "server/db/Mongoose";
 import {Minter, TX_TYPE} from "minter-js-sdk";
 import {generateWallet, walletFromMnemonic} from 'minterjs-wallet';
+
 const networks = {
     main: {
-        url: 'https://api.minter.one',
+        nodeApi: 'https://api.minter.one/v2',
+        explorerApi: 'https://explorer-api.minter.network/api/v2',
         coin: 'BIP',
         explorer: 'https://explorer.minter.network/',
         chainId: 1
     },
     test: {
-        url: 'https://node-api.testnet.minter.network',
+        nodeApi: 'https://node-api.testnet.minter.network/v2',
+        explorerApi: 'https://explorer-api.testnet.minter.network/api/v2',
         coin: 'MNT',
         explorer: 'https://explorer.testnet.minter.network/',
         chainId: 2
@@ -22,8 +25,11 @@ const params = {
     network,
     bannerPrice: process.env.BANNER_PRICE * 1,
     mixerFee: process.env.MIXER_FEE * 1,
-    lotteryPrize: process.env.LOTTERY_PRISE * 1
-
+    lotteryPrize: process.env.LOTTERY_PRISE * 1,
+    swap: {
+        routePay: process.env.SWAP_PAY_PER_ROUTE,
+        routeDays: process.env.SWAP_PAY_PERIOD
+    }
 }
 
 const minter = new Minter({apiType: 'node', baseURL: `${params.network.url}/v2/`});
@@ -38,8 +44,8 @@ const obj = {
         return /^Mx[a-fA-F0-9]{40}$/.test(address)
     },
 
-    async get(action, query) {
-        const url = `${this.params.network.url}/v2/${action}?${query}`;
+    async get(action, explorer) {
+        const url = `${this.params.network[explorer ? 'explorerApi' : 'nodeApi']}${action}`;
         try {
             const res = await axios.get(url)
             return res.data;
@@ -84,7 +90,7 @@ const obj = {
         }
         const txs = [];
         for (let block = current.latest_block_height * 1; block <= last.latest_block_height * 1; block++) {
-            const res = await this.get(`block/${block}`)
+            const res = await this.get(`/block/${block}`)
             for (const tx of res.transactions) {
                 tx.date = res.time;
                 if (!tx.data.list) {
@@ -151,7 +157,7 @@ const obj = {
         wallet.txParams = txParams;
         try {
             return this.sendTx(wallet);
-        }catch (e) {
+        } catch (e) {
             console.log(e.response ? `BLOCKCHAIN ERROR: ${e.response.data.error.message} ` : `NODE ERROR ${e.message}`)
         }
     },
@@ -169,7 +175,7 @@ const obj = {
         main.txParams = txParams;
         try {
             return this.sendTx(main);
-        }catch (e) {
+        } catch (e) {
             console.log(e.response ? `BLOCKCHAIN ERROR: ${e.response.data.error.message} ` : `NODE ERROR ${e.message}`)
         }
     },
@@ -191,7 +197,7 @@ const obj = {
             //if (balance <= txParams.data.value)
             txParams.data.value -= res.commission;
         }
-        if(txParams.data.value <=0) return console.log( `NEGATIVE value `, txParams.data)
+        if (txParams.data.value <= 0) return console.log(`NEGATIVE value `, txParams.data)
         txParams.chainId = this.params.network.chainId;
         txParams.nonce = await minter.getNonce(address);
         return new Promise((resolve, reject) => {

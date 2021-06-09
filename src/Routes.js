@@ -15,6 +15,7 @@ import PokerPlay from "./pages/Poker/PokerPlay";
 import PokerList from "./pages/Poker/PokerList";
 import GameList from "./games/GameList";
 import GamePlay from "./games/GamePlay";
+import SwapBot from "./pages/swap-bot/SwapBot";
 
 export default function Routes(store) {
     const routes = {
@@ -29,13 +30,12 @@ export default function Routes(store) {
         "/poker/view/:id": (params) => <PokerPlay store={store} {...params}/>,
         "/poker/play/:id": (params) => <PokerPlay store={store} {...params}/>,
         "/games": (params) => <GameList store={store} {...params}/>,
+        "/swap-bot": (params) => <SwapBot store={store} {...params}/>,
         "/game/:module/:id": (params) => <GamePlay store={store} {...params}/>,
         "/login": () => <Login store={store}/>,
     };
 
     const routesLogged = {
-
-
         "/cabinet/:control": (params) => <Cabinet store={store} {...params}/>,
         "/cabinet/:control/:id": (params) => <Cabinet store={store} {...params}/>,
         "/logout": () => <Logout store={store}/>,
