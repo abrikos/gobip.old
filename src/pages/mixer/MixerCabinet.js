@@ -46,7 +46,7 @@ export default function MixerCabinet(props) {
                 <tr>
                     <th>Funds on wallet</th>
                     <th>Address</th>
-                    <th>seed/mnemonic</th>
+                    <th>Withdraw</th>
                 </tr>
                 </thead>
                 <tbody>

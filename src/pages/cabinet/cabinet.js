@@ -7,13 +7,15 @@ import BannerCabinet from "pages/banner/BannerCabinet";
 import BetCabinet from "../bet/BetCabinet";
 import CabinetUser from "./CabinetUser";
 import SwapBot from "../swap-bot/SwapBot";
+import GameList from "../../games/GameList";
 
 export default function Cabinet(props) {
     const pages = {
         user: {label: 'User'},
         mixer: {label: 'Mixer wallets'},
         banners: {label: 'Banners'},
-        bet: {label: 'Bets'},
+        //bet: {label: 'Bets'},
+        //games: {label: 'Games'},
         swapbot: {label: 'Swap bots'},
     }
 
@@ -32,6 +34,7 @@ export default function Cabinet(props) {
                 {props.control === 'bet' && <BetCabinet {...props}/>}
                 {props.control === 'user' && <CabinetUser {...props}/>}
                 {props.control === 'swapbot' && <SwapBot {...props}/>}
+                {props.control === 'games' && <GameList {...props}/>}
             </div>
         </div>
 

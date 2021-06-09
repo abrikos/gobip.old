@@ -62,12 +62,12 @@ const obj = {
 
     async walletBalance(address) {
         const v = await this.get(`/address/${address}`)
-        return v.bip_value / this.divider;
+        return this.fromPip(v.bip_value) * 1;
     },
 
     async getCommission() {
         const v = await this.get(`/price_commissions`)
-        return v.send / this.divider;
+        return this.fromPip(v.send) * 1;
     },
 
     async updateBalances() {
