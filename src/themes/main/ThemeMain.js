@@ -27,7 +27,7 @@ export default function ThemeMain(props) {
         //{path: '/games', label: 'Games', icon: faGamepad},
         {path: '/mixer', label: props.store.network.coin + ' Mixer', icon: faBlender},
         {path: '/lottery/winners', label: 'Banner lottery', icon: faImages},
-        {path: '/bet', label: 'Crypto bets', icon: faCoins},
+        //{path: '/bet', label: 'Crypto bets', icon: faCoins},
         {path: '/cabinet/user', label: 'Cabinet', icon: faUserCog, type: 'logged'},
         {path: '/admin/start', label: 'Admin', icon: faCrown, type: 'admin'},
         {path: '/logout', label: 'Logout', icon: faSignOutAlt, type: 'logged'},

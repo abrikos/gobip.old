@@ -1,7 +1,9 @@
 import axios from "axios";
 import Mongoose from "server/db/Mongoose";
-import {Minter, TX_TYPE} from "minter-js-sdk";
+import {Minter, prepareSignedTx, prepareTx, TX_TYPE} from "minter-js-sdk";
 import {generateWallet, walletFromMnemonic} from 'minterjs-wallet';
+
+const util = require("minterjs-util")
 
 const networks = {
     main: {
@@ -44,14 +46,18 @@ const obj = {
         return /^Mx[a-fA-F0-9]{40}$/.test(address)
     },
 
-    async get(action, explorer) {
+    async get(action, explorer, debug) {
         const url = `${this.params.network[explorer ? 'explorerApi' : 'nodeApi']}${action}`;
-        try {
-            const res = await axios.get(url)
-            return res.data;
-        } catch (e) {
-            console.log('AXIOS ERORR:', e.message, url)
-        }
+        return new Promise((resolve, reject) => {
+            axios.get(url)
+                .then(r => resolve(r.data))
+                .catch(e => {
+                    const error = e.response ? e.response.data.error : e.message;
+                    process.env.REACT_APP_LOG_ENABLE === '1' && console.log('AXIOS ERORR:', error, url);
+                    reject(error)
+                })
+
+        })
     },
 
     async walletBalance(address) {
@@ -91,6 +97,7 @@ const obj = {
         const txs = [];
         for (let block = current.latest_block_height * 1; block <= last.latest_block_height * 1; block++) {
             const res = await this.get(`/block/${block}`)
+            if (!res) return [];
             for (const tx of res.transactions) {
                 tx.date = res.time;
                 if (!tx.data.list) {
@@ -120,12 +127,34 @@ const obj = {
         return txs;
     },
 
+    toPip(value) {
+        return util.convertToPip(value)
+    },
 
-    async getTxParamsCommission(txParams) {
-        txParams.type = txParams.data.list ? TX_TYPE.MULTISEND : TX_TYPE.SEND;
+    fromPip(value) {
+        return util.convertFromPip(value)
+    },
+
+    async getTxParamsCommission(txParamsOrig) {
+        const txParams = {...txParamsOrig};
+        if (!txParams.type) {
+            txParams.type = txParams.data.list ? TX_TYPE.MULTISEND : TX_TYPE.SEND;
+        }
         txParams.data.coin = 0;
+        txParams.nonce = 1;
         txParams.chainId = params.network.chainId;
-        return minter.estimateTxCommission(txParams)
+        try {
+            const tx = prepareTx({...txParams, signatureType: 1}).serializeToString();
+            //console.log(tx.serialize().toString('hex'))
+            const res = await this.get('/estimate_tx_commission/' + tx)
+            //const res = await  this.get('/price_commissions')
+            return this.fromPip(res.commission);
+        } catch (e) {
+            console.log('txParams commission error:', e.message)
+        }
+
+
+        //return minter.estimateTxCommission(txParams)
     },
 
     async newWallet(type, to, user) {
@@ -191,25 +220,34 @@ const obj = {
             txParams.type = TX_TYPE.SEND;
             txParams.data.coin = 0;
         }
-        const res = await this.getTxParamsCommission(txParams)
 
         if (!txParams.data.list) {
             //if (balance <= txParams.data.value)
-            txParams.data.value -= res.commission;
+            txParams.data.value -= await this.getTxParamsCommission(txParams);
         }
         if (txParams.data.value <= 0) return console.log(`NEGATIVE value `, txParams.data)
+        if (txParams.data.value >= balance)
+            return console.log(`INSUFFICIENT ${txParams.data.value} >= ${balance}`);
         txParams.chainId = this.params.network.chainId;
-        txParams.nonce = await minter.getNonce(address);
+        txParams.nonce = await this.getNonce(address);
+        return this.sendSignedTx(txParams, seedPhrase);
+
+    },
+
+    async getNonce(address) {
+        const res = await this.get(`/address/${address}`)
+        return res.transaction_count * 1 + 1;
+    },
+
+    async sendSignedTx(txParams, seedPhrase) {
+        const tx = prepareSignedTx(txParams, {seedPhrase}).serializeToString();
+        process.env.REACT_APP_LOG_ENABLE === '1' && console.log('TRY send', txParams);
         return new Promise((resolve, reject) => {
-            if (txParams.data.value >= balance)
-                return reject({response: {data: `INSUFFICIENT ${txParams.data.value} >= ${balance}`}})
-            console.log('TRY send', txParams.data)
-            minter.postTx(txParams, {seedPhrase})
+            this.get('/send_transaction/' + tx)
                 .then(resolve)
                 .catch(reject)
-        });
 
-
+        })
     },
 
     async getMainWallet() {

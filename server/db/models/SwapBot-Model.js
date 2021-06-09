@@ -31,9 +31,9 @@ modelSchema.virtual('date')
         return moment(this.createdAt).format('YYYY-MM-DD HH:mm:ss')
     });
 
-modelSchema.virtual('needPay')
+modelSchema.virtual('path')
     .get(function () {
-        return this.routes.filter(r=>!r.payDate && r.enabled).length * process.env.SWAP_PAY_PER_ROUTE;
+        return `/swapbot/${this.id}`
     });
 
 modelSchema.virtual('coins')

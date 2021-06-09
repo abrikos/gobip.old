@@ -42,6 +42,9 @@ export default function InputButtonLoading(props) {
 
     return <Form onSubmit={handleSubmit} validated={validated} noValidate>
             <InputGroup>
+                {props.label && <InputGroup.Prepend>
+                    <InputGroup.Text>{props.label}</InputGroup.Text>
+                </InputGroup.Prepend>}
                 <Form.Control required name={props.name} placeholder={props.placeholder} defaultValue={props.value}/>
                 <InputGroup.Append>
                     <Button type="submit">{loading ? <Loader/> : props.buttonText}</Button>

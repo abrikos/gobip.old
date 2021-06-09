@@ -6,6 +6,7 @@ import React from "react";
 
 MinterAddressLink.propTypes = {
     address: PropTypes.string.isRequired,
+    short: PropTypes.number,
 };
 MinterTxLink.propTypes = {
     tx: PropTypes.string.isRequired,
@@ -13,14 +14,15 @@ MinterTxLink.propTypes = {
 
 
 export function MinterAddressLink(props) {
-    return <span><a href={props.store.network.explorer + 'address/' + props.address} target="_blank" style={{fontFamily: 'monospace'}}>{props.address}</a> <CopyButton text={props.address}/> </span>
+    const address = props.short ? props.address.substr(0, props.short) + '...' : props.address;
+    return <span><a href={props.store.network.explorer + 'address/' + props.address} target="_blank" style={{fontFamily: 'monospace'}}>{address}</a> <CopyButton text={props.address}/> </span>
 }
 
 export function MinterTxLink(props) {
     return <span>
         <a href={props.store.network.explorer + 'transactions/' + props.tx} target="_blank" style={{fontFamily: 'monospace'}} title={props.tx}>
-        {props.tx.substr(0,10)}...
-            <FontAwesomeIcon        icon={faFileInvoice}/>
+        {props.tx.substr(0, 10)}...
+            <FontAwesomeIcon icon={faFileInvoice}/>
     </a>
 
     </span>

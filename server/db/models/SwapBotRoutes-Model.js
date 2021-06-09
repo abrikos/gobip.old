@@ -7,12 +7,12 @@ const name = 'swapbotroute';
 
 const modelSchema = new Schema({
         bot: {type: mongoose.Schema.Types.ObjectId, ref: 'swapbot'},
+        wallet: {type: mongoose.Schema.Types.ObjectId, ref: 'wallet'},
         ids: [Number],
         symbols: [String],
         payDate: Date,
-        profit: {type: Number, default: 0},
+        minToBuy: {type: Number, default: 105},
         amount: {type: Number, default: 100},
-        enabled: {type: Boolean, default: false},
         lastError: String,
     },
     {
@@ -36,6 +36,11 @@ modelSchema.virtual('payDateHuman')
 modelSchema.virtual('payedUntil')
     .get(function () {
         return this.payDate && moment(this.payDate).add(process.env.SWAP_PAY_PERIOD, 'days').format('YYYY-MM-DD HH:mm:ss')
+    });
+
+modelSchema.virtual('payNeeded')
+    .get(function () {
+        return process.env.SWAP_PAY_PER_ROUTE * 1 -  this.wallet.balance;
     });
 
 modelSchema.virtual('name')
