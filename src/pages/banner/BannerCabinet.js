@@ -23,10 +23,10 @@ export default function BannerCabinet(props) {
     }, []);
 
     function loadData() {
-        props.store.api('/banner/lottery/amounts',{},true)
+        props.store.api('/banner/lottery/amounts', {}, true)
             .then(setAmounts)
 
-        props.store.api('/cabinet/banner/list',{},true)
+        props.store.api('/cabinet/banner/list', {}, true)
             .then(setBanners)
         //.catch(console.warn)
     }
@@ -83,14 +83,17 @@ export default function BannerCabinet(props) {
     if (!banners) return <div/>
     return <div>
         <h1>My banners</h1>
-        <div className="alert alert-success"> <MinterValue value={amounts.lotteryStartSum - amounts.total} {...props}/> left until the next round of the lottery. Lottery
+        <div className="alert alert-success"><MinterValue value={amounts.lotteryStartSum - amounts.total} {...props}/> left until the next round of the lottery.
+            Lottery
             prize: <MinterValue value={amounts.prize} {...props}/></div>
         <div className="alert alert-info">
             <ul>
-                <li>Upload an image, enter the url, translate it to an address of at least <MinterValue value={props.store.params.bannerPrice} {...props}/> and your banner will
+                <li>Upload an image, enter the url, translate it to an address of at least <MinterValue value={props.store.params.bannerPrice} {...props}/> and
+                    your banner will
                     appear at the top of the left column. The next paid banner will move your banner down
                 </li>
-                <li>Each banner participates in a lottery. The drawing takes place when the total amount of banner coins reaches <strong><MinterValue value={amounts.prize} {...props}/></strong></li>
+                <li>Each banner participates in a lottery. The drawing takes place when the total amount of banner coins reaches <strong><MinterValue
+                    value={amounts.prize} {...props}/></strong></li>
                 <li>The chance of winning the lottery depends on the number of coins on the banner's address. More coins - more chances.</li>
 
             </ul>
@@ -99,19 +102,23 @@ export default function BannerCabinet(props) {
             <input type="file" ref={nameRef} multiple={true} onChange={_handleImageChange}
                    className="d-none"/>
             <Button onClick={openDialog}>Upload banner (max 50Kb)</Button>
-            {!!errors.length && <div className="alert alert-danger">{errors.map((e, i) => <div key={i}>File: <strong>{e.name}</strong>, {e.message} ({(e.size / 1024).toFixed(1)}Kb)</div>)}</div>}
+            {!!errors.length &&
+            <div className="alert alert-danger">{errors.map((e, i) => <div key={i}>File: <strong>{e.name}</strong>, {e.message} ({(e.size / 1024).toFixed(1)}Kb)
+            </div>)}</div>}
             <hr/>
         </div>}
         <div className="container">
             {banners.map(b => <div key={b.id} className={`row mb-2 border ${b.payDate ? 'border-dark' : 'border-warning'}`}>
-                <div className={`col-sm-1   text-right d-flex align-items-center justify-content-center ${b.payDate ? 'bg-dark text-light' : 'bg-warning'}`}><MinterValue value={b.wallet.balance} {...props}/></div>
+                <div className={`col-sm-1   text-right d-flex align-items-center justify-content-center ${b.payDate ? 'bg-dark text-light' : 'bg-warning'}`}>
+                    <MinterValue value={b.wallet.balance} {...props}/></div>
                 <div className="col-sm-7   d-flex align-items-center justify-content-center">
                     <div>
                         <MinterAddressLink address={b.wallet.address} {...props}/>
                         <FormControl placeholder="Input any URL" id={b.id} onChange={setUrl} defaultValue={b.url}/>
                         {b.url && <a href={b.url} target="_blank">link</a>}
                         {!b.payDate && <small className="alert-warning alert d-block">
-                            To make the banner visible in the right column, send at least <MinterValue value={props.store.params.bannerPrice} {...props}/> to the specified address.
+                            To make the banner visible in the right column, send at least <MinterValue value={props.store.params.bannerPrice} {...props}/> to
+                            the specified address.
                             More coins - more chances to win the lottery
                         </small>}
                     </div>
