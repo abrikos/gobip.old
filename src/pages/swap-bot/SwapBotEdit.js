@@ -1,10 +1,12 @@
 import {Button, Modal} from "react-bootstrap";
 import React, {useEffect, useState} from "react";
-import {MinterAddressLink} from "../../components/minter/MinterLink";
+import {MinterAddressLink, MinterTxLink} from "../../components/minter/MinterLink";
 import InputButtonLoading from "../../components/InputButtonLoading";
 import MinterValue from "../../components/minter/MinterValue";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faEdit, faTrash} from "@fortawesome/free-solid-svg-icons";
+import "./swapbot.sass"
+import ButtonLoading from "../../components/ButtonLoading";
 
 export default function SwapBotEdit(props) {
     const [bot, setBot] = useState();
@@ -56,13 +58,13 @@ export default function SwapBotEdit(props) {
                     loadBot();
                     setModal({})
                 }} url={`/swapbot/route/${r.id}/update/`} buttonText="Save" {...props}/>
-                <small className="text-danger">{r.lastError}</small>
+                <small className="text-danger">{r.execDateHuman}: {r.lastError}</small>
             </div>
         })
     }
 
     if (!bot) return <div/>
-    return <div>
+    return <div className="swap-bot-edit">
         <div className="row">
             <div className="col-9">
                 <h1>{bot.name}</h1>
@@ -81,6 +83,18 @@ export default function SwapBotEdit(props) {
                     </tr>)}
                     </tbody>
                 </table>
+                <ButtonLoading
+                    onFinish={r => {
+                        console.log('onFinis', r)
+                        //setSuccess(<div>Withdraw TX: <MinterTxLink tx={r.hash} {...props}/></div>);
+                        loadBot()
+                    }}
+                    url={'/cabinet/swapbot/wallet/withdraw/' + bot.wallet.id}
+                    variant={'warning'}
+                    confirmMessage={`Withdraw all to ${props.store.authenticatedUser.address}?`}
+                    {...props}>
+                    Withdraw
+                </ButtonLoading>
             </div>
         </div>
 
@@ -106,6 +120,7 @@ export default function SwapBotEdit(props) {
                 <th>Swap amount</th>
                 <th>MinToBuy</th>
                 <th>Payed until</th>
+                <th>Exec date</th>
                 {/*<th>Enabled</th>*/}
                 <th></th>
             </tr>
@@ -116,9 +131,9 @@ export default function SwapBotEdit(props) {
                 <td>{r.amount}</td>
                 <td>{r.minToBuy}</td>
                 <td>
-                    {r.payedUntil || <span>Need <MinterValue value={r.payNeeded} {...props}/><br/> <MinterAddressLink short={7} address={r.wallet.address} {...props}/></span>}
-
+                    <small>{r.payedUntil || <span>Need <MinterValue value={r.payNeeded} {...props}/><br/> <MinterAddressLink short={7} address={r.wallet.address} {...props}/></span>}</small>
                 </td>
+                <td><small>{r.execDateHuman}</small></td>
                 {/*<td><input type="checkbox" onChange={() => routeSwitch(r)} defaultChecked={r.enabled}/></td>*/}
                 <td>
 

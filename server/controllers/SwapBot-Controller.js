@@ -16,7 +16,9 @@ module.exports.controller = function (app) {
         }, null, true, 'America/Los_Angeles'
     )
     //Mongoose.swapbot.cleanIndexes(function (err, results) {       console.log(results)    });
-    SwapBotApi.coins();
+    //Mongoose.swapbotroute.deleteMany().then(console.log);
+    //Mongoose.coin.deleteMany().then(()=> {        SwapBotApi.coins()    });
+
 
     //MinterApi.getTxParamsCommission({type: '0x01', nonce: 1, data: {to: 'Mxaaa40f7d2e91705c75a0430557c469a5850aeaaa', value: 100, coin: 0}, chainId: 2}).then(console.log)
     //Mongoose.coin.find({symbol:'MNT'}).then(console.log)

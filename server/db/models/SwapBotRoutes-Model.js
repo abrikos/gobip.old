@@ -11,6 +11,7 @@ const modelSchema = new Schema({
         ids: [Number],
         symbols: [String],
         payDate: Date,
+        execDate: Date,
         minToBuy: {type: Number, default: 105},
         amount: {type: Number, default: 100},
         lastError: String,
@@ -26,6 +27,11 @@ const modelSchema = new Schema({
 modelSchema.virtual('date')
     .get(function () {
         return moment(this.createdAt).format('YYYY-MM-DD HH:mm:ss')
+    });
+
+modelSchema.virtual('execDateHuman')
+    .get(function () {
+        return moment(this.execDate).format('YYYY-MM-DD HH:mm:ss')
     });
 
 modelSchema.virtual('payDateHuman')

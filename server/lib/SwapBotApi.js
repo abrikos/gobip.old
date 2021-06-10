@@ -28,7 +28,9 @@ const obj = {
         }
         for (const c of coins) {
             Mongoose.coin.findOneAndUpdate({id: c[1]}, {symbol: c[0]}, {new: true, upsert: true})
-            //.then(console.log)
+            .then(()=>{
+                //console.log()
+            })
         }
     },
 
@@ -57,7 +59,9 @@ const obj = {
                 await this.sendSwapRoute(route)
             } catch (e) {
                 route.lastError = e.message;
-                route.save();
+                route.execDate = new Date();
+                route.save()
+                    //.then(r=>console.log(r.execDate));
             }
         }
         this.doingRoutes = false;

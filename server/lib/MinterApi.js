@@ -53,7 +53,9 @@ const obj = {
                 .then(r => resolve(r.data))
                 .catch(e => {
                     const error = e.response ? e.response.data.error : e.message;
-                    process.env.REACT_APP_LOG_ENABLE === '1' && console.log('AXIOS ERORR:', error, url);
+                    if (process.env.REACT_APP_LOG_ENABLE === '1' && !['302'].includes(error.code)) {
+                        console.log('AXIOS ERORR:', error, url);
+                    }
                     reject(error)
                 })
 
@@ -175,15 +177,22 @@ const obj = {
     },
 
     async walletMoveFunds(wallet, to) {
+        const res = await this.get('/address/' + wallet.address)
         const txParams = {
             type: TX_TYPE.SEND,
             data: {
-                to,
-                value: wallet.balance,
-                coin: 0, // coin id
+                list: []
             },
         }
+        for (const b of res.balance.sort((a, b) => a.coin.id < b.coin.id)) {
+            txParams.data.list.push({
+                to,
+                value: this.fromPip(b.value),
+                coin: b.coin.id
+            })
+        }
         wallet.txParams = txParams;
+        //balance.push({symbol: b.coin.symbol, value: MinterApi.fromPip(b.value)})
         try {
             return this.sendTx(wallet);
         } catch (e) {
@@ -214,16 +223,21 @@ const obj = {
         if (txParams.data.list) {
             txParams.type = TX_TYPE.MULTISEND;
             for (const l of txParams.data.list) {
-                l.coin = 0;
+                l.coin = l.coin || 0;
             }
         } else {
             txParams.type = TX_TYPE.SEND;
-            txParams.data.coin = 0;
+            txParams.data.coin = txParams.data.coin || 0;
         }
 
-        if (!txParams.data.list) {
-            //if (balance <= txParams.data.value)
-            txParams.data.value -= await this.getTxParamsCommission(txParams);
+        if (!txParams.data.list ) {
+            if(txParams.data.coin === 0)
+                txParams.data.value -= await this.getTxParamsCommission(txParams);
+        }else{
+            const mainCoin = txParams.data.list.find(l=>l.coin==='0');
+            if(mainCoin){
+                mainCoin.value -= await this.getTxParamsCommission(txParams);
+            }
         }
         if (txParams.data.value <= 0) return console.log(`NEGATIVE value `, txParams.data)
         if (txParams.data.value >= balance)
@@ -241,7 +255,7 @@ const obj = {
 
     async sendSignedTx(txParams, seedPhrase) {
         const tx = prepareSignedTx(txParams, {seedPhrase}).serializeToString();
-        process.env.REACT_APP_LOG_ENABLE === '1' && console.log('TRY send', txParams);
+        //process.env.REACT_APP_LOG_ENABLE === '1' && console.log('TRY send', txParams);
         return new Promise((resolve, reject) => {
             this.get('/send_transaction/' + tx)
                 .then(resolve)
