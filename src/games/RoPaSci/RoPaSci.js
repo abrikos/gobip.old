@@ -10,7 +10,7 @@ export default function RoPaSci(props) {
         return <div key={p.id} className={`${p.id === myId ? 'bg-success' : ''} row`}>
             <div className="col"><UserAvatar {...p}/></div>
             <div className="col">
-                {game.data.variants.map(v => <img src={images[v]} key={v} className={`choice ${result && result.choice === v?'selected':''}`}/>)}
+                {game.data.variants.map(v => <img alt={v} src={images[v]} key={v} className={`choice ${result && result.choice === v?'selected':''}`}/>)}
             </div>
         </div>
     }

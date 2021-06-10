@@ -1,5 +1,6 @@
 import GoogleLogin from "react-google-login";
 import React from "react";
+import {Button} from "react-bootstrap";
 
 export default function LoginFormGoogle(props) {
     //const [user, setUser] = useState()
@@ -12,14 +13,15 @@ export default function LoginFormGoogle(props) {
             })
     }
 
-
     return <span className={props.className + ' pointer'}>
         {/*<Button onClick={test}>Test</Button>*/}
         {process.env.REACT_APP_GOOGLE_ID && <GoogleLogin
             clientId={process.env.REACT_APP_GOOGLE_ID}
-            render={renderProps => (
-                <span className="pointer" onClick={renderProps.onClick} disabled={renderProps.disabled}>Login</span>
-            )}
+            render={renderProps => {
+                if(props.type==='button')
+                    return <Button onClick={renderProps.onClick} disabled={renderProps.disabled}>Login</Button>
+                return <span className="pointer" onClick={renderProps.onClick} disabled={renderProps.disabled}>Login</span>
+            }}
             buttonText="Вход"
             onSuccess={responseGoogle}
             onFailure={console.error}

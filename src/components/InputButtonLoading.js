@@ -17,20 +17,27 @@ export default function InputButtonLoading(props) {
     const [validated, setValidated] = useState(false);
     const [error, setError] = useState();
     const [loading, setLoading] = useState();
+    const [change, setChange] = useState();
+    const [value, setValue] = useState(props.value);
 
     const handleSubmit = (event) => {
         setLoading(true);
         event.preventDefault();
+        const formObj = event.target;
         const form = props.store.formToObject(event.target);
+
         console.log(event.currentTarget.checkValidity())
         if (event.currentTarget.checkValidity() === false) {
             event.stopPropagation();
         }
+
         props.store.api(props.url,form)
             .then(r=>{
                 setError(null)
                 props.onFinish && props.onFinish(r);
                 setLoading(false);
+                setChange(false)
+                if(!props.value) formObj.reset()
             })
             .catch(e=>{
                 setError(e.message)
@@ -45,10 +52,10 @@ export default function InputButtonLoading(props) {
                 {props.label && <InputGroup.Prepend>
                     <InputGroup.Text>{props.label}</InputGroup.Text>
                 </InputGroup.Prepend>}
-                <Form.Control required name={props.name} placeholder={props.placeholder} defaultValue={props.value}/>
-                <InputGroup.Append>
+                <Form.Control required name={props.name} placeholder={props.placeholder} defaultValue={value} onChange={()=>setChange(true)}/>
+                {change && <InputGroup.Append>
                     <Button type="submit">{loading ? <Loader/> : props.buttonText}</Button>
-                </InputGroup.Append>
+                </InputGroup.Append>}
             </InputGroup>
             {error && <div className="text-danger">{error}</div>}
     </Form>

@@ -1,6 +1,6 @@
 import {Button, Modal} from "react-bootstrap";
 import React, {useEffect, useState} from "react";
-import {MinterAddressLink, MinterTxLink} from "../../components/minter/MinterLink";
+import {MinterAddressLink} from "../../components/minter/MinterLink";
 import InputButtonLoading from "../../components/InputButtonLoading";
 import MinterValue from "../../components/minter/MinterValue";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
@@ -36,15 +36,6 @@ export default function SwapBotEdit(props) {
             .then(loadBot)
     }
 
-    function modalPayment(r) {
-        setModal({
-            title: `Payment info for ${r.name}`,
-            body: <div>
-                To enable route please send <MinterValue value={props.store.params.swap.routePay} {...props}/> to <MinterAddressLink address={r.wallet.address} {...props}/>
-            </div>
-        })
-    }
-
     function modalUpdate(r) {
         setModal({
             title: `Options for ${r.name}`,
@@ -65,9 +56,9 @@ export default function SwapBotEdit(props) {
 
     if (!bot) return <div/>
     return <div className="swap-bot-edit">
+        <h1><span className="text-secondary">My swap bot</span> {bot.name}</h1>
         <div className="row">
             <div className="col-9">
-                <h1>{bot.name}</h1>
                 <div className="alert alert-info">
                     Address of the bot: <MinterAddressLink address={bot.wallet.address} {...props}/>
                     <br/>
@@ -83,7 +74,7 @@ export default function SwapBotEdit(props) {
                     </tr>)}
                     </tbody>
                 </table>
-                <ButtonLoading
+                {!!balance.length && <ButtonLoading
                     onFinish={r => {
                         console.log('onFinis', r)
                         //setSuccess(<div>Withdraw TX: <MinterTxLink tx={r.hash} {...props}/></div>);
@@ -94,7 +85,7 @@ export default function SwapBotEdit(props) {
                     confirmMessage={`Withdraw all to ${props.store.authenticatedUser.address}?`}
                     {...props}>
                     Withdraw
-                </ButtonLoading>
+                </ButtonLoading>}
             </div>
         </div>
 
@@ -109,7 +100,7 @@ export default function SwapBotEdit(props) {
 
         <h3>Routes</h3>
 
-        <InputButtonLoading name="newRoute" onFinish={loadBot} url={`/swapbot/${bot.id}/route/add`} buttonText="Add" required
+        <InputButtonLoading label="New route" name="newRoute" onFinish={loadBot} url={`/swapbot/${bot.id}/route/add`} buttonText="Add" required
                             placeholder="Input new route of coins separated by space" {...props}/>
 
 

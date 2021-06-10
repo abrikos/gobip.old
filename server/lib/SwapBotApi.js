@@ -28,9 +28,9 @@ const obj = {
         }
         for (const c of coins) {
             Mongoose.coin.findOneAndUpdate({id: c[1]}, {symbol: c[0]}, {new: true, upsert: true})
-            .then(()=>{
-                //console.log()
-            })
+                .then(() => {
+                    //console.log()
+                })
         }
     },
 
@@ -61,7 +61,7 @@ const obj = {
                 route.lastError = e.message;
                 route.execDate = new Date();
                 route.save()
-                    //.then(r=>console.log(r.execDate));
+                //.then(r=>console.log(r.execDate));
             }
         }
         this.doingRoutes = false;
@@ -81,6 +81,29 @@ const obj = {
         txParams.data.minimumValueToBuy = route.minToBuy * 1;
         txParams.chainId = MinterApi.params.network.chainId;
         return MinterApi.sendSignedTx(txParams, route.bot.wallet.seedPhrase);
+
+    },
+
+    async checkRoute(route) {
+        return new Promise((resolve, reject) => {
+            const coins = route.trim().toUpperCase().split(/\s+/);
+            if (coins.length < 2) return reject({message: 'Too few coins to create a route'})
+            Mongoose.coin.find({symbol: {$in: coins}})
+                .then(found => {
+                    const ids = [];
+                    const symbols = [];
+                    for (const c of coins) {
+                        const f = found.find(f => f.symbol === c)
+                        if (f) {
+                            ids.push(f.id)
+                            symbols.push(f.symbol.toUpperCase())
+                        } else {
+                            return reject({message: `Wrong coin "${c}"`})
+                        }
+                    }
+                    resolve({ids, symbols})
+                })
+        })
 
     },
 

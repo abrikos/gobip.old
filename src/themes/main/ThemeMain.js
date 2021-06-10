@@ -2,19 +2,7 @@ import React from "react";
 import "themes/main/theme-main.sass"
 import ThemeMainTopMenu from "./ThemeMainTopMenu";
 import {A} from "hookrouter";
-import {
-    faBlender,
-    faCoins,
-    faCrown,
-    faGamepad,
-    faHeart,
-    faHome,
-    faImages,
-    faRobot,
-    faSignInAlt,
-    faSignOutAlt,
-    faUserCog
-} from "@fortawesome/free-solid-svg-icons";
+import {faBlender, faCrown, faHome, faImages, faRobot, faSignInAlt, faSignOutAlt, faUserCog} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {Banners} from "pages/banner/Banners";
 import LoginFormGoogle from "../../components/login/LoginFormGoogle";

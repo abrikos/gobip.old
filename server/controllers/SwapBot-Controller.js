@@ -109,6 +109,14 @@ module.exports.controller = function (app) {
     });
 
 
+    app.post('/api/swapbot/route/check', async (req, res) => {
+        SwapBotApi.checkRoute(req.body.newRoute)
+            .then(r=>res.send(r))
+            .catch(e => {
+                res.status(500).send(app.locals.adaptError(e))
+            })
+    });
+
     app.post('/api/swapbot/:id/route/add', passport.isLogged, async (req, res) => {
         Mongoose.swapbot.findById(req.params.id)
             .then(bot => {

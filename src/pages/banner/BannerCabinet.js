@@ -23,10 +23,10 @@ export default function BannerCabinet(props) {
     }, []);
 
     function loadData() {
-        props.store.api('/banner/lottery/amounts')
+        props.store.api('/banner/lottery/amounts',{},true)
             .then(setAmounts)
 
-        props.store.api('/cabinet/banner/list')
+        props.store.api('/cabinet/banner/list',{},true)
             .then(setBanners)
         //.catch(console.warn)
     }
