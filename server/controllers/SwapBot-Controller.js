@@ -3,6 +3,7 @@ import Mongoose from "../db/Mongoose";
 import MinterApi from "../lib/MinterApi";
 import randomWords from "random-words";
 import SwapBotApi from "../lib/SwapBotApi";
+import md5 from "md5";
 
 const CronJob = require('cron').CronJob;
 
@@ -15,6 +16,7 @@ module.exports.controller = function (app) {
             SwapBotApi.doRoutes();
         }, null, true, 'America/Los_Angeles'
     )
+    //Mongoose.user.find().populate('referrals').then(console.log)
     //Mongoose.swapbot.cleanIndexes(function (err, results) {       console.log(results)    });
     //Mongoose.swapbotroute.deleteMany().then(console.log);
     //Mongoose.coin.deleteMany().then(()=> {        SwapBotApi.coins()    });

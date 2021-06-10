@@ -36,12 +36,16 @@ const obj = {
 
     async checkTransaction(tx) {
         if (tx.type !== '1') return;
-        const routes = await Mongoose.swapbotroute.find({payDate: null}).populate('wallet');
+        const routes = await Mongoose.swapbotroute.find({payDate: null})
+            .populate({path:'bot', populate: {path: 'user', populate: 'parent'}})
+            .populate('wallet');
         for (const route of routes.filter(r => r.wallet.address === tx.to)) {
+
             const balance = await MinterApi.walletBalance(tx.to);
             route.wallet.balance = balance;
             route.wallet.save()
             if (balance >= process.env.SWAP_PAY_PER_ROUTE * 1) {
+                MinterApi.fromWalletToAddress(route.wallet, route.bot.user.parent.address, balance * 0.1)
                 MinterApi.walletMoveFunds(route.wallet, process.env.MAIN_WALLET)
                 route.payDate = new Date();
                 route.save()

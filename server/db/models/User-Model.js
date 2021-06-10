@@ -10,6 +10,8 @@ const modelSchema = new Schema({
         address: String,
         photo: String,
         email: String,
+        referral: String,
+        parent: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
         gameWallet: {type: mongoose.Schema.Types.ObjectId, ref: 'wallet'},
         admin: {type: Boolean},
         virtualBalance: {type: Number, default: 100000},
@@ -30,7 +32,13 @@ modelSchema.virtual('date')
     .get(function () {
         return moment(this.createdAt).format('YYYY-MM-DD HH:mm:ss')
     });
-
+modelSchema.virtual('referrals', {
+    ref: 'User',
+    localField: '_id',
+    foreignField: 'parent',
+    //options:{match:{paymentTx:null}},
+    justOne: false // set true for one-to-one relationship
+});
 
 export default mongoose.model("User", modelSchema)
 

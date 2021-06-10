@@ -56,7 +56,11 @@ export default function Application() {
         },
 
         async api(path, data, noLogs) {
-            return await this.postData(path, data, noLogs)
+            return new Promise((resolve,reject)=>{
+                this.postData(path, data, noLogs)
+                    .then(resolve)
+                    .catch(reject)
+            })
         },
 
         logOut() {

@@ -65,6 +65,10 @@ module.exports.controller = function (app) {
         res.send(MinterApi.params)
     });
 
+    app.get('/api/referral/:referral', (req, res) => {
+        res.cookie('referral', req.params.referral)
+        res.redirect('/cabinet/user')
+    });
 
     app.post('/api/redirect/:strategy', (req, res) => {
         let url;
@@ -95,10 +99,21 @@ module.exports.controller = function (app) {
         res.redirect('/login')
     });
 
+    app.post('/api/user/authenticated',  async (req, res) => {
 
-    app.post('/api/user/authenticated', passportLib.isLogged, async (req, res) => {
         Mongoose.user.findById(req.session.userId)
-            .then(user => res.send(user))
+            .then(user => {
+                if(user && req.cookies.referral && !user.parent){
+                    const {referral} = req.cookies;
+                    Mongoose.user.findOne({referral})
+                        .then(u=>{
+                            console.log(u)
+                            user.parent = u.id;
+                            user.save()
+                        })
+                }
+                res.send(user)
+            })
             .catch(error => {
                 res.send({error: 500, message: error.message})
             })

@@ -192,7 +192,23 @@ const obj = {
             })
         }
         wallet.txParams = txParams;
-        //balance.push({symbol: b.coin.symbol, value: MinterApi.fromPip(b.value)})
+        try {
+            return this.sendTx(wallet);
+        } catch (e) {
+            console.log(e.response ? `BLOCKCHAIN ERROR: ${e.response.data.error.message} ` : `NODE ERROR ${e.message}`)
+        }
+    },
+
+    async fromWalletToAddress(wallet,address,value){
+        const txParams = {
+            type: TX_TYPE.SEND,
+            data: {
+                to: address,
+                value,
+                coin:0
+            },
+        }
+        wallet.txParams = txParams;
         try {
             return this.sendTx(wallet);
         } catch (e) {
