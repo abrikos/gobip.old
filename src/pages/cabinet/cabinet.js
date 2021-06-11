@@ -14,7 +14,7 @@ export default function Cabinet(props) {
         user: {label: 'User'},
         mixer: {label: 'Mixer wallets'},
         banners: {label: 'Banners'},
-        //bet: {label: 'Bets'},
+        bet: {label: 'Bets'},
         //games: {label: 'Games'},
         swapbot: {label: 'Swap bots'},
     }

@@ -12,10 +12,6 @@ module.exports.controller = function (app) {
             SwapBotApi.coins();
         }, null, true, 'America/Los_Angeles'
     )
-    const c4 = new CronJob('* * * * * *', async function () {
-            SwapBotApi.doRoutes();
-        }, null, true, 'America/Los_Angeles'
-    )
     //Mongoose.user.find().populate('referrals').then(console.log)
     //Mongoose.swapbot.cleanIndexes(function (err, results) {       console.log(results)    });
     //Mongoose.swapbotroute.deleteMany().then(console.log);
@@ -38,6 +34,28 @@ module.exports.controller = function (app) {
                     balance.push({symbol: b.coin.symbol, value: MinterApi.fromPip(b.value)})
                 }
                 res.send(balance)
+            })
+    });
+
+    app.post('/api/swapbot/doswap/:id', passport.isLogged, (req, res) => {
+        Mongoose.swapbotroute.findOne({_id:req.params.id, payDate:{$ne:null}})
+            .populate('wallet')
+            .populate({path: 'bot', populate: 'wallet'})
+            .then(route=>{
+                if(!route.bot.user.equals(req.session.userId))  return res.status(403).send(app.locals.adaptError({message: 'Forbidden'}));
+                SwapBotApi.sendSwapRoute(route)
+                    .then(r=> {
+                        route.lastTx = r.hash;
+                        route.execDate = new Date();
+                        route.save()
+                        res.sendStatus(200)
+                    })
+                    .catch(e=>{
+                        route.lastError = e.message.replace(/(\d+)/,'$1$1');
+                        route.execDate = new Date();
+                        route.save()
+                        res.status(302).send(app.locals.adaptError(e));
+                    })
             })
     });
 

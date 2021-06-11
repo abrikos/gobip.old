@@ -54,6 +54,7 @@ export default function SwapBotEdit(props) {
         })
     }
 
+
     if (!bot) return <div/>
     return <div className="swap-bot-edit">
         <h1><span className="text-secondary">My swap bot</span> {bot.name}</h1>
@@ -107,6 +108,7 @@ export default function SwapBotEdit(props) {
         <table className="table table-striped">
             <thead>
             <tr>
+                <th></th>
                 <th>Route</th>
                 <th>Swap amount</th>
                 <th>MinToBuy</th>
@@ -118,7 +120,24 @@ export default function SwapBotEdit(props) {
             </thead>
             <tbody>
             {bot.routes.map((r, i) => <tr key={i} className={r.payDate ? '' : 'bg-warning'}>
-                <td>{r.name}</td>
+                <td>
+                    {r.payDate && <ButtonLoading
+                        onFinish={r => {
+                            console.log('onFinis', r)
+                            //setSuccess(<div>Withdraw TX: <MinterTxLink tx={r.hash} {...props}/></div>);
+                            loadBot()
+                        }}
+                        url={`/swapbot/doswap/${r.id}`}
+                        variant={'primary'}
+                        {...props}>
+                        Swap
+                    </ButtonLoading>}
+                </td>
+                <td>
+                    {r.name}
+                    <br/>
+                    <small>{r.lastTx|| r.lastError}</small>
+                </td>
                 <td>{r.amount}</td>
                 <td>{r.minToBuy}</td>
                 <td>
@@ -126,7 +145,7 @@ export default function SwapBotEdit(props) {
                 </td>
                 <td><small>{r.execDateHuman}</small></td>
                 {/*<td><input type="checkbox" onChange={() => routeSwitch(r)} defaultChecked={r.enabled}/></td>*/}
-                <td>
+                <td className="text-center">
 
                     {/*{!r.payedUntil && <Button size="sm" variant="primary" title="Payment" onClick={() => modalPayment(r)}><FontAwesomeIcon icon={faCoins}/></Button>}*/}
 

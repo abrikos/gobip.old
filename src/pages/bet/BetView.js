@@ -19,7 +19,7 @@ export default function BetView(props) {
     }, []);
 
     function loadBet() {
-        props.store.api('/bet/view/' + props.id)
+        props.store.api('/bet/view/' + props.id,{},true)
             .then(d => {
                 if(d.closed) clearInterval(timer);
                 chartRef.current && chartRef.current.chart.series[0].setData([
@@ -36,7 +36,7 @@ export default function BetView(props) {
         const wallet = yes ? b.walletF : b.walletA;
         return <div className={`border p-2 ${yes ? 'border-success' : 'border-danger'}`}>
             <div>address to vote <strong>{choice}</strong>:</div>
-            <MinterAddressLink address={wallet.address} {...props}/>
+            <MinterAddressLink short={9} address={wallet.address} {...props}/>
 
             {!!b.sum && <div><hr/>{b.balance[choice].toFixed(1)}% <small>(Votes: {b.votes[choice]})</small></div>}
         </div>
@@ -76,11 +76,11 @@ export default function BetView(props) {
         </div>
         <h2 className="text-center">Prize: <MinterValue value={bet.prizeForWinners} {...props}/></h2>
         <div className="row">
-            <div className="col">
+            <div className="col-6">
                 {choiceCell(bet, 'for')}
                 {votePrize(bet.votesF)}
             </div>
-            <div className="col">
+            <div className="col-6">
                 {choiceCell(bet, 'against')}
                 {votePrize(bet.votesA)}
             </div>

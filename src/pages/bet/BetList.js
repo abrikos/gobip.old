@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import "./bet.sass"
 import BetBlock from "./BetBlock";
 import BetCryptoChart from "./BetCryptoChart";
-
+import {A} from "hookrouter"
 
 export default function BetList(props) {
     const [bets, setBets] = useState([]);
@@ -23,10 +23,11 @@ export default function BetList(props) {
 
     //if(!bets) return <div/>;
     return <div>
-        <h1>Active bets</h1>
+        <h1>Active bets <A href="/cabinet/bet/create" className="btn btn-primary">Create bet</A></h1>
         <div className="d-flex flex-wrap">
             {bets.filter(b => !b.closed).map(b => <BetBlock bet={b} key={b.id} {...props}/>)}
         </div>
+        <hr/>
         {!!bets.filter(b => b.closed).length && <div>
             <h1>Closed bets</h1>
             <div className="d-flex flex-wrap">

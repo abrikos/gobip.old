@@ -12,6 +12,7 @@ module.exports.controller = function (app) {
     });
 
     app.post('/api/bet/view/:id', (req, res) => {
+        if(req.params.id === 'create') return res.sendStatus(200)
         Mongoose.bet.findById(req.params.id)
             .populate({path: 'walletF', select: ['address', 'balance']})
             .populate({path: 'walletA', select: ['address', 'balance']})
@@ -102,7 +103,7 @@ module.exports.controller = function (app) {
                 r.save()
                     .then(r => res.send(r))
             })
-        //.catch(e => {res.status(500).send(app.locals.adaptError(e))})
+        .catch(e => {res.status(500).send(app.locals.adaptError(e))})
     });
 
     //BetApi.aggregatePairData('BTC-USD').then(console.log)

@@ -12,6 +12,7 @@ const modelSchema = new Schema({
         symbols: [String],
         payDate: Date,
         execDate: Date,
+        lastTx: String,
         minToBuy: {type: Number, default: 105},
         amount: {type: Number, default: 100},
         lastError: String,

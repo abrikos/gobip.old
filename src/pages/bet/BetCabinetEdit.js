@@ -27,7 +27,7 @@ export default function BetCabinetEdit(props) {
 
     function loadBet() {
         if (props.id === 'create') return setBet({name: 'New bet'});
-        props.store.api('/cabinet/bet/view/' + props.id)
+        props.store.api('/cabinet/bet/view/' + props.id, {}, true)
             .then(d => {
                 if(d.closed) clearInterval(timer);
                 setBet(d);
