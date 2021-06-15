@@ -29,12 +29,12 @@ export default function SwapBot(props){
     }
 
     return <div className="swap-bot">
-        <h1>Swap bot</h1>
+        <h1>Swap routes</h1>
         <div className="alert alert-info">
-            About swap bot
+            You can create your own coin swap routes
         </div>
 
-        {step===0 &&<Button onClick={()=>setStep(1)}>Create own swap bot</Button>}
+        {step===0 &&<Button onClick={()=>setStep(1)}>Create own swap route</Button>}
 
         {step===1 && <div>
             <h3>{step}. Choose coins route</h3>

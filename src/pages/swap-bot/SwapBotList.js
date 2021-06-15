@@ -23,8 +23,8 @@ export default function SwapBotList(props) {
 
     return <div>
 
-            <h1>My bots</h1>
-            <Button onClick={add}>Create bot</Button>
+            <h1>My clusters of swap routes</h1>
+            <Button onClick={add}>Create cluster</Button>
             {list.map(l => <div key={l.id}>
                 <A href={'/cabinet' + l.path} className="pointer">{l.name || l.id}</A>
             </div>)}

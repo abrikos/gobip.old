@@ -102,6 +102,20 @@ module.exports.controller = function (app) {
             })
     });
 
+    app.post('/api/swapbot/:id/delete', passport.isLogged, (req, res) => {
+        Mongoose.swapbot.findById(req.params.id)
+            .then(bot=>{
+                if (!bot) return res.status(404).send(app.locals.adaptError({message: 'Not found'}));
+                if (!bot.user.equals(req.session.userId)) return res.status(403).send(app.locals.adaptError({message: 'Forbidden'}));
+                Mongoose.swapbotroute.deleteMany({bot}).then(()=>{});
+                bot.delete();
+                res.sendStatus(200)
+            })
+            .catch(e => {
+                res.status(500).send(app.locals.adaptError(e))
+            })
+    });
+
     app.post('/api/swapbot/route/:id/delete', passport.isLogged, (req, res) => {
         Mongoose.swapbotroute.findById(req.params.id)
             .populate('bot')

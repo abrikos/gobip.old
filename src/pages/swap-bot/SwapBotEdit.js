@@ -5,6 +5,7 @@ import InputButtonLoading from "../../components/InputButtonLoading";
 import MinterValue from "../../components/minter/MinterValue";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faEdit, faTrash} from "@fortawesome/free-solid-svg-icons";
+import {navigate} from "hookrouter";
 import "./swapbot.sass"
 import ButtonLoading from "../../components/ButtonLoading";
 
@@ -24,7 +25,7 @@ export default function SwapBotEdit(props) {
         props.store.api(`/swapbot/${props.id}/view`, {}, true)
             .then(b => {
                 setBot(b);
-                props.store.api(`/swapbot/address/${b.wallet.address}`, {}, true)
+                props.store.api(`/swapbot/address/${b.wallet && b.wallet.address}`, {}, true)
                     .then(setBalance)
             })
 
@@ -54,16 +55,21 @@ export default function SwapBotEdit(props) {
         })
     }
 
+    function botDelete(){
+        if(!window.confirm(`Delete swap routes "${bot.name}"`)) return;
+        props.store.api(`/swapbot/${bot.id}/delete`).then(()=>navigate('/cabinet/swapbot'))
+    }
+
 
     if (!bot) return <div/>
     return <div className="swap-bot-edit">
-        <h1><span className="text-secondary">My swap bot</span> {bot.name}</h1>
+        <h1><span className="text-secondary">My swap routes </span> {bot.name}</h1>
         <div className="row">
             <div className="col-9">
                 <div className="alert alert-info">
-                    Address of the bot: <MinterAddressLink address={bot.wallet.address} {...props}/>
+                    Address of the bot: <MinterAddressLink address={bot.wallet && bot.wallet.address} {...props}/>
                     <br/>
-                    Send on it all required payments and coins for swapping
+                    Send on it first coins for swapping
                 </div>
             </div>
             <div className="col-3">
@@ -94,7 +100,7 @@ export default function SwapBotEdit(props) {
 
         <h3>Options</h3>
         <InputButtonLoading label="Name" value={bot.name} name="name" onFinish={setBot} url={`/swapbot/${bot.id}/update/`} buttonText="Save" {...props}/>
-
+        <Button variant="danger" onClick={botDelete}><FontAwesomeIcon icon={faTrash}/></Button>
 
         <hr/>
 
