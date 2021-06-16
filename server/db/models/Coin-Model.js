@@ -5,8 +5,8 @@ const Schema = mongoose.Schema;
 const name = 'coin';
 
 const modelSchema = new Schema({
-        symbol: {type: String, unique: true},
-        id: {type: Number, unique: true}
+        symbol: {type: String},
+        id: {type: Number}
     }
 );
 

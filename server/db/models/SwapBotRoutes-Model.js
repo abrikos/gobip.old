@@ -1,4 +1,5 @@
 import moment from "moment";
+import SwapBotApi from "../../lib/SwapBotApi";
 
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
@@ -32,7 +33,7 @@ modelSchema.virtual('date')
 
 modelSchema.virtual('execDateHuman')
     .get(function () {
-        return moment(this.execDate).format('YYYY-MM-DD HH:mm:ss')
+        return this.execDate && moment(this.execDate).format('YYYY-MM-DD HH:mm:ss')
     });
 
 modelSchema.virtual('payDateHuman')
@@ -50,9 +51,24 @@ modelSchema.virtual('payNeeded')
         return process.env.SWAP_PAY_PER_ROUTE * 1 -  this.wallet.balance;
     });
 
+modelSchema.virtual('nameHuman')
+    .get(function () {
+        return this.symbols.join(' > ') || this.id;
+    })
+
 modelSchema.virtual('name')
     .get(function () {
         return this.symbols.join(' > ');
+    })
+    .set(function (v){
+        SwapBotApi.checkRoute(v)
+            .then(route=>{
+                this.ids = route.ids;
+                this.symbols = route.symbols;
+            })
+            .catch(e=>{
+                console.log('zzzzzzzzzzz',e.message)
+            })
     });
 
 

@@ -199,6 +199,11 @@ const obj = {
         }
     },
 
+    async estimateSwap(coin0, coin1, valueToSell, type){
+        const action = `/estimate_coin_${type}?swap_from=pool&value_to_${type}=${valueToSell}&coin_id_to_buy=${coin0}&coin_id_to_sell=${coin1}`
+        return this.get('node',action);
+    },
+
     async fromWalletToAddress(wallet,address,value){
         const txParams = {
             type: TX_TYPE.SEND,

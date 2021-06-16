@@ -1,6 +1,6 @@
 import {Button, Modal} from "react-bootstrap";
 import React, {useEffect, useState} from "react";
-import {MinterAddressLink} from "../../components/minter/MinterLink";
+import {MinterAddressLink, MinterTxLink} from "../../components/minter/MinterLink";
 import InputButtonLoading from "../../components/InputButtonLoading";
 import MinterValue from "../../components/minter/MinterValue";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
@@ -41,6 +41,9 @@ export default function SwapBotEdit(props) {
         setModal({
             title: `Options for ${r.name}`,
             body: <div>
+                <InputButtonLoading label="New route" name="name" onFinish={loadBot} url={`/swapbot/route/${r.id}/change`} buttonText="Save" required
+                                    value={r.name}
+                                    placeholder="Input new route of coins (symbols/ids separated by space)" {...props}/>
                 <InputButtonLoading label="Amount" value={r.amount.toString()} name="amount" onFinish={() => {
                     loadBot();
                     setModal({})
@@ -100,7 +103,7 @@ export default function SwapBotEdit(props) {
 
         <h3>Options</h3>
         <InputButtonLoading label="Name" value={bot.name} name="name" onFinish={setBot} url={`/swapbot/${bot.id}/update/`} buttonText="Save" {...props}/>
-        <Button variant="danger" onClick={botDelete}><FontAwesomeIcon icon={faTrash}/></Button>
+        <div className="text-center"><Button variant="danger" onClick={botDelete}><FontAwesomeIcon icon={faTrash}/></Button></div>
 
         <hr/>
 
@@ -119,7 +122,7 @@ export default function SwapBotEdit(props) {
                 <th>Swap amount</th>
                 <th>MinToBuy</th>
                 <th>Payed until</th>
-                <th>Exec date</th>
+                <th>Swap result</th>
                 {/*<th>Enabled</th>*/}
                 <th></th>
             </tr>
@@ -141,15 +144,18 @@ export default function SwapBotEdit(props) {
                 </td>
                 <td>
                     {r.name}
-                    <br/>
-                    <small>{r.lastTx|| r.lastError}</small>
                 </td>
                 <td>{r.amount}</td>
                 <td>{r.minToBuy}</td>
                 <td>
-                    <small>{r.payedUntil || <span>Need <MinterValue value={r.payNeeded} {...props}/><br/> <MinterAddressLink short={7} address={r.wallet.address} {...props}/></span>}</small>
+                    <small>{r.payedUntil || <span>Send <MinterValue value={r.payNeeded} {...props}/><br/> to <MinterAddressLink short={7} address={r.wallet.address} {...props}/></span>}</small>
                 </td>
-                <td><small>{r.execDateHuman}</small></td>
+                <td>
+                    <small>{r.execDateHuman}</small>
+                    <br/>
+                    <small><MinterTxLink tx={r.lastTx} {...props}/></small>
+                    <small className="text-danger">{r.lastError}</small>
+                </td>
                 {/*<td><input type="checkbox" onChange={() => routeSwitch(r)} defaultChecked={r.enabled}/></td>*/}
                 <td className="text-center">
 
@@ -164,7 +170,7 @@ export default function SwapBotEdit(props) {
 
         <Modal
             onHide={() => setModal({})}
-            show={modal.title}
+            show={!!modal.title}
             size="lg"
             aria-labelledby="contained-modal-title-vcenter"
             centered

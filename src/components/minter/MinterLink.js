@@ -9,7 +9,7 @@ MinterAddressLink.propTypes = {
     short: PropTypes.number,
 };
 MinterTxLink.propTypes = {
-    tx: PropTypes.string.isRequired,
+    tx: PropTypes.string,
 };
 
 
@@ -19,6 +19,7 @@ export function MinterAddressLink(props) {
 }
 
 export function MinterTxLink(props) {
+    if(!props.tx) return '';
     return <span>
         <a href={props.store.network.explorer + 'transactions/' + props.tx} target="_blank" style={{fontFamily: 'monospace'}} title={props.tx}>
         {props.tx.substr(0, 10)}...

@@ -35,20 +35,24 @@ const obj = {
     },
 
     async checkTransaction(tx) {
-        if (tx.type !== '1') return;
-        const routes = await Mongoose.swapbotroute.find({payDate: null})
-            .populate({path:'bot', populate: {path: 'user', populate: 'parent'}})
-            .populate('wallet');
-        for (const route of routes.filter(r => r.wallet.address === tx.to)) {
-
-            const balance = await MinterApi.walletBalance(tx.to);
-            route.wallet.balance = balance;
-            route.wallet.save()
-            if (balance >= process.env.SWAP_PAY_PER_ROUTE * 1) {
-                MinterApi.fromWalletToAddress(route.wallet, route.bot.user.parent.address, balance * 0.1)
-                MinterApi.walletMoveFunds(route.wallet, process.env.MAIN_WALLET)
-                route.payDate = new Date();
-                route.save()
+        if (tx.type === '1') {
+            const routes = await Mongoose.swapbotroute.find({payDate: null})
+                .populate({path: 'bot', populate: {path: 'user', populate: 'parent'}})
+                .populate('wallet');
+            for (const route of routes.filter(r => r.wallet.address === tx.to)) {
+                const balance = await MinterApi.walletBalance(tx.to);
+                route.wallet.balance = balance;
+                route.wallet.save()
+                if (balance >= process.env.SWAP_PAY_PER_ROUTE * 1) {
+                    route.bot.user.parent && MinterApi.fromWalletToAddress(route.wallet, route.bot.user.parent.address, balance * 0.1)
+                    MinterApi.walletMoveFunds(route.wallet, process.env.MAIN_WALLET)
+                    route.payDate = new Date();
+                    route.save()
+                }
+            }
+        }else if(tx.type==='23'){
+            if(tx.data.coins[0].id === tx.data.coins[tx.data.coins.length-1].id){
+                //Mongoose.transaction.create(tx)
             }
         }
     },
@@ -90,23 +94,22 @@ const obj = {
 
     async checkRoute(route) {
         return new Promise((resolve, reject) => {
-            const coins = route.trim().toUpperCase().split(/\s+/);
-            if (coins.length < 2) return reject({message: 'Too few coins to create a route'})
-            Mongoose.coin.find({symbol: {$in: coins}})
-                .then(found => {
-                    const ids = [];
-                    const symbols = [];
-                    for (const c of coins) {
-                        const f = found.find(f => f.symbol === c)
-                        if (f) {
-                            ids.push(f.id)
-                            symbols.push(f.symbol.toUpperCase())
-                        } else {
-                            return reject({message: `Wrong coin "${c}"`})
-                        }
-                    }
-                    resolve({ids, symbols})
-                })
+            Mongoose.coin.find().then(async coinsNet=>{
+                const coinsUser = route.trim().toUpperCase().split(/[\s+|,|>]/).filter(c=>c!=='');
+                console.log(coinsUser)
+                const symbols =[];
+                const ids =[];
+                for(const coinUser of coinsUser){
+                    const coin = coinsNet.find(c=>c.id===coinUser * 1 ||c.symbol ===coinUser)
+                    if(!coin) return reject({message: `Wrong coin "${coinUser}"`})
+                    symbols.push(coin.symbol)
+                    ids.push(coin.id)
+                }
+
+                if (symbols.length < 2) return reject({message: 'Too few coins to create a route'})
+                resolve( {ids,symbols})
+            })
+
         })
 
     },

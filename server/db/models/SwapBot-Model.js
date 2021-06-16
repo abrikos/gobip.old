@@ -50,7 +50,7 @@ modelSchema.virtual('routes', {
     ref: 'swapbotroute',
     localField: '_id',
     foreignField: 'bot',
-    //options:{match:{paymentTx:null}},
+    options:{sort:{createdAt:-1}},
     justOne: false // set true for one-to-one relationship
 });
 

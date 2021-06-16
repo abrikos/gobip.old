@@ -8,13 +8,13 @@ import md5 from "md5";
 const CronJob = require('cron').CronJob;
 
 module.exports.controller = function (app) {
-    const c3 = new CronJob('0 * * * * *', async function () {
+    const c3 = new CronJob('* * * * * *', async function () {
             SwapBotApi.coins();
         }, null, true, 'America/Los_Angeles'
     )
     //Mongoose.user.find().populate('referrals').then(console.log)
-    //Mongoose.swapbot.cleanIndexes(function (err, results) {       console.log(results)    });
-    //Mongoose.swapbotroute.deleteMany().then(console.log);
+    //Mongoose.coin.cleanIndexes(function (err, results) {       console.log(results)    });
+    //Mongoose.swapbotroute.findById('60c84298023e11b767346727').then(console.log);
     //Mongoose.coin.deleteMany().then(()=> {        SwapBotApi.coins()    });
 
 
@@ -38,20 +38,20 @@ module.exports.controller = function (app) {
     });
 
     app.post('/api/swapbot/doswap/:id', passport.isLogged, (req, res) => {
-        Mongoose.swapbotroute.findOne({_id:req.params.id, payDate:{$ne:null}})
+        Mongoose.swapbotroute.findOne({_id: req.params.id, payDate: {$ne: null}})
             .populate('wallet')
             .populate({path: 'bot', populate: 'wallet'})
-            .then(route=>{
-                if(!route.bot.user.equals(req.session.userId))  return res.status(403).send(app.locals.adaptError({message: 'Forbidden'}));
+            .then(route => {
+                if (!route.bot.user.equals(req.session.userId)) return res.status(403).send(app.locals.adaptError({message: 'Forbidden'}));
                 SwapBotApi.sendSwapRoute(route)
-                    .then(r=> {
+                    .then(r => {
                         route.lastTx = r.hash;
                         route.execDate = new Date();
                         route.save()
                         res.sendStatus(200)
                     })
-                    .catch(e=>{
-                        route.lastError = e.message.replace(/(\d+)/,'$1$1');
+                    .catch(e => {
+                        route.lastError = e.message;
                         route.execDate = new Date();
                         route.save()
                         res.status(302).send(app.locals.adaptError(e));
@@ -76,6 +76,29 @@ module.exports.controller = function (app) {
             })
     });
 
+    app.post('/api/swapbot/route/:id/change', passport.isLogged, (req, res) => {
+        Mongoose.swapbotroute.findById(req.params.id)
+            .populate('bot')
+            .then(r => {
+                if (!r) return res.status(404).send(app.locals.adaptError({message: 'Not found'}));
+                if (!r.bot.user.equals(req.session.userId)) return res.status(403).send(app.locals.adaptError({message: 'Forbidden'}));
+                SwapBotApi.checkRoute(req.body.name)
+                    .then(route => {
+                        r.ids = route.ids;
+                        r.symbols = route.symbols;
+                        r.save();
+                        res.sendStatus(200)
+                    })
+                    .catch(e => {
+                        res.status(500).send(app.locals.adaptError(e))
+                    })
+            })
+            .catch(e => {
+                res.status(500).send(app.locals.adaptError(e))
+            })
+
+    })
+
     app.post('/api/swapbot/route/:id/update', passport.isLogged, (req, res) => {
         Mongoose.swapbotroute.findById(req.params.id)
             .populate('bot')
@@ -87,6 +110,7 @@ module.exports.controller = function (app) {
                 }
                 r.save()
                 res.sendStatus(200)
+
             })
             .catch(e => {
                 res.status(500).send(app.locals.adaptError(e))
@@ -104,10 +128,11 @@ module.exports.controller = function (app) {
 
     app.post('/api/swapbot/:id/delete', passport.isLogged, (req, res) => {
         Mongoose.swapbot.findById(req.params.id)
-            .then(bot=>{
+            .then(bot => {
                 if (!bot) return res.status(404).send(app.locals.adaptError({message: 'Not found'}));
                 if (!bot.user.equals(req.session.userId)) return res.status(403).send(app.locals.adaptError({message: 'Forbidden'}));
-                Mongoose.swapbotroute.deleteMany({bot}).then(()=>{});
+                Mongoose.swapbotroute.deleteMany({bot}).then(() => {
+                });
                 bot.delete();
                 res.sendStatus(200)
             })
@@ -145,7 +170,7 @@ module.exports.controller = function (app) {
 
     app.post('/api/swapbot/route/check', async (req, res) => {
         SwapBotApi.checkRoute(req.body.newRoute)
-            .then(r=>res.send(r))
+            .then(r => res.send(r))
             .catch(e => {
                 res.status(500).send(app.locals.adaptError(e))
             })
@@ -156,29 +181,17 @@ module.exports.controller = function (app) {
             .then(bot => {
                 if (!bot) return res.status(404).send(app.locals.adaptError({message: 'Not found'}));
                 if (!req.body.newRoute) return res.status(500).send(app.locals.adaptError({message: 'Empty route'}))
-                const coins = req.body.newRoute.trim().toUpperCase().split(/\s+/);
-                Mongoose.coin.find({symbol: {$in: coins}})
-                    .then(found => {
-                        const ids = [];
-                        const symbols = [];
-                        for (const c of coins) {
-                            const f = found.find(f => f.symbol === c)
-                            if (f) {
-                                ids.push(f.id)
-                                symbols.push(f.symbol.toUpperCase())
-                            } else {
-                                return res.status(500).send(app.locals.adaptError({message: `Wrong coin "${c}"`}))
-                            }
-                        }
+                SwapBotApi.checkRoute(req.body.newRoute)
+                    .then(route => {
                         MinterApi.newWallet('swapbotroute', '', req.session.userId)
                             .then(wallet => {
-                                Mongoose.swapbotroute.create({ids, symbols, bot, wallet})
+                                Mongoose.swapbotroute.create({bot, wallet, ...route})
                                 res.sendStatus(200)
                             })
-
                     })
-
-
+                    .catch(e => {
+                        res.status(500).send(app.locals.adaptError(e))
+                    })
             })
             .catch(e => {
                 res.status(500).send(app.locals.adaptError(e))
