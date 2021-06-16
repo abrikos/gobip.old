@@ -1,13 +1,13 @@
 import moment from "moment";
-import SwapBotApi from "../../lib/SwapBotApi";
+import SwapBotApi from "../../lib/SwapRouteApi";
 
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const name = 'swapbotroute';
+const name = 'swaproute';
 
 
 const modelSchema = new Schema({
-        bot: {type: mongoose.Schema.Types.ObjectId, ref: 'swapbot'},
+        user: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
         wallet: {type: mongoose.Schema.Types.ObjectId, ref: 'wallet'},
         ids: [Number],
         symbols: [String],

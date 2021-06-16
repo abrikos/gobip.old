@@ -4,7 +4,7 @@ import InputButtonLoading from "../../components/InputButtonLoading";
 import LoginFormGoogle from "../../components/login/LoginFormGoogle";
 import {navigate} from "hookrouter";
 
-export default function SwapBot(props){
+export default function SwapRoutes(props){
     const [step,setStep] =useState(0)
     const [route,setRoute] =useState()
 
@@ -17,11 +17,7 @@ export default function SwapBot(props){
     function routeDone(r){
         setRoute(r)
         if(props.store.authenticatedUser){
-            props.store.api('/swapbot/create')
-                .then(bot=>{
-                    props.store.api(`/swapbot/${bot.id}/route/add`,{newRoute:r.symbols.join(' ')})
-                        .then(()=>navigate('/cabinet'+bot.path))
-                })
+            navigate('/cabinet/swaproutes')
         }else{
 
             setStep(2)
@@ -38,7 +34,7 @@ export default function SwapBot(props){
 
         {step===1 && <div>
             <h3>{step}. Choose coins route</h3>
-            <InputButtonLoading name="newRoute" onFinish={routeDone} url={`/swapbot/route/check`} buttonText="Done" required
+            <InputButtonLoading name="newRoute" onFinish={routeDone} url={`/swap-route/route/add`} buttonText="Done" required
                                 placeholder="Input new route of coins separated by space" {...props}/>
         </div>}
 

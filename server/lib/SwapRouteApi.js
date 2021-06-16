@@ -36,15 +36,15 @@ const obj = {
 
     async checkTransaction(tx) {
         if (tx.type === '1') {
-            const routes = await Mongoose.swapbotroute.find({payDate: null})
-                .populate({path: 'bot', populate: {path: 'user', populate: 'parent'}})
+            const routes = await Mongoose.swaproute.find({payDate: null})
+                .populate({path: 'user', populate: 'parent'})
                 .populate('wallet');
             for (const route of routes.filter(r => r.wallet.address === tx.to)) {
                 const balance = await MinterApi.walletBalance(tx.to);
                 route.wallet.balance = balance;
                 route.wallet.save()
                 if (balance >= process.env.SWAP_PAY_PER_ROUTE * 1) {
-                    route.bot.user.parent && MinterApi.fromWalletToAddress(route.wallet, route.bot.user.parent.address, balance * 0.1)
+                    route.user.parent && MinterApi.fromWalletToAddress(route.wallet, route.user.parent.address, balance * 0.1)
                     MinterApi.walletMoveFunds(route.wallet, process.env.MAIN_WALLET)
                     route.payDate = new Date();
                     route.save()
@@ -61,10 +61,10 @@ const obj = {
     async doRoutes() {
         if (this.doingRoutes) return;
         this.doingRoutes = true;
-        const routes = await Mongoose.swapbotroute.find({payDate: {$ne: null}}).populate('wallet').populate({path: 'bot', populate: 'wallet'});
+        const routes = await Mongoose.swaproute.find({payDate: {$ne: null}}).populate('wallet').populate({path: 'user', populate: 'swapWallet'});
         for (const route of routes) {
             try {
-                await this.sendSwapRoute(route)
+                await this.sendSwapRoute(route, route.user.swapWallet)
             } catch (e) {
                 route.lastError = e.message;
                 route.execDate = new Date();
@@ -75,9 +75,9 @@ const obj = {
         this.doingRoutes = false;
     },
 
-    async sendSwapRoute(route) {
+    async sendSwapRoute(route, wallet) {
         const txParams = {
-            nonce: await MinterApi.getNonce(route.bot.wallet.address),
+            nonce: await MinterApi.getNonce(wallet.address),
             type: TX_TYPE.SELL_SWAP_POOL,
             data: {
                 coins: route.ids, // route of coin IDs from spent to received
@@ -88,7 +88,7 @@ const obj = {
         //const commission = await MinterApi.getTxParamsCommission(txParams);
         txParams.data.minimumValueToBuy = route.minToBuy * 1;
         txParams.chainId = MinterApi.params.network.chainId;
-        return MinterApi.sendSignedTx(txParams, route.bot.wallet.seedPhrase);
+        return MinterApi.sendSignedTx(txParams, wallet.seedPhrase);
 
     },
 

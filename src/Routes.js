@@ -15,7 +15,7 @@ import PokerPlay from "./pages/Poker/PokerPlay";
 import PokerList from "./pages/Poker/PokerList";
 import GameList from "./games/GameList";
 import GamePlay from "./games/GamePlay";
-import SwapBot from "./pages/swap-bot/SwapBot";
+import SwapRoutes from "./pages/swap-bot/SwapRoute";
 
 export default function Routes(store) {
     const routes = {
@@ -30,7 +30,7 @@ export default function Routes(store) {
         "/poker/view/:id": (params) => <PokerPlay store={store} {...params}/>,
         "/poker/play/:id": (params) => <PokerPlay store={store} {...params}/>,
         "/games": (params) => <GameList store={store} {...params}/>,
-        "/swap-bot": (params) => <SwapBot store={store} {...params}/>,
+        "/swap-routes": (params) => <SwapRoutes store={store} {...params}/>,
         "/game/:module/:id": (params) => <GamePlay store={store} {...params}/>,
         "/login": () => <Login store={store}/>,
     };

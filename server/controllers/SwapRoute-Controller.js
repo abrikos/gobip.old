@@ -2,7 +2,7 @@ import passport from "server/lib/passport";
 import Mongoose from "../db/Mongoose";
 import MinterApi from "../lib/MinterApi";
 import randomWords from "random-words";
-import SwapBotApi from "../lib/SwapBotApi";
+import SwapBotApi from "../lib/SwapRouteApi";
 import md5 from "md5";
 
 const CronJob = require('cron').CronJob;
@@ -22,11 +22,11 @@ module.exports.controller = function (app) {
     //Mongoose.coin.find({symbol:'MNT'}).then(console.log)
     //Mongoose.wallet.findById('60c0ad8bbd0c0b2bcc35ed8d').then(console.log)
 
-    app.post('/api/swapbot/coins', (req, res) => {
+    app.post('/api/swap-route/coins', (req, res) => {
         Mongoose.coin.find().then(r => res.send(r))
     });
 
-    app.post('/api/swapbot/address/:address', (req, res) => {
+    app.post('/api/swap-route/address/:address', (req, res) => {
         MinterApi.get('/address/' + req.params.address)
             .then(a => {
                 const balance = []
@@ -37,16 +37,16 @@ module.exports.controller = function (app) {
             })
     });
 
-    app.post('/api/swapbot/doswap/:id', passport.isLogged, (req, res) => {
-        Mongoose.swapbotroute.findOne({_id: req.params.id, payDate: {$ne: null}})
+    app.post('/api/swap-route/doswap/:id', passport.isLogged, (req, res) => {
+        Mongoose.swaproute.findOne({_id: req.params.id, payDate: {$ne: null}, user:req.session.userId})
             .populate('wallet')
-            .populate({path: 'bot', populate: 'wallet'})
+            .populate({path: 'user', populate: 'swapWallet'})
             .then(route => {
-                if (!route.bot.user.equals(req.session.userId)) return res.status(403).send(app.locals.adaptError({message: 'Forbidden'}));
-                SwapBotApi.sendSwapRoute(route)
+                SwapBotApi.sendSwapRoute(route, route.user.swapWallet)
                     .then(r => {
                         route.lastTx = r.hash;
                         route.execDate = new Date();
+                        route.lastError = '';
                         route.save()
                         res.sendStatus(200)
                     })
@@ -59,7 +59,7 @@ module.exports.controller = function (app) {
             })
     });
 
-    app.post('/api/swapbot/:id/update', passport.isLogged, (req, res) => {
+    app.post('/api/swap-route/:id/update', passport.isLogged, (req, res) => {
         Mongoose.swapbot.findById(req.params.id)
             //.populate('wallet', ['address', 'balance'])
             .then(r => {
@@ -76,12 +76,11 @@ module.exports.controller = function (app) {
             })
     });
 
-    app.post('/api/swapbot/route/:id/change', passport.isLogged, (req, res) => {
-        Mongoose.swapbotroute.findById(req.params.id)
-            .populate('bot')
+    app.post('/api/swap-route/route/:id/change', passport.isLogged, (req, res) => {
+        Mongoose.swaproute.findById(req.params.id)
             .then(r => {
                 if (!r) return res.status(404).send(app.locals.adaptError({message: 'Not found'}));
-                if (!r.bot.user.equals(req.session.userId)) return res.status(403).send(app.locals.adaptError({message: 'Forbidden'}));
+                if (!r.user.equals(req.session.userId)) return res.status(403).send(app.locals.adaptError({message: 'Forbidden'}));
                 SwapBotApi.checkRoute(req.body.name)
                     .then(route => {
                         r.ids = route.ids;
@@ -99,26 +98,35 @@ module.exports.controller = function (app) {
 
     })
 
-    app.post('/api/swapbot/route/:id/update', passport.isLogged, (req, res) => {
-        Mongoose.swapbotroute.findById(req.params.id)
-            .populate('bot')
+    app.post('/api/swap-route/route/:id/update', passport.isLogged, (req, res) => {
+        Mongoose.swaproute.findById(req.params.id)
             .then(r => {
                 if (!r) return res.status(404).send(app.locals.adaptError({message: 'Not found'}));
-                if (!r.bot.user.equals(req.session.userId)) return res.status(403).send(app.locals.adaptError({message: 'Forbidden'}));
+                if (!r.user.equals(req.session.userId)) return res.status(403).send(app.locals.adaptError({message: 'Forbidden'}));
                 for (const key in req.body) {
                     r[key] = req.body[key]
                 }
                 r.save()
                 res.sendStatus(200)
-
             })
             .catch(e => {
                 res.status(500).send(app.locals.adaptError(e))
             })
     });
 
-    app.post('/api/swapbot/list', passport.isLogged, (req, res) => {
-        Mongoose.swapbot.find({user: req.session.userId})
+    app.post('/api/swap-route/wallet/create', passport.isLogged, (req, res) => {
+        Mongoose.user.findById(req.session.userId)
+            .then(user => {
+                MinterApi.newWallet('swap-route', '', req.session.userId)
+                    .then(wallet => {
+                        user.swapWallet = wallet;
+                        user.save();
+                        res.sendStatus(200)
+                    })
+            })
+    })
+    app.post('/api/swap-route/list', passport.isLogged, (req, res) => {
+        Mongoose.swaproute.find({user: req.session.userId})
             .populate('wallet', ['address', 'balance'])
             .then(r => res.send(r))
             .catch(e => {
@@ -126,7 +134,31 @@ module.exports.controller = function (app) {
             })
     });
 
-    app.post('/api/swapbot/:id/delete', passport.isLogged, (req, res) => {
+    app.post('/api/swap-route/wallet', passport.isLogged, (req, res) => {
+        Mongoose.user.findById(req.session.userId)
+            .populate('swapWallet', ['address', 'balance'])
+            .then(user => {
+                const wallet = user.swapWallet;
+                if (!wallet) return res.send({})
+                const {address} = wallet;
+                MinterApi.get('/address/' + wallet.address)
+                    .then(a => {
+                        const balance = []
+                        for (const b of a.balance) {
+                            balance.push({symbol: b.coin.symbol, value: MinterApi.fromPip(b.value)})
+                        }
+                        res.send({balance, address})
+                    })
+                    .catch(e => {
+                        res.status(500).send(app.locals.adaptError(e))
+                    })
+            })
+            .catch(e => {
+                res.status(500).send(app.locals.adaptError(e))
+            })
+    });
+
+    app.post('/api/swap-route/:id/delete', passport.isLogged, (req, res) => {
         Mongoose.swapbot.findById(req.params.id)
             .then(bot => {
                 if (!bot) return res.status(404).send(app.locals.adaptError({message: 'Not found'}));
@@ -141,7 +173,7 @@ module.exports.controller = function (app) {
             })
     });
 
-    app.post('/api/swapbot/route/:id/delete', passport.isLogged, (req, res) => {
+    app.post('/api/swap-route/route/:id/delete', passport.isLogged, (req, res) => {
         Mongoose.swapbotroute.findById(req.params.id)
             .populate('bot')
             .then(route => {
@@ -155,7 +187,7 @@ module.exports.controller = function (app) {
             })
     });
 
-    app.post('/api/swapbot/:id/view', passport.isLogged, (req, res) => {
+    app.post('/api/swap-route/:id/view', passport.isLogged, (req, res) => {
         Mongoose.swapbot.findById(req.params.id)
             .populate('wallet', ['address', 'balance'])
             .populate({path: 'routes', populate: {path: 'wallet', select: ['address', 'balanceReal']}})
@@ -168,7 +200,7 @@ module.exports.controller = function (app) {
     });
 
 
-    app.post('/api/swapbot/route/check', async (req, res) => {
+    app.post('/api/swap-route/route/check', async (req, res) => {
         SwapBotApi.checkRoute(req.body.newRoute)
             .then(r => res.send(r))
             .catch(e => {
@@ -176,29 +208,22 @@ module.exports.controller = function (app) {
             })
     });
 
-    app.post('/api/swapbot/:id/route/add', passport.isLogged, async (req, res) => {
-        Mongoose.swapbot.findById(req.params.id)
-            .then(bot => {
-                if (!bot) return res.status(404).send(app.locals.adaptError({message: 'Not found'}));
-                if (!req.body.newRoute) return res.status(500).send(app.locals.adaptError({message: 'Empty route'}))
-                SwapBotApi.checkRoute(req.body.newRoute)
-                    .then(route => {
-                        MinterApi.newWallet('swapbotroute', '', req.session.userId)
-                            .then(wallet => {
-                                Mongoose.swapbotroute.create({bot, wallet, ...route})
-                                res.sendStatus(200)
-                            })
-                    })
-                    .catch(e => {
-                        res.status(500).send(app.locals.adaptError(e))
+    app.post('/api/swap-route/route/add', passport.isLogged, async (req, res) => {
+        SwapBotApi.checkRoute(req.body.newRoute)
+            .then(route => {
+                MinterApi.newWallet('swap-route-pay', '', req.session.userId)
+                    .then(wallet => {
+                        Mongoose.swaproute.create({user:req.session.userId, wallet, ...route})
+                        res.sendStatus(200)
                     })
             })
             .catch(e => {
                 res.status(500).send(app.locals.adaptError(e))
             })
+
     });
 
-    app.post('/api/swapbot/create', passport.isLogged, (req, res) => {
+    app.post('/api/swap-route/create', passport.isLogged, (req, res) => {
         MinterApi.newWallet('swapbot', '', req.session.userId)
             .then(wallet => {
                 const name = randomWords({

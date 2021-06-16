@@ -6,7 +6,7 @@ import MixerApi from "server/lib/MixerApi";
 import CryptoApi from "../lib/CryptoApi";
 import BetApi from "../lib/BetApi";
 import PokerApi from "../games/PokerApi";
-import SwapBotApi from "../lib/SwapBotApi";
+import SwapBotApi from "../lib/SwapRouteApi";
 
 const CronJob = require('cron').CronJob;
 

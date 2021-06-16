@@ -11,7 +11,7 @@ import ErrorPage from "../../components/service/ErrorPage";
 export default function ThemeMain(props) {
     const links = [
         {path: '/', label: 'Home', icon: faHome},
-        {path: '/swap-bot', label: 'Swap coins', icon: faRobot},
+        {path: '/swap-routes', label: 'Swap routes', icon: faRobot},
         //{path: '/games', label: 'Games', icon: faGamepad},
         {path: '/mixer', label: props.store.network.coin + ' Mixer', icon: faBlender},
         {path: '/lottery/winners', label: 'Banner lottery', icon: faImages},

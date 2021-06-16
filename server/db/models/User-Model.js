@@ -13,6 +13,7 @@ const modelSchema = new Schema({
         referral: String,
         parent: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
         gameWallet: {type: mongoose.Schema.Types.ObjectId, ref: 'wallet'},
+        swapWallet: {type: mongoose.Schema.Types.ObjectId, ref: 'wallet'},
         admin: {type: Boolean},
         virtualBalance: {type: Number, default: 100000},
         realBalance: {type: Number, default: 0},
