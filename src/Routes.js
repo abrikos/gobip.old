@@ -15,7 +15,7 @@ import PokerPlay from "./pages/Poker/PokerPlay";
 import PokerList from "./pages/Poker/PokerList";
 import GameList from "./games/GameList";
 import GamePlay from "./games/GamePlay";
-import SwapRoutes from "./pages/swap-bot/SwapRoute";
+import SwapRoutes from "./pages/swap-route/SwapRoute";
 
 export default function Routes(store) {
     const routes = {

@@ -7,7 +7,7 @@ import BannerCabinet from "pages/banner/BannerCabinet";
 import BetCabinet from "../bet/BetCabinet";
 import CabinetUser from "./CabinetUser";
 import GameList from "../../games/GameList";
-import SwapRoutesCabinet from "../swap-bot/SwapRoutesCabinet";
+import SwapRoutesCabinet from "../swap-route/SwapRoutesCabinet";
 
 export default function Cabinet(props) {
     const [user,setUser] = useState();
