@@ -29,6 +29,7 @@ module.exports.controller = function (app) {
     app.post('/api/swap-route/transactions', (req, res) => {
         Mongoose.transaction.find({type:'23'})
             .sort({createdAt:-1})
+            .limit(30)
             .then(r=>res.send(r))
     });
 

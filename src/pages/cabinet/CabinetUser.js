@@ -4,12 +4,7 @@ import {Button, Form, FormControl} from "react-bootstrap";
 import UserAvatar from "./UserAvatar";
 
 export default function CabinetUser(props) {
-    const [user, setUser] = useState();
-    useEffect(() => {
-        props.store.api('/cabinet/user')
-            .then(setUser)
-
-    }, [props.control])
+    const [user, setUser] = useState(props.user);
 
     function submit(e) {
         e.preventDefault();

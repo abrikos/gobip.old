@@ -14,7 +14,7 @@ export default function SwapRoutes(props){
         if(props.store.authenticatedUser && route){
             routeDone(route)
         }
-        props.store.api('/swap-route/transaction')
+        props.store.api('/swap-route/transactions')
             .then(setTrensactions)
     },[props.store.authenticatedUser])
 
@@ -34,7 +34,7 @@ export default function SwapRoutes(props){
             You can create your own coin swap routes
         </div>
 
-        {step===0 &&<Button onClick={()=>setStep(1)}>Create own swap route</Button>}
+        {step===0 &&<Button onClick={()=>navigate('/cabinet/swaproutes')}>Create own swap route</Button>}
 
         {step===1 && <div>
             <h3>{step}. Choose coins route</h3>
@@ -46,8 +46,11 @@ export default function SwapRoutes(props){
             <h3>{step}. Please login to the system</h3>
             <LoginFormGoogle type="button" {...props}/>
         </div>}
-        <h3>Success arbitrage routes</h3>
-        <table>
+
+
+        <hr/>
+        <h3>Success arbitrage swap routes</h3>
+        <table className="table">
             <thead>
             <th>Date</th>
             <th>Route</th>
@@ -55,7 +58,7 @@ export default function SwapRoutes(props){
             </thead>
             <tbody>
             {transactions.map(tx=><tr key={tx.hash}>
-                <td>{tx.date}</td>
+                <td>{tx.dateHuman}</td>
                 <td>{tx.data.coins.map(c=>c.symbol).join(' > ')}</td>
                 <td><MinterTxLink tx={tx.hash} {...props}/></td>
                   </tr>)}

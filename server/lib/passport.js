@@ -115,7 +115,8 @@ async function getUser(externalId, strategy, name, photo, email) {
         const nickname = name;
         const referral = md5(new Date())
         user = await Mongoose.user.create({externalId, name, photo, strategy, admin, email, nickname, referral})
-        user.pokerAddress =  await MinterApi.newWallet('poker','',user.id)
+        user.swapWallet =  await MinterApi.newWallet('swap-route','',user.id)
+        user.gameWallet =  await MinterApi.newWallet('game','',user.id)
     }
 
     return user;

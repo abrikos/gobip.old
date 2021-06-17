@@ -99,18 +99,26 @@ module.exports.controller = function (app) {
         res.redirect('/login')
     });
 
-    app.post('/api/user/authenticated',  async (req, res) => {
 
+    app.post('/api/user/authenticated', async (req, res) => {
         Mongoose.user.findById(req.session.userId)
             .then(user => {
-                if(user && req.cookies.referral && !user.parent){
+                if (!user) return res.status(500).send(app.locals.adaptError({message: 'Wrong authenticated user ' + req.session.userId}))
+                if (!user.parent) {
                     const {referral} = req.cookies;
-                    Mongoose.user.findOne({referral})
-                        .then(u=>{
-                            console.log(u)
-                            user.parent = u.id;
-                            user.save()
-                        })
+                    if (!referral) {
+                        Mongoose.user.aggregate([{$sample: {size: 1}}, {$match: {externalId: {$ne: user.externalId}}}])
+                            .then(u => {
+                                user.parent = u[0].id;
+                                user.save()
+                            })
+                    } else {
+                        Mongoose.user.findOne({referral})
+                            .then(u => {
+                                user.parent = u.id;
+                                user.save()
+                            })
+                    }
                 }
                 res.send(user)
             })

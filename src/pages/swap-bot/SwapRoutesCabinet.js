@@ -9,6 +9,7 @@ import {navigate} from "hookrouter";
 import "./swap-route.sass"
 import ButtonLoading from "../../components/ButtonLoading";
 import CopyButton from "../../components/copy-button/CopyButton";
+import Loader from "../../components/Loader";
 
 export default function SwapRoutesCabinet(props) {
     const [routes, setRoutes] = useState([]);
@@ -75,16 +76,16 @@ export default function SwapRoutesCabinet(props) {
                 {ref} <CopyButton text={ref}/>
             </code>
         </div>
-        {!wallet.address && <Button onClick={createWallet}>Create wallet for routes</Button>}
+        {/*{!wallet.address && <Button onClick={createWallet}>Create wallet for routes</Button>}*/}
 
 
-        {wallet.address && <div>
+        {!wallet.address ? <div><Button onClick={createWallet}>Create wallet for routes</Button><Loader/></div> : <div>
             <div className="row">
                 <div className="col-9">
                     <div className="alert alert-info">
-                        Address for the routes: <MinterAddressLink address={wallet.address} {...props}/>
+                        Top up the balance of this wallet with coins that you plan to use in exchanges: <MinterAddressLink address={wallet.address} {...props}/>
                         <br/>
-                        Send on it first coins for swapping
+
                     </div>
                 </div>
                 <div className="col-3">
@@ -96,28 +97,31 @@ export default function SwapRoutesCabinet(props) {
                         </tr>)}
                         </tbody>
                     </table>
-                    {!!wallet.balance.length && <ButtonLoading
-                        onFinish={r => {
-                            console.log('onFinis', r)
-                            //setSuccess(<div>Withdraw TX: <MinterTxLink tx={r.hash} {...props}/></div>);
-                            loadRoutes()
-                        }}
-                        url={'/cabinet/swap-route/wallet/withdraw/'}
-                        variant={'warning'}
-                        confirmMessage={`Withdraw all to ${props.store.authenticatedUser.address}?`}
-                        {...props}>
-                        Withdraw
-                    </ButtonLoading>}
+                    {!wallet.balance.length && <div className="text-danger">Empty balance</div>}
+
                 </div>
             </div>
-
-
-            <h3>Routes</h3>
+            <div className="text-center">
+                {!!wallet.balance.length && <ButtonLoading
+                    onFinish={r => {
+                        console.log('onFinis', r)
+                        //setSuccess(<div>Withdraw TX: <MinterTxLink tx={r.hash} {...props}/></div>);
+                        loadRoutes()
+                    }}
+                    url={'/cabinet/swap-route/wallet/withdraw/'}
+                    variant={'warning'}
+                    confirmMessage={`Withdraw all to ${props.store.authenticatedUser.address}?`}
+                    {...props}>
+                    Withdraw all to your address <MinterAddressLink address={props.user.address} {...props}/>
+                </ButtonLoading>}
+            </div>
+            <hr/>
+            <h3>Routes </h3>
 
             <InputButtonLoading label="New route" name="newRoute" onFinish={loadRoutes} url={`/swap-route/route/add`} buttonText="Add" required
-                                placeholder="Input new route of coins separated by space" {...props}/>
+                                placeholder="Input ids/symbols of coins separated by space or comma" {...props}/>
 
-
+            <small>Each route must be activated by paying <MinterValue value={props.store.params.swap.routePay} {...props}/></small>
             <table className="table table-striped">
                 <thead>
                 <tr>

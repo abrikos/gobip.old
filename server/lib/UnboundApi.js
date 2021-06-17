@@ -7,7 +7,7 @@ const UnboundApi = {
         data.value = tx.data.value * 1e-18;
         data.coin = tx.data.coin.symbol;
         await Mongoose.unbound.create(tx)
-            .catch(e=>console.log('Unbound exists'))
+            .catch(e => console.log('Unbound exists'))
     },
 
     async daily(limit, match) {
@@ -29,7 +29,7 @@ const UnboundApi = {
             },
 
             {$addFields: {coin: "$coin"}},
-            {$sort: {date: 1, _id: 1}},
+            //{$sort: {date: 1, _id: 1}},
             {
                 $project: {
                     date: {$dateToString: {format: "%Y-%m-%d", date: "$date", timezone: "UTC"}},
@@ -40,9 +40,12 @@ const UnboundApi = {
 
         ]
         aggregateDaily.push({$match: match})
-        return Mongoose.unbound.aggregate(aggregateDaily).limit(limit)
+        const arr = await Mongoose.unbound.aggregate(aggregateDaily).sort({date: -1}).limit(limit)
+        //return arr;
+        return arr.sort((a, b) => a.date > b.date)
     }
 }
+
 //Mongoose.transaction.findOne().then(console.log)
 //UnboundApi.daily(30, {coin: 'BIP'})    .then(console.log)
 export default UnboundApi;

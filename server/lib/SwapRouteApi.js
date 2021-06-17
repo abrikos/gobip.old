@@ -54,8 +54,9 @@ const obj = {
             if (tx.data.coins[0].id === tx.data.coins[tx.data.coins.length - 1].id && tx.data.value_to_sell * 1 < tx.data.minimum_value_to_buy * 1) {
                 tx.coin = '';
                 tx.value = 0;
-                console.log(tx)
                 Mongoose.transaction.create(tx)
+                    .then(()=>{})
+                    .catch(()=>{})
             }
         }
     },
@@ -98,7 +99,6 @@ const obj = {
                 .catch(e => {
                     const message = e.code === '302' ? `MinToBuy ${MinterApi.fromPip(e.data.maximum_value_to_sell)}. Can buy only ${MinterApi.fromPip(e.data.needed_spend_value)}` : e.message
                     route.lastError = message;
-                    route.execDate = new Date();
                     route.save()
                     reject(e);
                 })

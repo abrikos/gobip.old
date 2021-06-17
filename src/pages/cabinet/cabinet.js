@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import MyBreadCrumb from "components/MyBreadCrumb";
 import {A} from "hookrouter";
 import "./cabinet.sass"
@@ -10,6 +10,7 @@ import GameList from "../../games/GameList";
 import SwapRoutesCabinet from "../swap-bot/SwapRoutesCabinet";
 
 export default function Cabinet(props) {
+    const [user,setUser] = useState();
     const pages = {
         user: {label: 'User'},
         mixer: {label: 'Mixer wallets'},
@@ -19,6 +20,11 @@ export default function Cabinet(props) {
         swaproutes: {label: 'Swap routes'},
     }
 
+    useEffect(() => {
+        props.store.api('/cabinet/user')
+            .then(setUser)
+
+    }, [props.control])
 
     return <div className="cabinet">
         <MyBreadCrumb items={[
@@ -29,12 +35,12 @@ export default function Cabinet(props) {
             <div >{Object.keys(pages).map(p => <span key={p}  className={`m-2 ${p===props.control ? 'glowed':''}`}><A href={`/cabinet/${p}`}>{pages[p].label}</A></span>)}</div>
             <hr/>
             <div>
-                {props.control === 'mixer' && <MixerCabinet {...props}/>}
-                {props.control === 'banners' && <BannerCabinet {...props}/>}
-                {props.control === 'bet' && <BetCabinet {...props}/>}
-                {props.control === 'user' && <CabinetUser {...props}/>}
-                {props.control === 'swaproutes' && <SwapRoutesCabinet {...props}/>}
-                {props.control === 'games' && <GameList {...props}/>}
+                {props.control === 'mixer' && <MixerCabinet user={user} {...props}/>}
+                {props.control === 'banners' && <BannerCabinet user={user} {...props}/>}
+                {props.control === 'bet' && <BetCabinet user={user} {...props}/>}
+                {props.control === 'user' && <CabinetUser user={user} {...props}/>}
+                {props.control === 'swaproutes' && <SwapRoutesCabinet user={user} {...props}/>}
+                {props.control === 'games' && <GameList user={user} {...props}/>}
             </div>
         </div>
 
