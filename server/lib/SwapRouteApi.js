@@ -50,9 +50,12 @@ const obj = {
                     route.save()
                 }
             }
-        }else if(tx.type==='23'){
-            if(tx.data.coins[0].id === tx.data.coins[tx.data.coins.length-1].id){
-                //Mongoose.transaction.create(tx)
+        } else if (tx.type === '23') {
+            if (tx.data.coins[0].id === tx.data.coins[tx.data.coins.length - 1].id && tx.data.value_to_sell * 1 < tx.data.minimum_value_to_buy * 1) {
+                tx.coin = '';
+                tx.value = 0;
+                console.log(tx)
+                Mongoose.transaction.create(tx)
             }
         }
     },
@@ -61,16 +64,11 @@ const obj = {
     async doRoutes() {
         if (this.doingRoutes) return;
         this.doingRoutes = true;
-        const routes = await Mongoose.swaproute.find({payDate: {$ne: null}}).populate('wallet').populate({path: 'user', populate: 'swapWallet'});
+        const routes = await Mongoose.swaproute.find({payDate: {$ne: null}, cron: true})
+            .populate('wallet')
+            .populate({path: 'user', populate: 'swapWallet'});
         for (const route of routes) {
-            try {
-                await this.sendSwapRoute(route, route.user.swapWallet)
-            } catch (e) {
-                route.lastError = e.message;
-                route.execDate = new Date();
-                route.save()
-                //.then(r=>console.log(r.execDate));
-            }
+            await this.sendSwapRoute(route, route.user.swapWallet)
         }
         this.doingRoutes = false;
     },
@@ -88,26 +86,42 @@ const obj = {
         //const commission = await MinterApi.getTxParamsCommission(txParams);
         txParams.data.minimumValueToBuy = route.minToBuy * 1;
         txParams.chainId = MinterApi.params.network.chainId;
-        return MinterApi.sendSignedTx(txParams, wallet.seedPhrase);
+        return new Promise((resolve, reject) => {
+            MinterApi.sendSignedTx(txParams, wallet.seedPhrase)
+                .then(r => {
+                    route.lastTx = r.hash;
+                    route.execDate = new Date();
+                    route.lastError = '';
+                    route.save()
+                    resolve()
+                })
+                .catch(e => {
+                    const message = e.code === '302' ? `MinToBuy ${MinterApi.fromPip(e.data.maximum_value_to_sell)}. Can buy only ${MinterApi.fromPip(e.data.needed_spend_value)}` : e.message
+                    route.lastError = message;
+                    route.execDate = new Date();
+                    route.save()
+                    reject(e);
+                })
+        })
 
     },
 
     async checkRoute(route) {
         return new Promise((resolve, reject) => {
-            Mongoose.coin.find().then(async coinsNet=>{
-                const coinsUser = route.trim().toUpperCase().split(/[\s+|,|>]/).filter(c=>c!=='');
+            Mongoose.coin.find().then(async coinsNet => {
+                const coinsUser = route.trim().toUpperCase().split(/[\s+|,|>]/).filter(c => c !== '');
                 console.log(coinsUser)
-                const symbols =[];
-                const ids =[];
-                for(const coinUser of coinsUser){
-                    const coin = coinsNet.find(c=>c.id===coinUser * 1 ||c.symbol ===coinUser)
-                    if(!coin) return reject({message: `Wrong coin "${coinUser}"`})
+                const symbols = [];
+                const ids = [];
+                for (const coinUser of coinsUser) {
+                    const coin = coinsNet.find(c => c.id === coinUser * 1 || c.symbol === coinUser)
+                    if (!coin) return reject({message: `Wrong coin "${coinUser}"`})
                     symbols.push(coin.symbol)
                     ids.push(coin.id)
                 }
 
                 if (symbols.length < 2) return reject({message: 'Too few coins to create a route'})
-                resolve( {ids,symbols})
+                resolve({ids, symbols})
             })
 
         })

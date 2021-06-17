@@ -33,9 +33,12 @@ module.exports.controller = function (app) {
 
     const c3 = new CronJob('0 0 * * * *', async function () {
             CryptoApi.cryptoCompare('BTC-USD')
-            CryptoApi.minterBipUsd()
+            CryptoApi.minterBipUsd();
+            MinterApi.updateBalances()
         }, null, true, 'America/Los_Angeles'
     )
+
+
 
     MinterApi.createMainWallet();
     BannerApi.lotteryInit()

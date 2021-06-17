@@ -44,15 +44,11 @@ export default function SwapRoutesCabinet(props) {
                 <InputButtonLoading label="New route" name="name" onFinish={loadRoutes} url={`/swap-route/route/${r.id}/change`} buttonText="Save" required
                                     value={r.name}
                                     placeholder="Input new route of coins (symbols/ids separated by space)" {...props}/>
-                <InputButtonLoading label="Amount" value={r.amount.toString()} name="amount" onFinish={() => {
-                    loadRoutes();
-                    setModal({})
-                }} url={`/swap-route/route/${r.id}/update/`} buttonText="Save" {...props}/>
+                <InputButtonLoading label="Amount" value={r.amount} name="amount" onFinish={loadRoutes} url={`/swap-route/route/${r.id}/update/`}
+                                    buttonText="Save" {...props}/>
                 <hr/>
-                <InputButtonLoading label="MinToBuy" value={r.minToBuy.toString()} name="minToBuy" onFinish={() => {
-                    loadRoutes();
-                    setModal({})
-                }} url={`/swap-route/route/${r.id}/update/`} buttonText="Save" {...props}/>
+                <InputButtonLoading label="MinToBuy" value={r.minToBuy} name="minToBuy" onFinish={loadRoutes()} url={`/swap-route/route/${r.id}/update/`}
+                                    buttonText="Save" {...props}/>
                 <small className="text-danger">{r.execDateHuman}: {r.lastError}</small>
             </div>
         })
@@ -60,6 +56,12 @@ export default function SwapRoutesCabinet(props) {
 
     function createWallet() {
         props.store.api('/swap-route/wallet/create')
+            .then(loadRoutes)
+    }
+
+    function changeCron(e, r) {
+        console.log(e.target.checked)
+        props.store.api(`/swap-route/route/${r.id}/update/`, {cron: e.target.checked})
             .then(loadRoutes)
     }
 
@@ -90,7 +92,7 @@ export default function SwapRoutesCabinet(props) {
                         <tbody>
                         {wallet.balance.map(b => <tr key={b.symbol}>
                             <td className="text-right">{b.symbol}</td>
-                            <td>{b.value}</td>
+                            <td>{(b.value * 1).toFixed(3)}</td>
                         </tr>)}
                         </tbody>
                     </table>
@@ -121,7 +123,7 @@ export default function SwapRoutesCabinet(props) {
                 <tr>
                     <th></th>
                     <th>Route</th>
-                    <th>Swap amount</th>
+                    <th>Amount</th>
                     <th>MinToBuy</th>
                     <th>Payed until</th>
                     <th>Swap result</th>
@@ -132,17 +134,22 @@ export default function SwapRoutesCabinet(props) {
                 <tbody>
                 {routes.map((r, i) => <tr key={i} className={r.payDate ? '' : 'bg-warning'}>
                     <td>
-                        {r.payDate && <ButtonLoading
-                            onFinish={r => {
-                                console.log('onFinis', r)
-                                //setSuccess(<div>Withdraw TX: <MinterTxLink tx={r.hash} {...props}/></div>);
-                                loadRoutes()
-                            }}
-                            url={`/swap-route/doswap/${r.id}`}
-                            variant={'primary'}
-                            {...props}>
+                        {r.payDate && <span>
+                            <ButtonLoading
+                                onFinish={r => {
+                                    console.log('onFinis', r)
+                                    //setSuccess(<div>Withdraw TX: <MinterTxLink tx={r.hash} {...props}/></div>);
+                                    loadRoutes()
+                                }}
+                                url={`/swap-route/doswap/${r.id}`}
+                                variant={'primary'}
+                                {...props}>
                             Swap
-                        </ButtonLoading>}
+                        </ButtonLoading>
+                            <br/> auto launch
+                            <br/>
+                        <input type="checkbox" onChange={e => changeCron(e, r)} defaultChecked={r.cron}/>
+                        </span>}
                     </td>
                     <td>
                         {r.name}
@@ -154,13 +161,12 @@ export default function SwapRoutesCabinet(props) {
                                                                                                                                     address={r.wallet.address} {...props}/></span>}</small>
                     </td>
                     <td>
-                        <small>{r.execDateHuman}</small>
-                        <br/>
-                        <small><MinterTxLink tx={r.lastTx} {...props}/></small>
+                        <small className="d-block">{r.execDateHuman}</small>
+                        <small className="d-block"><MinterTxLink tx={r.lastTx} {...props}/></small>
                         <small className="text-danger">{r.lastError}</small>
                     </td>
                     {/*<td><input type="checkbox" onChange={() => routeSwitch(r)} defaultChecked={r.enabled}/></td>*/}
-                    <td className="text-center">
+                    <td className="text-left">
 
                         {/*{!r.payedUntil && <Button size="sm" variant="primary" title="Payment" onClick={() => modalPayment(r)}><FontAwesomeIcon icon={faCoins}/></Button>}*/}
 

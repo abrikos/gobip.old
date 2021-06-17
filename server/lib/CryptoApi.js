@@ -57,7 +57,8 @@ const obj = {
             },
             {$match: {pair}}
         ];
-        return Mongoose.crypto.aggregate(aggregateDaily).limit(10)
+        const arr = await Mongoose.crypto.aggregate(aggregateDaily).sort({date:-1}).limit(30);
+        return arr.sort((a,b)=>a.date>b.date)
     }
 
 }

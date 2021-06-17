@@ -12,6 +12,10 @@ module.exports.controller = function (app) {
             SwapBotApi.coins();
         }, null, true, 'America/Los_Angeles'
     )
+    const c10 = new CronJob('*/10 * * * * *', async function () {
+            SwapBotApi.doRoutes();
+        }, null, true, 'America/Los_Angeles'
+    )
     //Mongoose.user.find().populate('referrals').then(console.log)
     //Mongoose.coin.cleanIndexes(function (err, results) {       console.log(results)    });
     //Mongoose.swapbotroute.findById('60c84298023e11b767346727').then(console.log);
@@ -21,6 +25,12 @@ module.exports.controller = function (app) {
     //MinterApi.getTxParamsCommission({type: '0x01', nonce: 1, data: {to: 'Mxaaa40f7d2e91705c75a0430557c469a5850aeaaa', value: 100, coin: 0}, chainId: 2}).then(console.log)
     //Mongoose.coin.find({symbol:'MNT'}).then(console.log)
     //Mongoose.wallet.findById('60c0ad8bbd0c0b2bcc35ed8d').then(console.log)
+
+    app.post('/api/swap-route/transactions', (req, res) => {
+        Mongoose.transaction.find({type:'23'})
+            .sort({createdAt:-1})
+            .then(r=>res.send(r))
+    });
 
     app.post('/api/swap-route/coins', (req, res) => {
         Mongoose.coin.find().then(r => res.send(r))
@@ -43,18 +53,9 @@ module.exports.controller = function (app) {
             .populate({path: 'user', populate: 'swapWallet'})
             .then(route => {
                 SwapBotApi.sendSwapRoute(route, route.user.swapWallet)
-                    .then(r => {
-                        route.lastTx = r.hash;
-                        route.execDate = new Date();
-                        route.lastError = '';
-                        route.save()
-                        res.sendStatus(200)
-                    })
+                    .then(()=>res.sendStatus(200))
                     .catch(e => {
-                        route.lastError = e.message;
-                        route.execDate = new Date();
-                        route.save()
-                        res.status(302).send(app.locals.adaptError(e));
+                        res.status(500).send(app.locals.adaptError(e))
                     })
             })
     });

@@ -13,9 +13,9 @@ export default function BetCryptoChart(props){
     },[])
 
     function loadData(){
-        props.store.api(`/bet/crypto/${props.pair}`)
+        props.store.api(`/bet/crypto/${props.pair}`,{},true)
             .then(d=> {
-                chartRef.current && chartRef.current.chart.series[0].setData(d.map(d => [d.date,d.value]))
+                //chartRef.current && chartRef.current.chart.series[0].setData(d.map(d => [d.date,d.value]))
                 setData(d)
             });
     }

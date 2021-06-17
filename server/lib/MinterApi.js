@@ -134,7 +134,7 @@ const obj = {
     },
 
     fromPip(value) {
-        return util.convertFromPip(value)
+        return (util.convertFromPip(value) * 1).toFixed(3)
     },
 
     async getTxParamsCommission(txParamsOrig) {

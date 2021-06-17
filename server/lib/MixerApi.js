@@ -6,7 +6,6 @@ const obj = {
     usePayload: true,
 
 
-
     async createAddressForMixing(to) {
         return new Promise((resolve, reject) => {
             if (!MinterApi.checkAddress(to)) return reject({message: 'Invalid address'})
@@ -55,11 +54,11 @@ const obj = {
             address: tx.to
         });
         if (!fromMultiSend) return;
-        console.log('TX form Mixer wallet',fromMultiSend.address, 'User', fromMultiSend.user)
+        console.log('TX form Mixer wallet', fromMultiSend.address, 'User', fromMultiSend.user)
         fromMultiSend.balance = await MinterApi.walletBalance(fromMultiSend.address);
-        console.log('New balance',fromMultiSend.balance)
+        console.log('New balance', fromMultiSend.balance)
         fromMultiSend.save();
-        if(fromMultiSend.user) return;
+        if (fromMultiSend.user) return;
         const singleSends = await this.mixedPayments(fromMultiSend, tx);
         const payment = new Mongoose.payment({
             tx: tx.hash,
@@ -83,13 +82,8 @@ const obj = {
     },
 
     async totalAmount() {
-        const res = await Mongoose.wallet.aggregate([{
-            $group: {
-                _id: "$type",
-                amount: {$sum: "$balance"}
-            }
-        }, {$match: {"_id": "mixer"}}])
-        return res[0].amount
+        const res = await Mongoose.wallet.find({balanceReal: {$gt: 0}, type: 'mixer'});
+        return res.reduce((n, {balance}) => n + balance, 0)
     },
 
 

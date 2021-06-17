@@ -46,6 +46,9 @@ module.exports.controller = function (app) {
             .then(r => res.send(r))
     });
 
+    MixerApi.totalAmount()
+
+
     app.post('/api/mixer/total-amount', async (req, res) => {
         res.send({amount: await MixerApi.totalAmount()})
     });

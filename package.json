@@ -30,7 +30,7 @@
     "highcharts-react-official": "^3.0.0",
     "hookrouter": "^1.2.5",
     "md5": "^2.3.0",
-    "minter-js-sdk": "^0.38.3",
+    "minter-js-sdk": "^0.38.2",
     "minterjs-wallet": "^6.1.0",
     "moment": "^2.29.1",
     "mongoose": "^5.12.12",

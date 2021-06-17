@@ -14,9 +14,10 @@ const modelSchema = new Schema({
         payDate: Date,
         execDate: Date,
         lastTx: String,
-        minToBuy: {type: Number, default: 105},
-        amount: {type: Number, default: 100},
+        minToBuy: {type: Number, default: 0},
+        amount: {type: Number, default: 0},
         lastError: String,
+        cron: Boolean,
     },
     {
         timestamps: {createdAt: 'createdAt'},
