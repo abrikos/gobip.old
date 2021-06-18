@@ -117,7 +117,7 @@ module.exports.controller = function (app) {
     app.post('/api/user/authenticated', async (req, res) => {
         Mongoose.user.findById(req.session.userId)
             .then(user => {
-                if (!user) return res.status(500).send(app.locals.adaptError({message: 'Wrong authenticated user ' + req.session.userId}))
+                if (!user) return res.status(401).send({message: 'Wrong authenticated user ' + req.session.userId})
                 if (!user.parent) {
                     const {referral} = req.cookies;
                     if (!referral) {

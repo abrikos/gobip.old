@@ -42,10 +42,11 @@ export default function Application() {
                         if(process.env.REACT_APP_LOG_ENABLE * 1 && !noLogs) console.timeEnd(label)
                     })
                     .catch(err => {
+                        console.log(err.response)
                         const error = {
                             path,
                             error: err.response && err.response.status,
-                            message: err.response.data.match("<html>") ? err.response.statusText : err.response.data
+                            message: typeof err.response.data === 'object' ?  err.response.data.message : err.response.statusText
                         }
                         if(process.env.REACT_APP_LOG_ENABLE * 1) setErrorGlobal(error)
                         //resolve({error: err.response.status, message: err.response.data.message || err.response.statusText})
