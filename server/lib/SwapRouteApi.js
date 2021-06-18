@@ -16,10 +16,6 @@ const obj = {
     },
 
     async poolsCoins() {
-
-    },
-
-    async coins() {
         const pools = await this.getPools();
         const coins = [];
         for (const p of pools) {
@@ -32,6 +28,17 @@ const obj = {
                     //console.log()
                 })
         }
+    },
+
+    async coins() {
+        const res = await MinterApi.get('/coins',true);
+        for(const c of res.data){
+            Mongoose.coin.findOneAndUpdate({id: c.id}, {symbol: c.symbol}, {new: true, upsert: true})
+                .then(() => {
+                    //console.log()
+                })
+        }
+        //console.log(res.data)
     },
 
     async checkTransaction(tx) {

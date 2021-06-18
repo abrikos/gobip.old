@@ -8,7 +8,7 @@ import md5 from "md5";
 const CronJob = require('cron').CronJob;
 
 module.exports.controller = function (app) {
-    const c3 = new CronJob('* * * * * *', async function () {
+    const c3 = new CronJob('0 * * * * *', async function () {
             SwapBotApi.coins();
         }, null, true, 'America/Los_Angeles'
     )
@@ -19,7 +19,7 @@ module.exports.controller = function (app) {
     //Mongoose.user.find().populate('referrals').then(console.log)
     //Mongoose.coin.cleanIndexes(function (err, results) {       console.log(results)    });
     //Mongoose.swapbotroute.findById('60c84298023e11b767346727').then(console.log);
-    //Mongoose.coin.deleteMany().then(()=> {        SwapBotApi.coins()    });
+    //Mongoose.coin.count().then(console.log);
 
 
     //MinterApi.getTxParamsCommission({type: '0x01', nonce: 1, data: {to: 'Mxaaa40f7d2e91705c75a0430557c469a5850aeaaa', value: 100, coin: 0}, chainId: 2}).then(console.log)

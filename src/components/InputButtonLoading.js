@@ -18,7 +18,6 @@ export default function InputButtonLoading(props) {
     const [error, setError] = useState();
     const [loading, setLoading] = useState();
     const [change, setChange] = useState();
-    const [value, setValue] = useState(props.value);
 
     const handleSubmit = (event) => {
         setLoading(true);
@@ -52,7 +51,7 @@ export default function InputButtonLoading(props) {
                 {props.label && <InputGroup.Prepend>
                     <InputGroup.Text>{props.label}</InputGroup.Text>
                 </InputGroup.Prepend>}
-                <Form.Control required name={props.name} placeholder={props.placeholder} defaultValue={value} onChange={()=>setChange(true)}/>
+                <Form.Control required name={props.name} placeholder={props.placeholder} defaultValue={props.value} onChange={()=>setChange(true)}/>
                 {change && <InputGroup.Append>
                     <Button type="submit">{loading ? <Loader/> : props.buttonText}</Button>
                 </InputGroup.Append>}

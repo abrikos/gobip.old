@@ -11,6 +11,7 @@ const networks = {
         explorerApi: 'https://explorer-api.minter.network/api/v2',
         coin: 'BIP',
         explorer: 'https://explorer.minter.network/',
+        image: 'https://my.minter.network/api/v1/avatar/by/coin/',
         chainId: 1
     },
     test: {
@@ -18,6 +19,7 @@ const networks = {
         explorerApi: 'https://explorer-api.testnet.minter.network/api/v2',
         coin: 'MNT',
         explorer: 'https://explorer.testnet.minter.network/',
+        image: 'https://my.beta.minter.network/api/v1/avatar/by/coin/',
         chainId: 2
     }
 }
@@ -199,9 +201,9 @@ const obj = {
         }
     },
 
-    async estimateSwap(coin0, coin1, valueToSell, type){
-        const action = `/estimate_coin_${type}?swap_from=pool&value_to_${type}=${valueToSell}&coin_id_to_buy=${coin0}&coin_id_to_sell=${coin1}`
-        return this.get('node',action);
+    async estimateSwap(coin0, coin1, valueToSell, type, swap_from='pool'){
+        const action = `/estimate_coin_${type}?swap_from=${swap_from}&value_to_${type}=${valueToSell}&coin_to_buy=${coin0}&coin_to_sell=${coin1}`
+        return this.get(action);
     },
 
     async fromWalletToAddress(wallet,address,value){

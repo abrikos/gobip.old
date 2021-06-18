@@ -1,17 +1,17 @@
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import "./cabinet.sass"
 import {Button, Form, FormControl} from "react-bootstrap";
 import UserAvatar from "./UserAvatar";
 
 export default function CabinetUser(props) {
-    const [user, setUser] = useState(props.user);
+    const user = props.user
+    //const [user, setUser] = useState(props.user);
 
     function submit(e) {
         e.preventDefault();
         const form = props.store.formToObject(e.target)
         props.store.api('/cabinet/user/update', form)
-            .then(setUser)
-
+            //.then(setUser)
     }
 
     if (!user) return <div/>

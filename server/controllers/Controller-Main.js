@@ -109,6 +109,7 @@ module.exports.controller = function (app) {
                     if (!referral) {
                         Mongoose.user.aggregate([{$sample: {size: 1}}, {$match: {externalId: {$ne: user.externalId}}}])
                             .then(u => {
+                                if(!u[0]) return;
                                 user.parent = u[0].id;
                                 user.save()
                             })

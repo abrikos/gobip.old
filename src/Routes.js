@@ -16,11 +16,13 @@ import PokerList from "./pages/Poker/PokerList";
 import GameList from "./games/GameList";
 import GamePlay from "./games/GamePlay";
 import SwapRoutes from "./pages/swap-route/SwapRoute";
+import Exchange from "./pages/exchange/Exchange";
 
 export default function Routes(store) {
     const routes = {
         "/": () => <Home store={store}/>,
         "/unbound": () => <UnboundCharts store={store}/>,
+        "/exchange": () => <Exchange store={store}/>,
         "/mixer": () => <Mixer store={store}/>,
         "/bet": () => <BetList store={store}/>,
         "/bet/:id": (params) => <BetView store={store}  {...params}/>,

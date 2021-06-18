@@ -5,7 +5,6 @@ import InputButtonLoading from "../../components/InputButtonLoading";
 import MinterValue from "../../components/minter/MinterValue";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faEdit, faTrash} from "@fortawesome/free-solid-svg-icons";
-import {navigate} from "hookrouter";
 import "./swap-route.sass"
 import ButtonLoading from "../../components/ButtonLoading";
 import CopyButton from "../../components/copy-button/CopyButton";
@@ -13,7 +12,6 @@ import Loader from "../../components/Loader";
 
 export default function SwapRoutesCabinet(props) {
     const [routes, setRoutes] = useState([]);
-    const [balance, setBalance] = useState([]);
     const [modal, setModal] = useState({});
     const [wallet, setWallet] = useState({});
     const ref = document.location.origin + '/api/referral/' + props.store.authenticatedUser.referral;
@@ -79,7 +77,7 @@ export default function SwapRoutesCabinet(props) {
         {/*{!wallet.address && <Button onClick={createWallet}>Create wallet for routes</Button>}*/}
 
 
-        {!wallet.address ? <div><Button onClick={createWallet}>Create wallet for routes</Button><Loader/></div> : <div>
+        {!wallet.address ? <div>{/*<Button onClick={createWallet}>Create wallet for routes</Button>*/}<Loader/></div> : <div>
             <div className="row">
                 <div className="col-9">
                     <div className="alert alert-info">
