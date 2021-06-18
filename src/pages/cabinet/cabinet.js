@@ -8,6 +8,7 @@ import BetCabinet from "../bet/BetCabinet";
 import CabinetUser from "./CabinetUser";
 import GameList from "../../games/GameList";
 import SwapRoutesCabinet from "../swap-route/SwapRoutesCabinet";
+import ReferralProgram from "./ReferralProgram";
 
 export default function Cabinet(props) {
     const [user,setUser] = useState();
@@ -31,6 +32,7 @@ export default function Cabinet(props) {
             {label: 'Cabinet', href: '/cabinet/user'},
             {label: pages[props.control] && pages[props.control].label}
         ]}/>
+        <ReferralProgram {...props}/>
         <div>
             <div >{Object.keys(pages).map(p => <span key={p}  className={`m-2 ${p===props.control ? 'glowed':''}`}><A href={`/cabinet/${p}`}>{pages[p].label}</A></span>)}</div>
             <hr/>

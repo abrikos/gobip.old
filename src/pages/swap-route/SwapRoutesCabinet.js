@@ -14,7 +14,6 @@ export default function SwapRoutesCabinet(props) {
     const [routes, setRoutes] = useState([]);
     const [modal, setModal] = useState({});
     const [wallet, setWallet] = useState({});
-    const ref = document.location.origin + '/api/referral/' + props.store.authenticatedUser.referral;
 
     useEffect(() => {
         loadRoutes()
@@ -66,14 +65,7 @@ export default function SwapRoutesCabinet(props) {
 
     return <div className="swap-bot-edit">
         <h1>My swap routes </h1>
-        <div className="alert alert-success">
-            <h4>Referral program</h4>
-            Each route paid by your referrals will bring you 10% of the cost
-            <hr/>
-            <code>
-                {ref} <CopyButton text={ref}/>
-            </code>
-        </div>
+
         {/*{!wallet.address && <Button onClick={createWallet}>Create wallet for routes</Button>}*/}
 
 

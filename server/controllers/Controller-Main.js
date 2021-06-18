@@ -65,9 +65,23 @@ module.exports.controller = function (app) {
         res.send(MinterApi.params)
     });
 
+    app.get('/api/share', (req, res) => {
+        res.render('share', {
+            header: process.env.REACT_APP_SITE_TITLE,
+            text: process.env.REACT_APP_SITE_DESCRIPTION,
+            image: req.protocol + '://' + req.get('host') + '/logo.svg',
+            url: req.query.url
+        });
+    });
+
     app.get('/api/referral/:referral', (req, res) => {
         res.cookie('referral', req.params.referral)
-        res.redirect('/cabinet/user')
+        res.render('share', {
+            header: process.env.REACT_APP_SITE_TITLE,
+            text: process.env.REACT_APP_SITE_DESCRIPTION,
+            image: req.protocol + '://' + req.get('host') + '/logo.svg',
+            url: req.query.redirect
+        });
     });
 
     app.post('/api/redirect/:strategy', (req, res) => {
@@ -109,7 +123,7 @@ module.exports.controller = function (app) {
                     if (!referral) {
                         Mongoose.user.aggregate([{$sample: {size: 1}}, {$match: {externalId: {$ne: user.externalId}}}])
                             .then(u => {
-                                if(!u[0]) return;
+                                if (!u[0]) return;
                                 user.parent = u[0].id;
                                 user.save()
                             })
