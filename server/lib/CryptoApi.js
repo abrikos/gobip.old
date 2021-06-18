@@ -14,7 +14,7 @@ const obj = {
     async minterBipUsd() {
         const url = `https://explorer-api.minter.network/api/v2/status`
         const data = await this.get(url);
-        Mongoose.crypto.create({pair: 'BIP-USD', value: data.data.bip_price_usd});
+        Mongoose.crypto.create({pair: 'BIP-USD', value: (data.data.bip_price_usd*1).toFixed(3)});
     },
 
     async get(url) {

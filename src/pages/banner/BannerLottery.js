@@ -3,7 +3,7 @@ import "./banner.sass";
 import {BannerContainer} from "./Banners";
 import {MinterTxLink} from "../../components/minter/MinterLink";
 import MinterValue from "../../components/minter/MinterValue";
-
+import {A} from "hookrouter"
 
 export default function BannerLottery(props) {
     const [winners, setWinners] = useState([]);
@@ -22,6 +22,7 @@ export default function BannerLottery(props) {
             <li>The lottery is drawn when the sum of balances of all wallets of active banners reaches <MinterValue value={amounts.prize - amounts.total} {...props}/></li>
             <li>After that, the balance of the banner wallet is reset to zero</li>
             <li>Only banners with non-zero balance participate in the lottery</li>
+            <li>View your banners in  <A href="/cabinet/banners" className="btn btn-sm btn-primary">your account</A></li>
         </ul>
         <h1>Banner lottery winners</h1>
         <div className="d-flex flex-wrap">

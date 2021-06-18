@@ -17,7 +17,7 @@ export default function MixerCabinet(props) {
     }, []);
 
     function loadWallets() {
-        props.store.api('/cabinet/mixer/wallets')
+        props.store.api('/cabinet/mixer/wallets',{}, true)
             .then(d => {
                 setWallets(d);
             })
@@ -36,7 +36,6 @@ export default function MixerCabinet(props) {
 
     if(!wallets) return <div/>;
     return <div>
-
             <h1>My mixer wallets</h1>
             {success && <div className="alert alert-success">{success}</div>}
             <div className="alert alert-info">Create an address, send funds to it and get a proportional percentage of mixer commission from each mix in the system</div>
@@ -51,7 +50,7 @@ export default function MixerCabinet(props) {
                 </thead>
                 <tbody>
                 {wallets.map(d => <tr key={d.id}>
-                    <td className="text-right"><MinterValue value={d.balance} {...props}/></td>
+                    <td className="text-rightX"><MinterValue value={d.balance} {...props}/></td>
                     <td><MinterAddressLink address={d.address} {...props}/></td>
                     {/*<div>
                 {d.profits.map(p=><div key={p.date}><small>{p.date}</small> {p.value.toFixed(1)}</div>)}

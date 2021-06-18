@@ -17,10 +17,12 @@ import GameList from "./games/GameList";
 import GamePlay from "./games/GamePlay";
 import SwapRoutes from "./pages/swap-route/SwapRoute";
 import Exchange from "./pages/exchange/Exchange";
+import Support from "./pages/Support";
 
 export default function Routes(store) {
     const routes = {
         "/": () => <Home store={store}/>,
+        "/support": () => <Support store={store}/>,
         "/unbound": () => <UnboundCharts store={store}/>,
         "/exchange": () => <Exchange store={store}/>,
         "/mixer": () => <Mixer store={store}/>,

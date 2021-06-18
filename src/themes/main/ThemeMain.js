@@ -6,9 +6,9 @@ import {
     faBlender,
     faCoins,
     faCrown,
-    faDollarSign, faExchangeAlt,
+    faDollarSign, faExchangeAlt, faHandsHelping,
     faHome,
-    faImages,
+    faImages, faQuestionCircle,
     faRecycle,
     faRobot,
     faSignInAlt,
@@ -31,8 +31,10 @@ export default function ThemeMain(props) {
         {path: '/bet', label: 'Crypto bets', icon: faCoins},
         {path: '/cabinet/user', label: 'Cabinet', icon: faUserCog, type: 'logged'},
         {path: '/admin/start', label: 'Admin', icon: faCrown, type: 'admin'},
+        {path: '/support', label: 'Support', icon: faQuestionCircle, type: 'admin'},
         {path: '/logout', label: 'Logout', icon: faSignOutAlt, type: 'logged'},
         {path: '/login', component: <LoginFormGoogle store={props.store}/>, icon: faSignInAlt, type: 'not-logged'},
+
 
     ]
 
@@ -61,6 +63,29 @@ export default function ThemeMain(props) {
         </li>
     }
 
+    function ym(){
+        return "<!-- Yandex.Metrika informer -->\n" +
+            "<a href=\"https://metrika.yandex.ru/stat/?id=81116914&amp;from=informer\"\n" +
+            "target=\"_blank\" rel=\"nofollow\"><img src=\"https://informer.yandex.ru/informer/81116914/3_1_FFFFFFFF_EFEFEFFF_0_pageviews\"\n" +
+            "style=\"width:88px; height:31px; border:0;\" alt=\"Яндекс.Метрика\" title=\"Яндекс.Метрика: данные за сегодня (просмотры, визиты и уникальные посетители)\" class=\"ym-advanced-informer\" data-cid=\"81116914\" data-lang=\"ru\" /></a>\n" +
+            "<!-- /Yandex.Metrika informer -->\n" +
+            "\n" +
+            "<!-- Yandex.Metrika counter -->\n" +
+            "<script type=\"text/javascript\" >\n" +
+            "   (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};\n" +
+            "   m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})\n" +
+            "   (window, document, \"script\", \"https://mc.yandex.ru/metrika/tag.js\", \"ym\");\n" +
+            "\n" +
+            "   ym(81116914, \"init\", {\n" +
+            "        clickmap:true,\n" +
+            "        trackLinks:true,\n" +
+            "        accurateTrackBounce:true\n" +
+            "   });\n" +
+            "</script>\n" +
+            "<noscript><div><img src=\"https://mc.yandex.ru/watch/81116914\" style=\"position:absolute; left:-9999px;\" alt=\"\" /></div></noscript>\n" +
+            "<!-- /Yandex.Metrika counter -->"
+    }
+
     return <div>
         <ThemeMainTopMenu {...props}/>
         <div className="theme-main">
@@ -73,12 +98,7 @@ export default function ThemeMain(props) {
                     </div>
 
                     <div className="d-sm-block d-none">
-                        <a href="https://metrika.yandex.ru/stat/?id=75689170&amp;from=informer"
-                           target="_blank" rel="nofollow">
-                            <img src="https://informer.yandex.ru/informer/75689170/3_1_FFFFFFFF_EFEFEFFF_0_pageviews"
-                                                       alt="Яндекс.Метрика" title="Яндекс.Метрика: данные за сегодня (просмотры, визиты и уникальные посетители)"
-                                                   className="ym-advanced-informer" data-cid="75689170" data-lang="ru" /></a>
-
+                        <div className="text-center" dangerouslySetInnerHTML={{__html: ym()}}/>
                     </div>
 
 
