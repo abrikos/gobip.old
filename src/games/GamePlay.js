@@ -6,6 +6,7 @@ import GameUserInfo from "./GameUserInfo";
 import GameBetForm from "./GameBetForm";
 import Poker from "./Poker/Poker";
 import UserAvatar from "../pages/cabinet/UserAvatar";
+import {Button} from "react-bootstrap";
 
 export default function GamePlay(props){
     const [game,setGame] = useState()
@@ -22,6 +23,15 @@ export default function GamePlay(props){
             .then(setGame)
     }
 
+    function doLeave(){
+        props.store.api(`/game/leave/${game.id}`)
+    }
+
+    function doJoin(){
+        props.store.api(`/game/join/${game.id}`)
+            .then(loadGame)
+    }
+
     if(!game) return <div/>
     //game.player = game.players.find(p=>props.store.authenticatedUser && p.id===props.store.authenticatedUser.id)
     return(
@@ -34,6 +44,9 @@ export default function GamePlay(props){
             {game.module === 'Dices' && <Dices game={game} userInfo={userInfo} onBet={loadGame} {...props}/>}
             {game.module === 'Poker' && <Poker game={game} userInfo={userInfo} onBet={loadGame} {...props}/>}
             <GameBetForm userInfo={userInfo} game={game} {...props}/>
+            {props.store.authenticatedUser && <div>
+                {game.players.map(g=>g.id).includes(props.store.authenticatedUser.id) ? <Button variant="warning" onClick={doLeave}>Leave</Button> : <Button onClick={doJoin}>Join</Button>}
+            </div>}
             {!!game.waitList.length && <div>Wait list
                 {game.waitList.map(p => <UserAvatar key={p.id} {...p}/>)}
             </div>}

@@ -8,6 +8,8 @@ export default function GameUserInfo(props) {
 
     useEffect(()=>{
         init();
+        const timer = setInterval(init, 1000)
+        return () => clearInterval(timer);
     },[])
 
     function init(){
@@ -16,7 +18,7 @@ export default function GameUserInfo(props) {
     }
 
     if(!props.store.authenticatedUser) return <div>No user</div>;
-    if(!userInfo) return <div/>
+    if(!userInfo) return <div>No info</div>
     return (
         <div className="row">
             <div className="col-sm d-flex flex-column justify-content-center ">

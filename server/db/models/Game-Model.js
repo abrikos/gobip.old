@@ -34,6 +34,16 @@ const modelSchema = new Schema({
         toJSON: {virtuals: true}
     });
 
+modelSchema.methods.leaveGame = function (req) {
+    const player = this.players.find(p=>p.equals(req.session.userId));
+    this.players = this.players.filter(p=>!p.equals(req.session.userId));
+    const myStake = this.stakes[req.session.userId];
+    player[`${this.type}Balance`] += myStake;
+    player.save();
+    delete this.stakes[req.session.userid];
+    this.save()
+}
+
 modelSchema.methods.fundStake = function (req) {
     let amount = req.body.amount * 1 || this.data.initialStake;
     const player = this.players.find(p => p.id === req.session.userId);

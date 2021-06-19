@@ -13,8 +13,8 @@ module.exports.controller = function (app) {
         Mongoose.game.timeFoldPlayers();
     }, null, true, 'America/Los_Angeles')
 
-    const test = false;
-    doTest();
+    const test = true;
+
 
     //Mongoose.game.clearGames();
 
@@ -23,11 +23,31 @@ module.exports.controller = function (app) {
         return game.doModelBet(req);
     }
 
-    async function doTest() {
+    async function doTestRoPaSci(){
         if (!test) return
         const {USER1, USER2, USER3} = process.env;
         const req = {
-            session: {userId: process.env.USER1},
+            session: {userId: USER1},
+            body: {
+                module: 'RoPaSci',
+                type: 'virtual'
+            }
+        }
+        //START
+        let game = await Mongoose.game.start(req);
+
+        //JOIN small blind
+        req.session.userId = USER3
+        await game.doModelJoin(req);
+    }
+
+    doTestRoPaSci()
+    //doTestPoker();
+    async function doTestPoker() {
+        if (!test) return
+        const {USER1, USER2, USER3} = process.env;
+        const req = {
+            session: {userId: USER1},
             body: {
                 module: 'Poker',
                 type: 'virtual'
@@ -42,7 +62,7 @@ module.exports.controller = function (app) {
 
 
         //Join player 3
-        req.session.userId = process.env.USER3
+        req.session.userId =USER3
         delete req.body.bet;
         await game.doModelJoin(req);
         //console.log('....... Active player:', game.activePlayer.name)
@@ -78,6 +98,30 @@ module.exports.controller = function (app) {
                 res.send(r.adaptGameForClients(req))
             })
         //.catch(e => {res.status(500).send(app.locals.adaptError(e))})
+    });
+
+    app.post('/api/game/join/:id', passportLib.isLogged, (req, res) => {
+        Mongoose.game.findById(req.params.id)
+            .populate('players', ['name', 'photo', 'realBalance', 'virtualBalance'])
+            .then(game=>{
+                game.doModelJoin(req);
+                res.sendStatus(200)
+            })
+            .catch(e => {
+                res.status(500).send(app.locals.adaptError(e))
+            })
+    });
+
+    app.post('/api/game/leave/:id', passportLib.isLogged, (req, res) => {
+        Mongoose.game.findById(req.params.id)
+            .populate('players', ['name', 'photo', 'realBalance', 'virtualBalance'])
+            .then(game=>{
+                game.leaveGame(req);
+                res.sendStatus(200)
+            })
+            .catch(e => {
+                res.status(500).send(app.locals.adaptError(e))
+            })
     });
 
 

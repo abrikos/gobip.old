@@ -1,7 +1,8 @@
 const RoPaSciModule = {
     label: "Rock Paper Scissors",
     defaultData: {
-        variants: ['rock', 'scissors', 'paper'],
+        initialStake:200,
+        variants: ['rock', 'paper', 'scissors'],
         bets: [],
         choices: []
     },
