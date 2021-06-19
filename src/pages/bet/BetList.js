@@ -35,9 +35,9 @@ export default function BetList(props) {
             </div>
         </div>}
         <hr/>
-        <BetCryptoChart pair={'BTC-USD'} {...props}/>
+        <BetCryptoChart pair={'BTC/USD'} {...props}/>
         <hr/>
-        <BetCryptoChart pair={'BIP-USD'} {...props}/>
+        <BetCryptoChart pair={'USDT/BIP'} {...props}/>
 
 
         {/*<div className="col-sm-4"><Mixer {...props}/></div>*/}

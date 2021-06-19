@@ -1,35 +1,33 @@
 import MinterValue from "components/minter/MinterValue";
-import React from "react";
+import React, {useEffect, useState} from "react";
 import {MinterAddressLink} from "components/minter/MinterLink";
 import ButtonLoading from "components/ButtonLoading";
 
 export default function GameUserInfo(props) {
-    const {userInfo} = props;
-    //const [userInfo, setuserInfo] = useState({})
+    const [userInfo, setUserInfo] = useState();
 
+    useEffect(()=>{
+        init();
+    },[])
+
+    function init(){
+        props.store.api('/game/cabinet/user/info', {}, true)
+            .then(setUserInfo)
+    }
 
     if(!props.store.authenticatedUser) return <div>No user</div>;
+    if(!userInfo) return <div/>
     return (
         <div className="row">
             <div className="col-sm d-flex flex-column justify-content-center ">
                 {['real', 'any'].includes(props.type) && (
                     <div>
                         Balance real: <MinterValue value={userInfo.realBalance} {...props}/>{' '}
-                        {!!userInfo.realBalance && <ButtonLoading size={'sm'} url={'/poker/cabinet/wallet/withdraw'}  {...props} confirmMessage={'Withdraw?'}>Withdraw</ButtonLoading>}
+                        {!!userInfo.realBalance && <ButtonLoading size={'sm'} url={'/game/cabinet/wallet/withdraw'}  {...props} confirmMessage={'Withdraw?'}>Withdraw</ButtonLoading>}
+                        to top up <MinterAddressLink address={userInfo.address} short={0} {...props}/>
                     </div>)}
-                {['virtual', 'any'].includes(props.type) && <div>Balance virtual: {userInfo.virtualBalance}</div>}
+                {['virtual', 'any'].includes(props.type) && <div>Balance virtual: <span className="text-success">{userInfo.virtualBalance.toLocaleString('ru')}</span></div>}
             </div>
-            {['real', 'any'].includes(props.type) &&<div className="col-sm text-center">
-                <strong>Wallet for refill real balance</strong>{' '}
-                {userInfo.address ? <span>
-                 <MinterAddressLink address={userInfo.address} {...props}/>
-                <ButtonLoading size={'sm'} url={'/game/cabinet/wallet/change'}  {...props}>Change</ButtonLoading>
-            </span>
-                    :
-                    <ButtonLoading size={'sm'} url={'/game/cabinet/wallet/change'}  {...props}>Create</ButtonLoading>}
-            </div>}
-
-
         </div>
     )
 }

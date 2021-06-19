@@ -54,8 +54,8 @@ const obj = {
             axios.get(url)
                 .then(r => resolve(r.data))
                 .catch(e => {
-                    const error = e.response ? e.response.data.error : e.message;
-                    if (process.env.REACT_APP_LOG_ENABLE === '1' && !['302'].includes(error.code)) {
+                    const error = e.response ? JSON.parse(e.response.data).error : e.message;
+                    if (process.env.REACT_APP_LOG_ENABLE === '1' && !['302'].includes(error && error.code)) {
                         console.log('AXIOS ERORR:', error, url);
                     }
                     reject(error)

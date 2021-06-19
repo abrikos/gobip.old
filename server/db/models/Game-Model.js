@@ -156,7 +156,16 @@ modelSchema.methods.reload = async function () {
     }
 }
 
-modelSchema.statics.modules = Object.keys(Games)
+modelSchema.statics.modules = function (){
+    const modules = [];
+    for(const k of Object.keys(Games)){
+        modules.push({
+            name:k,
+            label:Games[k].label || k
+        })
+    }
+    return modules;
+}
 
 modelSchema.statics.timeFoldPlayers = function () {
     this.find({activePlayerTime: {$lt: moment().unix() - process.env.GAME_TURN_TIME, $gt: 0}})

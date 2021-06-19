@@ -2,7 +2,6 @@ import Mongoose from "server/db/Mongoose";
 import passportLib from 'server/lib/passport';
 import passport from "../lib/passport";
 import MinterApi from "../lib/MinterApi";
-import PokerApi from "../games/PokerApi";
 
 //Mongoose.User.find().then(console.log)
 //Mongoose.User.updateMany({},{group:null}).then(console.log).catch(console.error)
@@ -16,21 +15,22 @@ module.exports.controller = function (app) {
 
     const test = false;
     doTest();
+
     //Mongoose.game.clearGames();
 
-    async function doBet(game, bet,userId){
-        const req = {body:{bet}, session:{userId}};
+    async function doBet(game, bet, userId) {
+        const req = {body: {bet}, session: {userId}};
         return game.doModelBet(req);
     }
 
-    async function doTest(){
-        if(!test) return
-        const {USER1,USER2,USER3} = process.env;
-        const req ={
-            session:{userId:process.env.USER1},
-            body:{
+    async function doTest() {
+        if (!test) return
+        const {USER1, USER2, USER3} = process.env;
+        const req = {
+            session: {userId: process.env.USER1},
+            body: {
                 module: 'Poker',
-                type : 'virtual'
+                type: 'virtual'
             }
         }
         //START
@@ -52,7 +52,7 @@ module.exports.controller = function (app) {
         await doBet(game, 40, USER2)
 
 
-        Mongoose.game.findOne().populate('players').sort({createdAt:-1}).then(r=>console.log('FIND DATA',r.data.bets))
+        Mongoose.game.findOne().populate('players').sort({createdAt: -1}).then(r => console.log('FIND DATA', r.data.bets))
 
     }
 
@@ -62,46 +62,53 @@ module.exports.controller = function (app) {
 
     app.post('/api/game/start', passportLib.isLogged, (req, res) => {
         Mongoose.game.start(req)
-            .then(r=>res.send(r))
-            .catch(e => {res.status(500).send(app.locals.adaptError(e))})
+            .then(r => res.send(r))
+            .catch(e => {
+                res.status(500).send(app.locals.adaptError(e))
+            })
     });
 
-    app.post('/api/game/play/:id',  (req, res) => {
-        const promise = test ? Mongoose.game.findOne().sort({createdAt:-1}) :        Mongoose.game.findById(req.params.id);
+    app.post('/api/game/play/:id', (req, res) => {
+        const promise = test ? Mongoose.game.findOne().sort({createdAt: -1}) : Mongoose.game.findById(req.params.id);
         promise
-            .populate('players', ['name','photo','realBalance','virtualBalance'])
-            .populate('waitList', ['name','photo','realBalance','virtualBalance'])
-            .then(async r=> {
+            .populate('players', ['name', 'photo', 'realBalance', 'virtualBalance'])
+            .populate('waitList', ['name', 'photo', 'realBalance', 'virtualBalance'])
+            .then(async r => {
 
                 res.send(r.adaptGameForClients(req))
             })
-            //.catch(e => {res.status(500).send(app.locals.adaptError(e))})
+        //.catch(e => {res.status(500).send(app.locals.adaptError(e))})
     });
 
 
-    app.post('/api/game/modules',  (req, res) => {
-        res.send(Mongoose.game.modules)
+    app.post('/api/game/modules', (req, res) => {
+        res.send(Mongoose.game.modules())
     });
 
 
-    app.post('/api/game/list',  (req, res) => {
+    app.post('/api/game/list', (req, res) => {
         const {module} = req.body;
         Mongoose.game.find({module})
             .select(['name', 'type', 'module'])
             //.populate('players', ['name','photo','realBalance','virtualBalance'])
-            .then(r=>res.send(r))
-            .catch(e => {res.status(500).send(app.locals.adaptError(e))})
+            .then(r => res.send(r))
+            .catch(e => {
+                res.status(500).send(app.locals.adaptError(e))
+            })
     });
 
     app.post('/api/game/cabinet/wallet/withdraw', passport.isLogged, (req, res) => {
         Mongoose.user.findById(req.session.userId)
             .then(r => {
                 if (!r.realBalance) return res.status(500).send('Insufficient funds')
-                MinterApi.fromMainTo(r.address, r.realBalance - process.env.POKER_WITHDRAW_FEE)
+                MinterApi.fromMainTo(r.address, r.realBalance - process.env.GAME_WITHDRAW_FEE)
                     .then(tx => {
                         r.realBalance = 0;
                         r.save()
                             .then(() => res.send(tx))
+                    })
+                    .catch(e => {
+                        res.status(500).send(app.locals.adaptError(e))
                     })
             })
             .catch(e => {
@@ -109,14 +116,24 @@ module.exports.controller = function (app) {
             })
     });
 
-
     app.post('/api/game/cabinet/wallet/change', passport.isLogged, async (req, res) => {
-        PokerApi.newWallet(req.session.userId)
-            .then(r => res.send(r.gameWallet.address))
+        Mongoose.user.findById(req.session.userId)
+            .then(user => {
+                if(user.gameWallet) return res.sendStatus(200)
+                MinterApi.newWallet('game', '', req.session.userId)
+                    .then(r => {
+                        user.gameWallet = r;
+                        user.save()
+                        res.sendStatus(200)
+                    })
+                    .catch(e => {
+                        res.status(500).send(app.locals.adaptError(e))
+                    })
+            })
             .catch(e => {
-
                 res.status(500).send(app.locals.adaptError(e))
             })
+
     })
 
     app.post('/api/game/cabinet/user/info', passport.isLogged, async (req, res) => {
@@ -127,20 +144,23 @@ module.exports.controller = function (app) {
                 res.send({address: r.gameWallet && r.gameWallet.address, realBalance, virtualBalance})
             })
             .catch(e => {
-
                 res.status(500).send(app.locals.adaptError(e))
             })
     })
 
     app.post('/api/game/bet/:id', passport.isLogged, async (req, res) => {
         Mongoose.game.findById(req.params.id)
-            .populate('players', ['name','photo','realBalance','virtualBalance'])
-            .then(r=> {
+            .populate('players', ['name', 'photo', 'realBalance', 'virtualBalance'])
+            .then(r => {
                 r.doModelBet(req)
-                    .then(r=>res.send(r))
-                    .catch(e => {res.status(500).send(app.locals.adaptError(e))})
+                    .then(r => res.send(r))
+                    .catch(e => {
+                        res.status(500).send(app.locals.adaptError(e))
+                    })
             })
-            .catch(e => {res.status(500).send(app.locals.adaptError(e))})
+            .catch(e => {
+                res.status(500).send(app.locals.adaptError(e))
+            })
     })
 
 };

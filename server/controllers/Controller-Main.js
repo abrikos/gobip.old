@@ -76,12 +76,28 @@ module.exports.controller = function (app) {
 
     app.get('/api/referral/:referral', (req, res) => {
         res.cookie('referral', req.params.referral)
-        res.render('share', {
-            header: process.env.REACT_APP_SITE_TITLE,
-            text: process.env.REACT_APP_SITE_DESCRIPTION,
-            image: req.protocol + '://' + req.get('host') + '/logo.svg',
-            url: req.query.redirect
-        });
+        const parsed = req.query.redirect.match(/(\w+)\/([\w|\d]+)/);
+        const model = Mongoose[parsed[1]]
+        if(model){
+            model.findById(parsed[2])
+                .then(r=>{
+                    res.render('share',{
+                        header: r.name + ' ' + process.env.REACT_APP_SITE_TITLE,
+                        text: r.description || process.env.REACT_APP_SITE_DESCRIPTION,
+                        image: req.protocol + '://' + req.get('host') + '/logo.svg',
+                        url: req.query.redirect
+                    })
+                })
+                .catch(e => {res.status(500).send(app.locals.adaptError(e))})
+        }else{
+            res.render('share', {
+                header: process.env.REACT_APP_SITE_TITLE,
+                text: process.env.REACT_APP_SITE_DESCRIPTION,
+                image: req.protocol + '://' + req.get('host') + '/logo.svg',
+                url: req.query.redirect
+            });
+        }
+
     });
 
     app.post('/api/redirect/:strategy', (req, res) => {

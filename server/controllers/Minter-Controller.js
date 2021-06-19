@@ -3,7 +3,6 @@ import Mongoose from "server/db/Mongoose";
 import UnboundApi from "server/lib/UnboundApi";
 import BannerApi from "server/lib/BannerApi";
 import MixerApi from "server/lib/MixerApi";
-import CryptoApi from "../lib/CryptoApi";
 import BetApi from "../lib/BetApi";
 import PokerApi from "../games/PokerApi";
 import SwapBotApi from "../lib/SwapRouteApi";
@@ -31,10 +30,14 @@ module.exports.controller = function (app) {
         }, null, true, 'America/Los_Angeles'
     )
 
-    const c3 = new CronJob('0 0 * * * *', async function () {
-            CryptoApi.cryptoCompare('BTC-USD')
-            CryptoApi.minterBipUsd();
-            MinterApi.updateBalances()
+    const c3 = new CronJob('*/10 * * * * *', async function () {
+            BetApi.cryptoCompare('BTC/USD')
+            BetApi.pairs();
+        }, null, true, 'America/Los_Angeles'
+    )
+
+    const c4 = new CronJob('0 0 * * * *', async function () {
+        MinterApi.updateBalances()
         }, null, true, 'America/Los_Angeles'
     )
 

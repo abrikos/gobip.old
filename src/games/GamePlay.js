@@ -20,10 +20,6 @@ export default function GamePlay(props){
     function loadGame(){
         props.store.api(`/game/play/${props.id}`,{},true)
             .then(setGame)
-        if(props.authenticatedUser) {
-            props.store.api('/game/cabinet/user/info', {}, true)
-                .then(setUserInfo)
-        }
     }
 
     if(!game) return <div/>
@@ -31,7 +27,7 @@ export default function GamePlay(props){
     return(
         <div>
             <h1>PLAY {game.type} {game.module} "{game.name}"</h1>
-            <GameUserInfo userInfo={userInfo} type={game.type} {...props}/>
+            <GameUserInfo type={game.type} {...props}/>
             <hr/>
             {game.module === 'RoPaSci' && <RoPaSci game={game} userInfo={userInfo} onBet={loadGame} {...props}/>}
             {game.module === 'Reversi' && <Reversi game={game} userInfo={userInfo} onBet={loadGame} {...props}/>}

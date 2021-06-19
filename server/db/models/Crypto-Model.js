@@ -22,6 +22,11 @@ modelSchema.virtual('date')
         return moment(this.createdAt).format('YYYY-MM-DD HH:mm:ss')
     });
 
+modelSchema.virtual('valueHuman')
+    .get(function () {
+        return this.value.toLocaleString('ru')
+    });
+
 
 export default mongoose.model(name, modelSchema)
 

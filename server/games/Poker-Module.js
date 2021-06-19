@@ -1,6 +1,7 @@
 import PokerApi from "./PokerApi";
 
 const PokerModule = {
+    label:'Texas Hold`Em Poker',
     defaultData: {
         hands: {},
         desk: [],

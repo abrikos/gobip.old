@@ -1,18 +1,27 @@
 import Mongoose from "server/db/Mongoose";
 import passport from "server/lib/passport";
 import MinterApi from "server/lib/MinterApi";
-import CryptoApi from "../lib/CryptoApi";
+import BetApi from "../lib/BetApi";
 
 const CronJob = require('cron').CronJob;
 
 module.exports.controller = function (app) {
 
-    app.post('/api/bet/crypto/:pair', (req, res) => {
-        CryptoApi.aggregatePairData(req.params.pair).then(r => res.send(r))
+    app.post('/api/bet/crypto/pair/:from/:to', (req, res) => {
+        BetApi.aggregatePairData(`${req.params.from}/${req.params.to}`).then(r => res.send(r))
+    });
+
+    app.post('/api/bet/price/:from/:to', (req, res) => {
+        Mongoose.crypto.findOne({pair: `${req.params.from}/${req.params.to}`})
+            .sort({createdAt:-1})
+            .then(r => res.send(r))
+            .catch(e => {
+                res.status(500).send(app.locals.adaptError(e))
+            })
     });
 
     app.post('/api/bet/view/:id', (req, res) => {
-        if(req.params.id === 'create') return res.sendStatus(200)
+        if (req.params.id === 'create') return res.sendStatus(200)
         Mongoose.bet.findById(req.params.id)
             .populate({path: 'walletF', select: ['address', 'balance']})
             .populate({path: 'walletA', select: ['address', 'balance']})
@@ -20,7 +29,9 @@ module.exports.controller = function (app) {
                 if (!r) return res.status(404).send('Bet not found')
                 res.send(r)
             })
-            .catch(e => {res.status(500).send(app.locals.adaptError(e))})
+            .catch(e => {
+                res.status(500).send(app.locals.adaptError(e))
+            })
     });
 
 
@@ -32,7 +43,9 @@ module.exports.controller = function (app) {
             .then(r => {
                 res.send(r)
             })
-            .catch(e => {res.status(500).send(app.locals.adaptError(e))})
+            .catch(e => {
+                res.status(500).send(app.locals.adaptError(e))
+            })
     });
 
     //Mongoose.wallet.find({address:'Mx7d34060e7679bf8f2cf5a2f8e7663c1c25c588dd'}).then(console.log)
@@ -45,7 +58,9 @@ module.exports.controller = function (app) {
             .then(r => {
                 res.send(r)
             })
-            .catch(e => {res.status(500).send(app.locals.adaptError(e))})
+            .catch(e => {
+                res.status(500).send(app.locals.adaptError(e))
+            })
     });
 
     app.post('/api/cabinet/bet/view/:id', passport.isLogged, (req, res) => {
@@ -57,7 +72,9 @@ module.exports.controller = function (app) {
                 if (!r) return res.status(404).send('Bet not found')
                 res.send(r)
             })
-            .catch(e => {res.status(500).send(app.locals.adaptError(e))})
+            .catch(e => {
+                res.status(500).send(app.locals.adaptError(e))
+            })
     });
 
     //Mongoose.bet.deleteMany({}).then(console.log)
@@ -71,7 +88,9 @@ module.exports.controller = function (app) {
                 if (r.sum) return res.status(500).send('The bet has been paid. Removal prohibited')
                 res.status(200).send('Ok')
             })
-            .catch(e => {res.status(500).send(app.locals.adaptError(e))})
+            .catch(e => {
+                res.status(500).send(app.locals.adaptError(e))
+            })
 
     });
 
@@ -89,9 +108,13 @@ module.exports.controller = function (app) {
                 r.checkDate = req.body.checkDate;
                 r.save()
                     .then(r => res.send(r))
-                    .catch(e => {res.status(500).send(app.locals.adaptError(e))})
+                    .catch(e => {
+                        res.status(500).send(app.locals.adaptError(e))
+                    })
             })
-            .catch(e => {res.status(500).send(app.locals.adaptError(e))})
+            .catch(e => {
+                res.status(500).send(app.locals.adaptError(e))
+            })
     });
 
     app.post('/api/cabinet/bet/create/new', passport.isLogged, (req, res) => {
@@ -103,14 +126,18 @@ module.exports.controller = function (app) {
                 r.save()
                     .then(r => res.send(r))
             })
-        .catch(e => {res.status(500).send(app.locals.adaptError(e))})
+            .catch(e => {
+                res.status(500).send(app.locals.adaptError(e))
+            })
     });
 
     //BetApi.aggregatePairData('BTC-USD').then(console.log)
     app.post('/api/crypto/pairs', (req, res) => {
-        CryptoApi.getPairs()
+        BetApi.getPairs()
             .then(p => res.send(p))
-            .catch(e => {res.status(500).send(app.locals.adaptError(e))})
+            .catch(e => {
+                res.status(500).send(app.locals.adaptError(e))
+            })
     });
 
 }

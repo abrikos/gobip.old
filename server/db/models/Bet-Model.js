@@ -17,7 +17,7 @@ const modelSchema = new Schema({
         value: {type: Number, default: 0, min: 0},
         closed: Boolean,
         closeTx: String,
-        pair: {type: String, required: true, validate: {validator: v => v.match(/(\w+)-(\w+)/)}, message: p => `${p.value} is not a valid pair`}
+        pair: {type: String, required: true, validate: {validator: v => v.match(/(\w+)\/(\w+)/)}, message: p => `${p.value} is not a valid pair`}
     },
     {
         timestamps: {createdAt: 'createdAt'},
@@ -87,17 +87,27 @@ modelSchema.virtual('conditionHuman')
         return conditions[this.condition];
     });
 
+modelSchema.virtual('valueHuman')
+    .get(function () {
+        return this.value.toLocaleString('ru');
+    });
+
+modelSchema.virtual('description')
+    .get(function () {
+        return 'Bet for or against the statement: ' + this.name;
+    });
+
 modelSchema.virtual('name')
     .get(function () {
         if (!this.checkDate || !this.pair || !this.condition) return 'Bet without required parameters'
 
-        return `${this.checkDateHuman} :: ${this.pair}  ${this.condition} ${this.value}`
+        return `${this.pair}  ${this.condition} ${this.valueHuman} at ${this.checkDateHuman}`
     });
 
 modelSchema.virtual('pairObject')
     .get(function () {
         if (!this.pair) return '';
-        const p = this.pair.match(/(\w+)-(\w+)/)
+        const p = this.pair.match(/(\w+)\/(\w+)/)
         if (!p) return false;
         return {from: p[1], to: p[2]}
     });
