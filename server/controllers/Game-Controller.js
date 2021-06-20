@@ -11,25 +11,30 @@ const CronJob = require('cron').CronJob;
 module.exports.controller = function (app) {
     const c2 = new CronJob('* * * * * *', async function () {
         Mongoose.game.timeFoldPlayers();
+        Mongoose.game.reloadFinished();
     }, null, true, 'America/Los_Angeles')
 
-    const test = true;
+    const c3 = new CronJob('* * * * * *', async function () {
+        Mongoose.game.deleteForgottenGames();
+    }, null, true, 'America/Los_Angeles')
+
+    const test = false;
+    //doTestRoPaSci();
+    //doTestPoker();
 
 
-    //Mongoose.game.clearGames();
-
-    async function doBet(game, bet, userId) {
-        const req = {body: {bet}, session: {userId}};
-        return game.doModelBet(req);
-    }
-
-    async function doTestRoPaSci(){
+    async function doTestRoPaSci() {
+        async function doTurn(game, turn, userId) {
+            req.body.turn = turn;
+            req.session.userId = userId
+            await game.doModelTurn(req);
+        }
         if (!test) return
         const {USER1, USER2, USER3} = process.env;
         const req = {
             session: {userId: USER1},
             body: {
-                module: 'RoPaSci',
+                module: {name:'RoPaSci'},
                 type: 'virtual'
             }
         }
@@ -38,33 +43,38 @@ module.exports.controller = function (app) {
 
         //JOIN small blind
         req.session.userId = USER3
-        await game.doModelJoin(req);
+        await game.doModelJoin(req, true);
+        await doTurn(game,'paper',USER1);
+        await doTurn(game,'rock',USER3);
     }
 
-    doTestRoPaSci()
-    //doTestPoker();
     async function doTestPoker() {
+        async function doBet(game, bet, userId) {
+            req.body.bet = bet;
+            req.session.userId = userId
+            await game.doModelBet(req);
+        }
         if (!test) return
         const {USER1, USER2, USER3} = process.env;
         const req = {
             session: {userId: USER1},
             body: {
-                module: 'Poker',
+                module: {name:'Poker'},
                 type: 'virtual'
             }
         }
         //START
         let game = await Mongoose.game.start(req);
+        req.params.id = game.id;
 
         //JOIN small blind
         req.session.userId = USER2
-        await game.doModelJoin(req);
-
+        await game.doModelJoin(req, true);
 
         //Join player 3
-        req.session.userId =USER3
+        req.session.userId = USER3
         delete req.body.bet;
-        await game.doModelJoin(req);
+        await game.doModelJoin(req, true);
         //console.log('....... Active player:', game.activePlayer.name)
         await doBet(game, 10, USER2)
         await doBet(game, 30, USER3)
@@ -76,7 +86,7 @@ module.exports.controller = function (app) {
 
     }
 
-    //Mongoose.game.findById('60b5c1549388f9bd6a527225').then(console.log)
+    //Mongoose.game.findOne().sort({createdAt: -1}).then(console.log)
     //Mongoose.game.deleteMany({}).then(console.log)
     //Mongoose.user.find().then(r=>console.log(r.map(r=>r.id)))
 
@@ -88,42 +98,41 @@ module.exports.controller = function (app) {
             })
     });
 
-    app.post('/api/game/play/:id', (req, res) => {
-        const promise = test ? Mongoose.game.findOne().sort({createdAt: -1}) : Mongoose.game.findById(req.params.id);
-        promise
-            .populate('players', ['name', 'photo', 'realBalance', 'virtualBalance'])
-            .populate('waitList', ['name', 'photo', 'realBalance', 'virtualBalance'])
-            .then(async r => {
-
-                res.send(r.adaptGameForClients(req))
+    app.post('/api/game/play/:id', async (req, res) => {
+        if(test){
+            const lastGame = await Mongoose.game.findOne().sort({createdAt: -1});
+            req.params.id = lastGame.id
+        }
+        Mongoose.game.hideOpponentData(req)
+            .then(r=>res.send(r))
+            .catch(e => {
+                res.status(500).send(app.locals.adaptError(e))
             })
-        //.catch(e => {res.status(500).send(app.locals.adaptError(e))})
     });
 
     app.post('/api/game/join/:id', passportLib.isLogged, (req, res) => {
-        Mongoose.game.findById(req.params.id)
-            .populate('players', ['name', 'photo', 'realBalance', 'virtualBalance'])
-            .then(game=>{
-                game.doModelJoin(req);
-                res.sendStatus(200)
-            })
-            .catch(e => {
-                res.status(500).send(app.locals.adaptError(e))
-            })
+        Mongoose.game.doJoin(req)
+        res.sendStatus(200)
+    });
+
+    app.post('/api/game/turn/:id', passportLib.isLogged, (req, res) => {
+        Mongoose.game.doTurn(req)
+        res.sendStatus(200)
+    });
+
+    app.post('/api/game/can-leave/:id', passportLib.isLogged, (req, res) => {
+        Mongoose.game.canLeave(req)
+            .then(canLeave=>res.send({canLeave}))
     });
 
     app.post('/api/game/leave/:id', passportLib.isLogged, (req, res) => {
-        Mongoose.game.findById(req.params.id)
-            .populate('players', ['name', 'photo', 'realBalance', 'virtualBalance'])
-            .then(game=>{
-                game.leaveGame(req);
-                res.sendStatus(200)
-            })
-            .catch(e => {
-                res.status(500).send(app.locals.adaptError(e))
-            })
+        Mongoose.game.leaveGame(req)
+        res.sendStatus(200)
     });
 
+    app.post('/api/game/turn/:id', passportLib.isLogged, (req, res) => {
+
+    });
 
     app.post('/api/game/modules', (req, res) => {
         res.send(Mongoose.game.modules())
@@ -133,6 +142,7 @@ module.exports.controller = function (app) {
     app.post('/api/game/list', (req, res) => {
         const {module} = req.body;
         Mongoose.game.find({module})
+            .sort({updatedAt:-1})
             .select(['name', 'type', 'module'])
             //.populate('players', ['name','photo','realBalance','virtualBalance'])
             .then(r => res.send(r))
@@ -163,7 +173,7 @@ module.exports.controller = function (app) {
     app.post('/api/game/cabinet/wallet/change', passport.isLogged, async (req, res) => {
         Mongoose.user.findById(req.session.userId)
             .then(user => {
-                if(user.gameWallet) return res.sendStatus(200)
+                if (user.gameWallet) return res.sendStatus(200)
                 MinterApi.newWallet('game', '', req.session.userId)
                     .then(r => {
                         user.gameWallet = r;
@@ -193,18 +203,8 @@ module.exports.controller = function (app) {
     })
 
     app.post('/api/game/bet/:id', passport.isLogged, async (req, res) => {
-        Mongoose.game.findById(req.params.id)
-            .populate('players', ['name', 'photo', 'realBalance', 'virtualBalance'])
-            .then(r => {
-                r.doModelBet(req)
-                    .then(r => res.send(r))
-                    .catch(e => {
-                        res.status(500).send(app.locals.adaptError(e))
-                    })
-            })
-            .catch(e => {
-                res.status(500).send(app.locals.adaptError(e))
-            })
+        Mongoose.game.doBet(req)
+        res.sendStatus(200)
     })
 
 };

@@ -3,12 +3,13 @@ import RoPaSci from "./RoPaSci/RoPaSci";
 import Reversi from "./Reversi/Reversi";
 import Dices from "./Dices/Dices";
 import GameUserInfo from "./GameUserInfo";
-import GameBetForm from "./GameBetForm";
 import Poker from "./Poker/Poker";
 import UserAvatar from "../pages/cabinet/UserAvatar";
 import {Button} from "react-bootstrap";
+import {navigate} from "hookrouter";
 
 export default function GamePlay(props){
+    const [error,setError] = useState({})
     const [game,setGame] = useState()
     const [userInfo,setUserInfo] = useState({})
 
@@ -23,8 +24,24 @@ export default function GamePlay(props){
             .then(setGame)
     }
 
+    function doTurn(turn){
+        props.store.api(`/game/turn/${game.id}`,{turn})
+            .then(loadGame)
+            .catch(setError)
+    }
+
+
     function doLeave(){
         props.store.api(`/game/leave/${game.id}`)
+            .then(()=>navigate('/games'))
+        /*props.store.api(`/game/can-leave/${game.id}`)
+            .then(r=>{
+                if(r.canLeave) {
+                    props.store.api(`/game/leave/${game.id}`)
+                }else{
+                    setError({message:'You cant leave the game now'})
+                }
+            })*/
     }
 
     function doJoin(){
@@ -36,14 +53,16 @@ export default function GamePlay(props){
     //game.player = game.players.find(p=>props.store.authenticatedUser && p.id===props.store.authenticatedUser.id)
     return(
         <div>
-            <h1>PLAY {game.type} {game.module} "{game.name}"</h1>
+            <small className="float-right">{game.type} "{game.moduleHuman}"</small>
+            <h1>{game.name}</h1>
+
             <GameUserInfo type={game.type} {...props}/>
             <hr/>
-            {game.module === 'RoPaSci' && <RoPaSci game={game} userInfo={userInfo} onBet={loadGame} {...props}/>}
-            {game.module === 'Reversi' && <Reversi game={game} userInfo={userInfo} onBet={loadGame} {...props}/>}
-            {game.module === 'Dices' && <Dices game={game} userInfo={userInfo} onBet={loadGame} {...props}/>}
-            {game.module === 'Poker' && <Poker game={game} userInfo={userInfo} onBet={loadGame} {...props}/>}
-            <GameBetForm userInfo={userInfo} game={game} {...props}/>
+            {error.message && <div className="alert alert-danger">{error.message}</div>}
+            {game.module === 'RoPaSci' && <RoPaSci game={game} userInfo={userInfo} onBet={loadGame} doTurn={doTurn} {...props}/>}
+            {game.module === 'Reversi' && <Reversi game={game} userInfo={userInfo} onBet={loadGame} doTurn={doTurn} {...props}/>}
+            {game.module === 'Dices' && <Dices game={game} userInfo={userInfo} onBet={loadGame} doTurn={doTurn} {...props}/>}
+            {game.module === 'Poker' && <Poker game={game} userInfo={userInfo} onBet={loadGame} doTurn={doTurn} {...props}/>}
             {props.store.authenticatedUser && <div>
                 {game.players.map(g=>g.id).includes(props.store.authenticatedUser.id) ? <Button variant="warning" onClick={doLeave}>Leave</Button> : <Button onClick={doJoin}>Join</Button>}
             </div>}

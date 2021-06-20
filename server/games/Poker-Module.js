@@ -2,6 +2,8 @@ import PokerApi from "./PokerApi";
 
 const PokerModule = {
     label:'Texas Hold`Em Poker',
+    waitList:true,
+    shiftFirstTurn: true,
     defaultData: {
         hands: {},
         desk: [],
@@ -11,7 +13,7 @@ const PokerModule = {
         bets: [{}, {}, {}, {}, {}, {}],
         results: {},
         betActions: ['call', 'bet', 'check', 'ford'],
-        initialStake: 100
+        initialStake: 1000
     },
     rounds: ['blinds', 'pre-flop', 'flop', 'turn', 'river', 'finish'],
 
@@ -68,6 +70,10 @@ const PokerModule = {
         return game.data.round === 0 && !(this._betsCount(game.data) > 1 && game.activePlayerIdx === 0);
     },
 
+    canLeave(game,req){
+        return true;
+    },
+
     onBet(game, req) {
         const data = game.data;
         const maxBet = Math.max.apply(null, Object.values(data.bets[data.round]));
@@ -115,7 +121,7 @@ const PokerModule = {
         return {}
     },
 
-    adaptGameForClients(game, req) {
+    hideOpponentData(game, req) {
         //return game;
         const data = game.data;
         for (const k of Object.keys(data.hands)) {

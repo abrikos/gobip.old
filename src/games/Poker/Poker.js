@@ -34,6 +34,7 @@ export default function Poker(props) {
                 {game.data.desk.map((p, i) => <PokerCard {...p} key={i}/>)}
                 {game.players.map(drawPlayer)}
             </div>
+            {/*<GameBetForm userInfo={userInfo} game={game} {...props}/>*/}
         </div>
     )
 }

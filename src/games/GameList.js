@@ -41,7 +41,6 @@ export default function GameList(props) {
 
     return (
         <div>
-            {JSON.stringify(modules)}
             <Nav variant="tabs" onSelect={m => {
                 setModule(m);
                 loadList();

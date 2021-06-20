@@ -17,7 +17,7 @@ const modelSchema = new Schema({
         type: String,
         dataStr: String,
         stakesStr: String,
-        started: {type: Boolean, default: false},
+        finishTime: {type: Number, default: 0},
         activePlayerIdx: {type: Number, default: 0},
         activePlayerTime: {type: Number, default: 0},
         minBet: {type: Number, default: process.env.GAME_MIN_BET},
@@ -34,54 +34,108 @@ const modelSchema = new Schema({
         toJSON: {virtuals: true}
     });
 
-modelSchema.methods.leaveGame = function (req) {
-    const player = this.players.find(p=>p.equals(req.session.userId));
-    this.players = this.players.filter(p=>!p.equals(req.session.userId));
-    const myStake = this.stakes[req.session.userId];
-    player[`${this.type}Balance`] += myStake;
-    player.save();
-    delete this.stakes[req.session.userid];
-    this.save()
+modelSchema.methods.doModelTurn = async function (req) {
+    const game = this;
+    const module = Games[game.module];
+    if (!module.doTurn(game, req)) return;
+    console.log('TURN', game.iamPlayer(req).name, req.body.turn)
+    if (module.isEnd(game)) {
+        await game.payToWInners();
+        //await game.reload();
+    }
+    await game.save()
 }
 
-modelSchema.methods.fundStake = function (req) {
-    let amount = req.body.amount * 1 || this.data.initialStake;
-    const player = this.players.find(p => p.id === req.session.userId);
-    if (player[`${this.type}Balance`] < amount) return {error: 500, message: 'Insufficient funds'}
-    player[`${this.type}Balance`] -= amount;
+console.log(moment().add(-1,'hours'))
+
+modelSchema.statics.deleteForgottenGames = async function () {
+    const games = await this.find({updatedAt:{$lt:moment().utc().add(-1,'hours').format('YYYY-MM-DD hh:mm')}})
+        .populate('players', ['name', 'photo', 'realBalance', 'virtualBalance']);
+    for(const game of games){
+        for(const p of game.players) {
+            try {
+                game.doModelLeave({session: {userId: p.id}}, true);
+            }catch (e) {
+
+            }
+            game.delete()
+        }
+    }
+}
+
+modelSchema.statics.doTurn = async function (req) {
+    const game = await this.findById(req.params.id)
+        .populate('players', ['name', 'photo', 'realBalance', 'virtualBalance'])
+    game.doModelTurn(req)
+}
+
+modelSchema.methods.doModelLeave = function (req, forgotten) {
+    const game = this;
+    if (!game.canLeave(req) && !forgotten) return;
+    Games[game.module].onLeave(game,req);
+    const player = game.players.find(p => p.equals(req.session.userId));
+    game.players = game.players.filter(p => !p.equals(req.session.userId));
+    game.waitList = game.waitList.filter(p => !p.equals(req.session.userId));
+    const myStake = game.stakes[req.session.userId];
+    player[`${game.type}Balance`] += myStake;
     player.save();
-    this.changeStake(req, this.stakes[req.session.userId] + amount)
-    return {}
+    delete game.stakes[req.session.userid];
+    if(!game.players.length) game.delete();
+}
+
+modelSchema.methods.canLeave = function (req) {
+    return Games[this.module].canLeave(this, req);
+}
+
+modelSchema.statics.canLeave = async function (req) {
+    const game = await this.findById(req.params.id)
+    return game.canLeave(req);
+}
+
+modelSchema.statics.leaveGame = function (req) {
+    this.findById(req.params.id)
+        .populate('players', ['name', 'photo', 'realBalance', 'virtualBalance'])
+        .then(game => {
+            game.doModelLeave(req);
+            game.save()
+                .catch(e=>{})
+        })
+}
+
+modelSchema.statics.doBet = async function (req) {
+    const game = await this.findById(req.params.id).populate('players', ['name', 'photo', 'realBalance', 'virtualBalance'])
+    game.doModelBet(req)
 }
 
 modelSchema.methods.doModelBet = async function (req) {
+    const game = this;
     const bet = req.body.bet * 1;
-    if (this.winners.length) {
-        const message = `Cannot bet. There is winners "${this.name}"`
+    if (game.winners.length) {
+        const message = `Cannot bet. There is winners "${game.name}"`
         console.log(message);
         throw {error: 500, message}
     }
-    await this.populate('players', ['name', 'photo', 'realBalance', 'virtualBalance']).execPopulate()
-    if(!this.iamPlayer(req)) return this;
-    console.log('BET', this.iamPlayer(req).name, bet)
-    if (!this.activePlayer.equals(req.session.userId)) {
+    await game.populate('players', ['name', 'photo', 'realBalance', 'virtualBalance']).execPopulate()
+    if (!game.iamPlayer(req)) return game;
+    console.log('BET', game.iamPlayer(req).name, bet)
+    if (!game.activePlayer.equals(req.session.userId)) {
         console.log('Not you turn');
         throw {error: 500, message: 'Not you turn'}
     }
-    if (this.stakes[req.session.userId] < bet) {
+    if (game.stakes[req.session.userId] < bet) {
         const message = 'Stake too low';
         console.log('model bet error:', message);
         throw new Error(message);
     }
-    if(bet<0) await this.doFold();
-    const betResult = Games[this.module].onBet(this, req);
-    if (betResult.error) {
+    if (bet < 0) await game.doFold();
+    const betResult = Games[game.module].onBet(game, req);
+    if (betResult && betResult.error) {
         console.log(betResult);
         throw betResult
     }
-    this.changeStake(req, this.stakes[req.session.userId] - bet)
-    this.activePlayerTime = moment().unix();
-    return this.save()
+    game.changeStake(req, game.stakes[req.session.userId] - bet)
+    game.activePlayerTime = moment().unix();
+    return game.save()
 }
 
 modelSchema.methods.doFold = async function () {
@@ -90,12 +144,12 @@ modelSchema.methods.doFold = async function () {
         this.delete();
         return;
     }
-    this.waitList.push(spliced[0].id);
+    Games[this.module].waitList && this.waitList.push(spliced[0].id);
     if (this.players.length === 1) {
         this.winners = this.players;
         await this.payToWInners()
 
-    }else {
+    } else {
         this.activePlayerTime = moment().unix();
     }
     await this.save();
@@ -107,29 +161,47 @@ modelSchema.methods.changeStake = function (req, amount) {
     this.stakes = s;
 }
 
+modelSchema.statics.doJoin = async function (req) {
+    const game = await this.findById(req.params.id).populate('players', ['name', 'photo', 'realBalance', 'virtualBalance']);
+    game.doModelJoin(req, true)
+}
+
 modelSchema.methods.doModelJoin = async function (req) {
-    if (Games[this.module].canJoin(this, req)) {
-        this.players.push(req.session.userId);
-        await this.populate('players', ['name', 'photo', 'realBalance', 'virtualBalance']).execPopulate()
-        console.log('JOIN', this.iamPlayer(req).name, req.session.userId)
-        this.changeStake(req, 0);
-        const canPay = this.fundStake(req);
+    const game = this;
+    if (Games[game.module].canJoin(game, req)) {
+        game.players.push(req.session.userId);
+        await game.populate('players', ['name', 'photo', 'realBalance', 'virtualBalance']).execPopulate()
+        console.log('JOIN', game.iamPlayer(req).name, req.session.userId)
+        game.changeStake(req, 0);
+        const canPay = game.fromBalanceToStake(req, this.data.initialStake);
         if (canPay.error) {
             console.log('Join error:', canPay);
             throw canPay
         }
-        Games[this.module].onJoin(this, req);
-        if (req.body.bet) await this.doModelBet(req);
+        Games[game.module].onJoin(game, req);
+        if (req.body.bet) await game.doModelBet(req);
     } else {
         console.log('WAIT LIST')
-        this.waitList.push(req.session.userId);
+        game.waitList.push(req.session.userId);
     }
-    return this.save();
+    await game.save()
 }
 
-modelSchema.methods.adaptGameForClients = function (req) {
-    Games[this.module].adaptGameForClients(this, req);
-    return this;
+modelSchema.methods.fromBalanceToStake = function (req, amount) {
+    const player = this.players.find(p => p.id === req.session.userId);
+    if (player[`${this.type}Balance`] < amount) return {error: 500, message: 'Insufficient funds'}
+    player[`${this.type}Balance`] -= amount;
+    player.save();
+    this.changeStake(req, this.stakes[req.session.userId] + amount)
+    return {}
+}
+
+modelSchema.statics.hideOpponentData = async function (req) {
+    const game = await this.findById(req.params.id)
+        .populate('waitList', ['name', 'photo', 'realBalance', 'virtualBalance'])
+        .populate('players', ['name', 'photo', 'realBalance', 'virtualBalance']);
+    if (!game) return null
+    return Games[game.module].hideOpponentData(game, req)
 }
 
 modelSchema.methods.iamPlayer = function (req) {
@@ -137,41 +209,57 @@ modelSchema.methods.iamPlayer = function (req) {
 }
 
 modelSchema.methods.payToWInners = async function () {
-    const bank = Games[this.module].getBank(this)
+    const bank = Games[this.module].getBank(this);
     for (const p of this.winners) {
         const amount = bank / this.winners.length;
-        console.log('winner',p.name, amount)
         p[`${this.type}Balance`] += amount;
+        console.log('winner', p.name, amount, p[`${this.type}Balance`])
+        await p.save()
     }
-    await this.reload();
+    this.finishTime = moment().unix();
+    await this.save()
+}
+
+modelSchema.statics.reloadFinished = async function () {
+    const games = await this.find({finishTime: {$lt: moment().unix() - 10, $gt: 0}});
+    for (const game of games) {
+        game.reload()
+    }
 }
 
 modelSchema.methods.reload = async function () {
-    this.history.push({data:this.data, winners:this.winners, date:new Date()});
+    this.finishTime = 0;
+    this.history.push({data: this.data, winners: this.winners, date: new Date()});
     this.winners = [];
     this.data = Games[this.module].defaultData;
-    await this.populate('waitList', ['name', 'photo', 'realBalance', 'virtualBalance']).execPopulate()
+    await this
+        .populate('waitList', ['name', 'photo', 'realBalance', 'virtualBalance'])
+        .populate('players', ['name', 'photo', 'realBalance', 'virtualBalance'])
+        .execPopulate()
     const players = this.players.concat(this.waitList);
-    players.push(players.shift());
+    if (Games[this.module].shiftFirstTurn) {
+        players.push(players.shift());
+    }
     this.players = [];
     this.activePlayerTime = 0;
     this.activePlayerIdx = 0;
     this.waitList = [];
-    for(const p of players){
+    for (const p of players) {
         const req = {
-            body:{},
+            body: {},
             session: {userId: p.id},
         }
         await this.doModelJoin(req)
     }
+    await this.save();
 }
 
-modelSchema.statics.modules = function (){
+modelSchema.statics.modules = function () {
     const modules = [];
-    for(const k of Object.keys(Games)){
+    for (const k of Object.keys(Games)) {
         modules.push({
-            name:k,
-            label:Games[k].label || k
+            name: k,
+            label: Games[k].label || k
         })
     }
     return modules;
@@ -181,23 +269,23 @@ modelSchema.statics.timeFoldPlayers = function () {
     this.find({activePlayerTime: {$lt: moment().unix() - process.env.GAME_TURN_TIME, $gt: 0}})
         .then(async games => {
             for (const g of games) {
-                if(g.players.length <2 || !g.players[g.activePlayerIdx]) continue
+                if (g.players.length < 2 || !g.players[g.activePlayerIdx]) continue
                 if (g.winners.length) continue;
-                if(!g.players.length) continue;
+                if (!g.players.length) continue;
                 const req = {
                     session: {userId: g.players[g.activePlayerIdx]},
                     body: {bet: -1}
                 };
                 g.autoFold.push(req.session.userId);
                 await g.doModelBet(req);
-                if(g.autoFold.filter(u=>u.equals(req.session.userId)).length>2){
-                    g.players = g.players.filter(u=>u.equals(req.session.userId))
+                if (g.autoFold.filter(u => u.equals(req.session.userId)).length > 2) {
+                    g.players = g.players.filter(u => u.equals(req.session.userId))
                     console.log('USER', req.session.userId)
                     console.log('AUTOFOLD', g.autoFold)
                     console.log('WAIT LIST', g.waitList)
-                    console.log('AUTOFOLD LENGTH', g.autoFold.filter(u=>u.equals(req.session.userId)).length)
-                    g.waitList = g.waitList.filter(u=>!u.equals(req.session.userId))
-                    g.autoFold = g.autoFold.filter(u=>!u.equals(req.session.userId))
+                    console.log('AUTOFOLD LENGTH', g.autoFold.filter(u => u.equals(req.session.userId)).length)
+                    g.waitList = g.waitList.filter(u => !u.equals(req.session.userId))
+                    g.autoFold = g.autoFold.filter(u => !u.equals(req.session.userId))
                     await g.save()
                 }
             }
@@ -206,29 +294,20 @@ modelSchema.statics.timeFoldPlayers = function () {
 
 modelSchema.statics.start = async function (req) {
     const {module, type} = req.body;
-    const g = new this({module, type, data: Games[module].defaultData});
+    const g = new this({module: module.name, type, data: Games[module.name].defaultData});
     g.name = randomWords({exactly: 1, wordsPerString: 3, formatter: (word, i) => i ? word : word.slice(0, 1).toUpperCase().concat(word.slice(1))})[0];
     console.log(g.module, ' ========START GAME=======', g.name)
-    await g.doModelJoin(req);
-
-    return g.save();
+    await g.doModelJoin(req, true);
+    return g;
 }
-/*
-modelSchema.methods.getBank = function (){
-    return Games[this.module].getBank(this);
-}
-*/
 
-/*
-modelSchema.methods.maxBet= function () {
-        console.log('zzzzzzz',Object.keys(this))
-        return Games[this.module].getMaxBet(this);
-    };
-*/
+modelSchema.virtual('moduleHuman')
+    .get(function () {
+        return Games[this.module].label;
+    });
 
 modelSchema.virtual('activePlayer')
     .get(function () {
-
         return this.players ? this.players[this.activePlayerIdx] : {};
     });
 
@@ -250,7 +329,6 @@ modelSchema.virtual('data')
     .set(function (v) {
         this.dataStr = JSON.stringify(v);
     });
-
 
 
 modelSchema.virtual('stakes')
