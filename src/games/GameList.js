@@ -4,45 +4,50 @@ import Nav from "react-bootstrap/Nav";
 import {A, navigate} from "hookrouter";
 
 export default function GameList(props) {
-    const [module, setModule] = useState({name:'RoPaSci'})
+    const [module, setModule] = useState({})
     const [modules, setModules] = useState([])
     const [list, setList] = useState([])
 
 
     useEffect(() => {
-        loadTypes();
+        if (!modules.length) loadTypes();
         loadList();
         const timer = setInterval(loadList, 5000)
         return () => clearInterval(timer);
-    }, [module])
+    }, [module.name])
 
 
     function loadList() {
-        props.store.api('/game/list', {module:module.name}, true)
+        if (!module) return;
+        props.store.api('/game/list', {module: module.name}, true)
             .then(setList)
     }
 
     function loadTypes() {
         props.store.api('/game/modules')
-            .then(setModules)
+            .then(r => {
+                setModules(r);
+                console.log(r[0])
+                setModule(r[0])
+            })
     }
 
     function startGame(type) {
-        props.store.api('/game/start', {module,type})
-            .then(g=>navigate(g.link))
+        props.store.api('/game/start', {module, type})
+            .then(g => navigate(g.link))
     }
 
-    function gameList(type){
+    function gameList(type) {
         return <div>
-            {props.store.authenticatedUser && <Button onClick={()=>startGame(type)}>Start new {module.label} ({type})</Button>}
-            {list.filter(g=>g.type===type).map(g=><div key={g.id}><A href={g.link}>{g.name}</A></div>)}
+            {props.store.authenticatedUser && <Button onClick={() => startGame(type)}>Start new {module.label} ({type})</Button>}
+            {list.filter(g => g.type === type).map(g => <div key={g.id}><A href={g.link}>{g.name}</A></div>)}
         </div>
     }
 
     return (
         <div>
             <Nav variant="tabs" onSelect={m => {
-                setModule(m);
+                setModule(modules.find(m1 => m1.name === m));
                 loadList();
             }} activeKey={module.name}>
                 {modules.map((t) => <Nav.Item key={t.name} className="nav-item">

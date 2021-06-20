@@ -1,6 +1,7 @@
 import PokerApi from "./PokerApi";
 
 const PokerModule = {
+    order:2,
     label:'Texas Hold`Em Poker',
     waitList:true,
     shiftFirstTurn: true,

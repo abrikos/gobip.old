@@ -46,16 +46,16 @@ modelSchema.methods.doModelTurn = async function (req) {
     await game.save()
 }
 
-console.log(moment().add(-1,'hours'))
+console.log(moment().add(-1, 'hours'))
 
 modelSchema.statics.deleteForgottenGames = async function () {
-    const games = await this.find({updatedAt:{$lt:moment().utc().add(-1,'hours').format('YYYY-MM-DD hh:mm')}})
+    const games = await this.find({updatedAt: {$lt: moment().utc().add(-1, 'hours').format('YYYY-MM-DD hh:mm')}})
         .populate('players', ['name', 'photo', 'realBalance', 'virtualBalance']);
-    for(const game of games){
-        for(const p of game.players) {
+    for (const game of games) {
+        for (const p of game.players) {
             try {
                 game.doModelLeave({session: {userId: p.id}}, true);
-            }catch (e) {
+            } catch (e) {
 
             }
             game.delete()
@@ -72,7 +72,7 @@ modelSchema.statics.doTurn = async function (req) {
 modelSchema.methods.doModelLeave = function (req, forgotten) {
     const game = this;
     if (!game.canLeave(req) && !forgotten) return;
-    Games[game.module].onLeave(game,req);
+    Games[game.module].onLeave(game, req);
     const player = game.players.find(p => p.equals(req.session.userId));
     game.players = game.players.filter(p => !p.equals(req.session.userId));
     game.waitList = game.waitList.filter(p => !p.equals(req.session.userId));
@@ -80,7 +80,7 @@ modelSchema.methods.doModelLeave = function (req, forgotten) {
     player[`${game.type}Balance`] += myStake;
     player.save();
     delete game.stakes[req.session.userid];
-    if(!game.players.length) game.delete();
+    if (!game.players.length) game.delete();
 }
 
 modelSchema.methods.canLeave = function (req) {
@@ -98,7 +98,8 @@ modelSchema.statics.leaveGame = function (req) {
         .then(game => {
             game.doModelLeave(req);
             game.save()
-                .catch(e=>{})
+                .catch(e => {
+                })
         })
 }
 
@@ -259,16 +260,22 @@ modelSchema.statics.modules = function () {
     for (const k of Object.keys(Games)) {
         modules.push({
             name: k,
-            label: Games[k].label || k
+            label: Games[k].label || k,
+            order: Games[k].order
         })
     }
-    return modules;
+    return modules.sort((a, b) => a.order * 1 > b.order * 1);
 }
 
 modelSchema.statics.timeFoldPlayers = function () {
     this.find({activePlayerTime: {$lt: moment().unix() - process.env.GAME_TURN_TIME, $gt: 0}})
         .then(async games => {
             for (const g of games) {
+                if (Games[g.module].noTimer) {
+                    g.activePlayerTime = 0;
+                    g.save()
+                    continue;
+                }
                 if (g.players.length < 2 || !g.players[g.activePlayerIdx]) continue
                 if (g.winners.length) continue;
                 if (!g.players.length) continue;
@@ -294,6 +301,7 @@ modelSchema.statics.timeFoldPlayers = function () {
 
 modelSchema.statics.start = async function (req) {
     const {module, type} = req.body;
+    console.log(module)
     const g = new this({module: module.name, type, data: Games[module.name].defaultData});
     g.name = randomWords({exactly: 1, wordsPerString: 3, formatter: (word, i) => i ? word : word.slice(0, 1).toUpperCase().concat(word.slice(1))})[0];
     console.log(g.module, ' ========START GAME=======', g.name)
@@ -313,7 +321,7 @@ modelSchema.virtual('activePlayer')
 
 modelSchema.virtual('timeLeft')
     .get(function () {
-        return this.activePlayerTime + process.env.GAME_TURN_TIME * 1 - moment().unix();
+        return !Games[this.module].noTimer && this.activePlayerTime && this.activePlayerTime + process.env.GAME_TURN_TIME * 1 - moment().unix();
     });
 
 modelSchema.virtual('link')

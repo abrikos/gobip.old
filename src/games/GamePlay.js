@@ -7,6 +7,7 @@ import Poker from "./Poker/Poker";
 import UserAvatar from "../pages/cabinet/UserAvatar";
 import {Button} from "react-bootstrap";
 import {navigate} from "hookrouter";
+import TicTacToe from "./TicTacToe/TicTacToe";
 
 export default function GamePlay(props){
     const [error,setError] = useState({})
@@ -63,6 +64,7 @@ export default function GamePlay(props){
             {game.module === 'Reversi' && <Reversi game={game} userInfo={userInfo} onBet={loadGame} doTurn={doTurn} {...props}/>}
             {game.module === 'Dices' && <Dices game={game} userInfo={userInfo} onBet={loadGame} doTurn={doTurn} {...props}/>}
             {game.module === 'Poker' && <Poker game={game} userInfo={userInfo} onBet={loadGame} doTurn={doTurn} {...props}/>}
+            {game.module === 'TicTacToe' && <TicTacToe game={game} userInfo={userInfo} onBet={loadGame} doTurn={doTurn} {...props}/>}
             {props.store.authenticatedUser && <div>
                 {game.players.map(g=>g.id).includes(props.store.authenticatedUser.id) ? <Button variant="warning" onClick={doLeave}>Leave</Button> : <Button onClick={doJoin}>Join</Button>}
             </div>}

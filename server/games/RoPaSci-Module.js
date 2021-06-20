@@ -1,5 +1,6 @@
 const RoPaSciModule = {
     label: "Rock Paper Scissors",
+    order:3,
     opponentTurns: false,
     defaultData: {
         initialStake: 100,
