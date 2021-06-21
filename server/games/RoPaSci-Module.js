@@ -20,7 +20,7 @@ const RoPaSciModule = {
     },
 
 
-    isEnd(game) {
+    hasWinners(game) {
         const data = game.data;
         if (data.turns.length !== game.players.length) return false;
         const plain = data.turns.map(t => t.turn);

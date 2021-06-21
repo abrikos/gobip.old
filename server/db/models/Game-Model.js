@@ -34,22 +34,23 @@ const modelSchema = new Schema({
         toJSON: {virtuals: true}
     });
 
+modelSchema.methods.test = function (req) {
+    return Games[this.module].isWinner(this)
+}
 modelSchema.methods.doModelTurn = async function (req) {
     const game = this;
     const module = Games[game.module];
     if (!module.doTurn(game, req)) return;
     console.log('TURN', game.iamPlayer(req).name, req.body.turn)
-    if (module.isEnd(game)) {
+    if (module.hasWinners(game)) {
         await game.payToWInners();
         //await game.reload();
     }
     await game.save()
 }
 
-console.log(moment().add(-1, 'hours'))
-
 modelSchema.statics.deleteForgottenGames = async function () {
-    const games = await this.find({updatedAt: {$lt: moment().utc().add(-1, 'hours').format('YYYY-MM-DD hh:mm')}})
+    const games = await this.find({updatedAt: {$lt: moment().utc().add(-5, 'hours').format('YYYY-MM-DD hh:mm')}})
         .populate('players', ['name', 'photo', 'realBalance', 'virtualBalance']);
     for (const game of games) {
         for (const p of game.players) {
@@ -58,6 +59,7 @@ modelSchema.statics.deleteForgottenGames = async function () {
             } catch (e) {
 
             }
+            console.log('Delete game',game.id)
             game.delete()
         }
     }
@@ -222,7 +224,7 @@ modelSchema.methods.payToWInners = async function () {
 }
 
 modelSchema.statics.reloadFinished = async function () {
-    const games = await this.find({finishTime: {$lt: moment().unix() - 10, $gt: 0}});
+    const games = await this.find({finishTime: {$lt: moment().unix() - process.env.GAME_RELOAD_TIME * 1, $gt: 0}});
     for (const game of games) {
         game.reload()
     }
@@ -309,6 +311,11 @@ modelSchema.statics.start = async function (req) {
     return g;
 }
 
+modelSchema.virtual('description')
+    .get(function () {
+        return Games[this.module].description;
+    });
+
 modelSchema.virtual('moduleHuman')
     .get(function () {
         return Games[this.module].label;
@@ -322,6 +329,11 @@ modelSchema.virtual('activePlayer')
 modelSchema.virtual('timeLeft')
     .get(function () {
         return !Games[this.module].noTimer && this.activePlayerTime && this.activePlayerTime + process.env.GAME_TURN_TIME * 1 - moment().unix();
+    });
+
+modelSchema.virtual('timeFinishLeft')
+    .get(function () {
+        return this.finishTime && this.finishTime + process.env.GAME_RELOAD_TIME * 1 - moment().unix();
     });
 
 modelSchema.virtual('link')

@@ -86,6 +86,14 @@ module.exports.controller = function (app) {
 
     }
 
+    //tictoctest();
+    function tictoctest(){
+        Mongoose.game.findOne({module:'TicTacToe'})
+            .then(game=>{
+                console.log(game.test())
+            })
+    }
+
     //Mongoose.game.findOne().sort({createdAt: -1}).then(console.log)
     //Mongoose.game.deleteMany({}).then(console.log)
     //Mongoose.user.find().then(r=>console.log(r.map(r=>r.id)))
@@ -104,7 +112,9 @@ module.exports.controller = function (app) {
             req.params.id = lastGame.id
         }
         Mongoose.game.hideOpponentData(req)
-            .then(r=>res.send(r))
+            .then(r=> {
+                res.send(r)
+            })
             .catch(e => {
                 res.status(500).send(app.locals.adaptError(e))
             })

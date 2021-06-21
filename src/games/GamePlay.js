@@ -56,9 +56,10 @@ export default function GamePlay(props){
         <div>
             <small className="float-right">{game.type} "{game.moduleHuman}"</small>
             <h1>{game.name}</h1>
-
             <GameUserInfo type={game.type} {...props}/>
             <hr/>
+            <small className="d-block text-center">{game.description}</small>
+            {!!game.timeFinishLeft && <div>Reload: {game.timeFinishLeft}</div>}
             {error.message && <div className="alert alert-danger">{error.message}</div>}
             {game.module === 'RoPaSci' && <RoPaSci game={game} userInfo={userInfo} onBet={loadGame} doTurn={doTurn} {...props}/>}
             {game.module === 'Reversi' && <Reversi game={game} userInfo={userInfo} onBet={loadGame} doTurn={doTurn} {...props}/>}

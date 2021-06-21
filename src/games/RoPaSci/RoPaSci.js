@@ -20,7 +20,7 @@ export default function RoPaSci(props) {
                     {result && <img alt={result.turn} src={images[result.turn]} className={`choice`}/>}
                 </div>
                 <div className="d-flex justify-content-center align-items-center">
-                    <span>Bet: {game.stakes[p.id]}</span>
+                    {!game.finishTime && <span>Bet: {game.stakes[p.id]}</span>}
                 </div>
                 <div className="d-flex justify-content-center align-items-center">
                     {winner && <WinnerSign/>}

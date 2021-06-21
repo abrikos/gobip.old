@@ -1,18 +1,20 @@
 import moment from "moment";
 
-const cols = 5;
-const rows = 5;
-const cells = Array.from({length: rows * cols}, (v, id) => {
-    return {id}
+const cols = 15;
+const rows = 15;
+const winRows = 5;
+const cells = Array.from({length: rows * cols}, (v, i) => {
+    return {col: i % rows, row: Math.ceil((i + 1) / rows) - 1}
 });
 
 const RoPaSciModule = {
     noTimer: true,
     order: 1,
     label: "Tic Tac Toe",
+    description:`${winRows} cells in a line wins the game`,
     opponentTurns: true,
     defaultData: {
-        winRows: 3,
+        winRows,
         cols,
         rows,
         cells,
@@ -25,27 +27,62 @@ const RoPaSciModule = {
     },
 
 
-    isEnd(game) {
+    hasWinners(game) {
         const data = game.data;
-        if (data.cells.length !== 9) return false;
-        const winners = [];
-        for (const w of winners) {
-            game.winners.push(game.players.find(p => p.equals(w.userId)));
+        const winnerCells = this.isWinner(game);
+        for (const w of winnerCells) {
+            data.cells[this._id(w)].win = 1;
         }
-        return true;
+        game.data = data;
+        if (winnerCells.length) {
+            game.winners.push(game.players.find(p => p.equals(winnerCells[0].userId)));
+        } else {
+            const emptyCells = game.data.cells.filter(c => !c.userId).length;
+            if (!emptyCells) {
+                game.winners = game.players;
+            }
+        }
+        return game.winners.length;
+    },
+
+    _id(turn) {
+        return cols * turn.row + turn.col;
     },
 
     doTurn(game, req) {
         if (!game.activePlayer.equals(req.session.userId)) return;
         const {turn} = req.body;
         const data = game.data;
-        data.cells[cols * turn.row + turn.col].userId = req.session.userId;
+        const cell = data.cells.find(c => c.row === turn.row && c.col === turn.col);
+        if (!cell) return;
+        if (cell.userId) return;
+        cell.userId = req.session.userId;
         //data.turns.push({turn, userId: req.session.userId});
         game.data = data;
         game.activePlayerIdx++;
         if (game.activePlayerIdx >= game.players.length) game.activePlayerIdx = 0;
         game.activePlayerTime = moment().unix();
         return true
+    },
+
+    isWinner(game) {
+        //const vectors = [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]]
+        const vectors =[ [0,1]]
+        for (const cell of game.data.cells.filter(c => c.userId)) {
+            for (const vector of vectors) {
+                const ids = []
+                for (let i = 0; i < game.data.winRows; i++) {
+                    const c = game.data.cells.find(c => c.row === cell.row + vector[0] * i && c.col === cell.col + vector[1] * i)
+                    if (c && c.userId === cell.userId) {
+                        ids.push(c)
+                    }
+                }
+                if (ids.length >= game.data.winRows) {
+                    return ids
+                }
+            }
+        }
+        return [];
     },
 
     nextTurn(game, req) {

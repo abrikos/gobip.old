@@ -1,14 +1,31 @@
 .TicTacToe
-  table
+  .tictac-table
     margin: auto
-    td
+    width: 250px
+    display: flex
+    flex-wrap: wrap
+    div
       border: 1px solid silver
       width: 50px
       height: 50px
-      background-size: cover
-
-    td.tic
-      background-image: url("ttt.png")
-    td.tac
-      background-position: right -50px
-      background-image: url("ttt.png")
+      display: flex
+      align-items: center
+      justify-content: center
+      span
+        width: 33px
+        height: 30px
+        display: block
+        background-size: cover
+        background-repeat: no-repeat
+    div.win
+        background-color: #1c7430
+    div.loose
+        background-color: #ba8b00
+    div.tac
+      span
+        background-position: 3px 0px
+        background-image: url("ttt.png")
+    div.tic
+      span
+        background-position: -33px 0px
+        background-image: url("ttt.png")
