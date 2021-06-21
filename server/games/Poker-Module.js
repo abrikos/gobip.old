@@ -1,10 +1,11 @@
 import PokerApi from "./PokerApi";
 
 const PokerModule = {
-    order:2,
-    label:'Texas Hold`Em Poker',
-    waitList:true,
+    order: 2,
+    label: 'Texas Hold`Em Poker',
+    waitList: true,
     shiftFirstTurn: true,
+    //noTimer: true,
     defaultData: {
         hands: {},
         desk: [],
@@ -14,7 +15,7 @@ const PokerModule = {
         bets: [{}, {}, {}, {}, {}, {}],
         results: {},
         betActions: ['call', 'bet', 'check', 'ford'],
-        initialStake: 1000
+        initialStake: 100
     },
     rounds: ['blinds', 'pre-flop', 'flop', 'turn', 'river', 'finish'],
 
@@ -55,12 +56,12 @@ const PokerModule = {
     },
 
     getMaxBet(game) {
-        return Math.max.apply(null,Object.values(game.data.bets[game.data.round]));
+        return Math.max.apply(null, Object.values(game.data.bets[game.data.round]));
     },
 
     getBank(game) {
         let bank = 0;
-        if(!game.data.bets)  return;
+        if (!game.data.bets) return;
         for (const round of game.data.bets) {
             bank += this._sumBets(round)
         }
@@ -71,7 +72,7 @@ const PokerModule = {
         return game.data.round === 0 && !(this._betsCount(game.data) > 1 && game.activePlayerIdx === 0);
     },
 
-    canLeave(game,req){
+    canLeave(game, req) {
         return true;
     },
 
@@ -79,19 +80,19 @@ const PokerModule = {
         const data = game.data;
         const maxBet = Math.max.apply(null, Object.values(data.bets[data.round]));
         const beforeBet = data.bets[data.round][req.session.userId];
-        if(req.body.bet>=0) {
+        if (req.body.bet >= 0) {
             if (!beforeBet) data.bets[data.round][req.session.userId] = 0;
             data.bets[data.round][req.session.userId] += req.body.bet * 1;
             if (data.bets[data.round][req.session.userId] < maxBet && !(game.activePlayerIdx === 1 && data.round === 0))
                 return {error: 'Bet too small. Min: ' + (maxBet - beforeBet) + ' Curr: ' + data.bets[data.round][req.session.userId]}
         }
-        if ((this._isCall(data) && this._betsCount(data) > 1) || this._bigBlindCheck(game, data, req)) {
+        if ((this._isCall(game, data) && this._betsCount(data) > 1) || this._bigBlindCheck(game, data, req)) {
             game.activePlayerIdx = 0;
             data.round++;
             console.log('======== NEW ROUND ', this._roundName(data), data.round)
             data.roundName = this._roundName(data);
             if (data.round > 4) {
-                console.log('FINISH');
+                //console.log('FINISH');
                 let maxPriority = 0;
                 let maxSum = 0;
                 for (const c in data.hands) {
@@ -104,16 +105,15 @@ const PokerModule = {
                 let winners = Object.keys(data.results).filter(k => data.results[k].priority === maxPriority)
                 if (winners.length > 1)
                     winners = winners.filter(k => data.results[k].sum === maxSum);
-                game.winners = winners;
-                game.payToWInners();
+                game.winners = game.players.filter(p => winners.includes(p.id));
             } else {
                 this._fillDesk(game, data);
             }
         } else if (data.round === 0 && game.activePlayerIdx === 1 && game.players.length === 2) {
-            console.log('small blind')
+            //console.log('small blind')
             game.activePlayerIdx = 1;
         } else {
-            if(req.body.bet>=0) game.activePlayerIdx++;
+            if (req.body.bet >= 0) game.activePlayerIdx++;
             if (game.activePlayerIdx >= game.players.length && game.players.length >= 2) {
                 game.activePlayerIdx = 0;
             }
@@ -130,10 +130,12 @@ const PokerModule = {
                 data.hands[k] = [0, 0]
             }
         }
-        data.desk = Array(data.desk.length).fill(0)
+        if (data.round < 2)
+            data.desk = Array(data.desk.length).fill(0)
         //data.hands = data.hands.filter(h=>h[req.session.userId])
         //game.data.hands = game.data.hands.map(h=>h.userId===req.session.userId? h :[0,0])
         game.data = data;
+        return game;
     },
 
     _roundName(data) {
@@ -157,10 +159,10 @@ const PokerModule = {
         return Object.keys(data.bets[data.round]).length
     },
 
-    _isCall(data) {
+    _isCall(game, data) {
         let sums = Object.values(data.bets[data.round]);
         const unique = [...new Set(sums)];
-        return unique.length === 1
+        return sums.length === game.players.length && unique.length === 1
     },
 
 }

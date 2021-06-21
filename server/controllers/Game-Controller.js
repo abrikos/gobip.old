@@ -18,9 +18,9 @@ module.exports.controller = function (app) {
         Mongoose.game.deleteForgottenGames();
     }, null, true, 'America/Los_Angeles')
 
-    const test = false;
+    const test = true;
     //doTestRoPaSci();
-    //doTestPoker();
+    doTestPoker();
 
 
     async function doTestRoPaSci() {
@@ -65,8 +65,6 @@ module.exports.controller = function (app) {
         }
         //START
         let game = await Mongoose.game.start(req);
-        req.params.id = game.id;
-
         //JOIN small blind
         req.session.userId = USER2
         await game.doModelJoin(req, true);
@@ -75,14 +73,31 @@ module.exports.controller = function (app) {
         req.session.userId = USER3
         delete req.body.bet;
         await game.doModelJoin(req, true);
+        console.log(game.data.bets)
+        return;
         //console.log('....... Active player:', game.activePlayer.name)
         await doBet(game, 10, USER2)
         await doBet(game, 30, USER3)
         await doBet(game, 10, USER1)
-        await doBet(game, 40, USER2)
+        await doBet(game, 10, USER2)
+        await doBet(game, 0, USER1)
+
+        await doBet(game, 0, USER1)
+        await doBet(game, 0, USER2)
+        await doBet(game, 0, USER3)
+
+        await doBet(game, 0, USER1)
+        await doBet(game, 0, USER2)
+        await doBet(game, 0, USER3)
+
+        await doBet(game, 0, USER1)
+        await doBet(game, 0, USER2)
+        //await doBet(game, 0, USER3)
+        //console.log(game.activePlayer)
+        //await doBet(game, 0, USER3)
 
 
-        Mongoose.game.findOne().populate('players').sort({createdAt: -1}).then(r => console.log('FIND DATA', r.data.bets))
+        //Mongoose.game.findOne().populate('players').sort({createdAt: -1}).then(r => console.log('FIND DATA', r.data.bets))
 
     }
 

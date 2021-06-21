@@ -3,6 +3,7 @@ import "./poker.sass"
 import PokerCard from "./PokerCard";
 import React from "react";
 import GameBetForm from "../GameBetForm";
+import WinnerSign from "../WinnerSign";
 
 export default function Poker(props) {
     const {game, userInfo} = props;
@@ -16,13 +17,11 @@ export default function Poker(props) {
                 {game.data.hands[p.id].map((h,i)=><PokerCard {...h} key={i}/>)}
             </div>
             <div className="col-6">
-                MaxBet: {game.maxBet} <br/>
                 Bet: {game.data.bets[game.data.round][p.id]}
-
-                {game.activePlayer && game.activePlayer.id === p.id && <GameBetForm callBet={game.maxBet - game.data.bets[game.data.round][p.id]} userInfo={userInfo} game={game} {...props}/>}
-                {game.activePlayer && game.activePlayer.id === p.id && <span> TURN: {game.timeLeft}</span>}
-                {!!game.winners.length && game.data.results && <div>{game.data.results[p.id].name}</div>}
-                {game.winners.includes(p.id) && 'WINNER'}
+                {!!game.activePlayer && game.activePlayer.id === p.id && <GameBetForm callBet={game.maxBet - game.data.bets[game.data.round][p.id]} userInfo={userInfo} game={game} {...props}/>}
+                {!!game.activePlayer && game.activePlayer.id === p.id && <div> Player turn {game.timeLeft && <div>Time left: {game.timeLeft}</div>}</div>}
+                {!!game.winners.length && game.data.results && <strong className="d-block">{game.data.results[p.id].name}</strong>}
+                {game.winners.includes(p.id) && <WinnerSign/>}
             </div>
             <div className="col-2"><UserAvatar {...p}/> Stake: {game.stakes[p.id]}</div>
         </div>

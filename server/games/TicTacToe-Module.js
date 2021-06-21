@@ -1,7 +1,7 @@
 import moment from "moment";
 
-const cols = 15;
-const rows = 15;
+const cols = 10;
+const rows = 10;
 const winRows = 5;
 const cells = Array.from({length: rows * cols}, (v, i) => {
     return {col: i % rows, row: Math.ceil((i + 1) / rows) - 1}
