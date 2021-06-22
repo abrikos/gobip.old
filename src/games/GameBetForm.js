@@ -32,7 +32,7 @@ export default function GameBetForm(props) {
             .then(props.onBet)
     }
 
-    if(game.winners.length || !(props.store.authenticatedUser && game.activePlayer && props.store.authenticatedUser.id === game.activePlayer.id)) return <div/>
+    if(game.players.length < 2 || game.winners.length || !(props.store.authenticatedUser && game.activePlayer && props.store.authenticatedUser.id === game.activePlayer.id)) return <div/>
     const maxBet = game.data.bets[game.data.round];
     return (
         <Form onSubmit={doBet} className="d-flex">

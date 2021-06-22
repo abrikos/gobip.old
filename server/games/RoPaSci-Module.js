@@ -55,8 +55,8 @@ const RoPaSciModule = {
     canJoin(game, req) {
         return game.players.length < 2;
     },
-    onJoin(game, req) {
-        return true;
+    onJoinDoTurn(game, req) {
+        return false;
     },
     onLeave(game, req) {
         const data = game.data;

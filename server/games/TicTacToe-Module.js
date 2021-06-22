@@ -50,7 +50,6 @@ const RoPaSciModule = {
     },
 
     doTurn(game, req) {
-        if (!game.activePlayer.equals(req.session.userId)) return;
         const {turn} = req.body;
         const data = game.data;
         const cell = data.cells.find(c => c.row === turn.row && c.col === turn.col);
@@ -59,10 +58,6 @@ const RoPaSciModule = {
         cell.userId = req.session.userId;
         //data.turns.push({turn, userId: req.session.userId});
         game.data = data;
-        game.activePlayerIdx++;
-        if (game.activePlayerIdx >= game.players.length) game.activePlayerIdx = 0;
-        game.activePlayerTime = moment().unix();
-        return true
     },
 
     isWinner(game) {
@@ -97,8 +92,8 @@ const RoPaSciModule = {
     canJoin(game, req) {
         return game.players.length < 2;
     },
-    onJoin(game, req) {
-        return true;
+    onJoinDoTurn(game, req) {
+        return false;
     },
     onLeave(game, req) {
         game.data = this.defaultData;

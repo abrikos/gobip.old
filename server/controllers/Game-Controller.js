@@ -10,15 +10,15 @@ const CronJob = require('cron').CronJob;
 
 module.exports.controller = function (app) {
     const c2 = new CronJob('* * * * * *', async function () {
-        Mongoose.game.timeFoldPlayers();
-        Mongoose.game.reloadFinished();
+        //Mongoose.game.timeFoldPlayers();
+        //Mongoose.game.reloadFinished();
     }, null, true, 'America/Los_Angeles')
 
     const c3 = new CronJob('* * * * * *', async function () {
-        Mongoose.game.deleteForgottenGames();
+        //Mongoose.game.deleteForgottenGames();
     }, null, true, 'America/Los_Angeles')
 
-    const test = false;
+    const test = true;
     //doTestRoPaSci();
     doTestPoker();
 
@@ -50,9 +50,9 @@ module.exports.controller = function (app) {
 
     async function doTestPoker() {
         async function doBet(game, bet, userId) {
-            req.body.bet = bet;
-            req.session.userId = userId
-            await game.doModelBet(req);
+            req.body = {bet};
+            req.session.userId = userId;
+            await game.doModelTurn(req);
         }
         if (!test) return
         const {USER1, USER2, USER3} = process.env;
@@ -68,13 +68,12 @@ module.exports.controller = function (app) {
         //JOIN small blind
         req.session.userId = USER2
         await game.doModelJoin(req, true);
-
+        return;
         //Join player 3
         req.session.userId = USER3
         delete req.body.bet;
         await game.doModelJoin(req, true);
-        console.log(game.data)
-        return;
+
         //console.log('....... Active player:', game.activePlayer.name)
         await doBet(game, 10, USER2)
         await doBet(game, 30, USER3)
@@ -92,7 +91,7 @@ module.exports.controller = function (app) {
 
         await doBet(game, 0, USER1)
         await doBet(game, 0, USER2)
-        //await doBet(game, 0, USER3)
+        await doBet(game, 0, USER3)
         //console.log(game.activePlayer)
         //await doBet(game, 0, USER3)
 
@@ -101,17 +100,9 @@ module.exports.controller = function (app) {
 
     }
 
-    //tictoctest();
-    function tictoctest(){
-        Mongoose.game.findOne({module:'TicTacToe'})
-            .then(game=>{
-                console.log(game.test())
-            })
-    }
-
-    //Mongoose.game.findOne().sort({createdAt: -1}).then(console.log)
     //Mongoose.game.deleteMany({}).then(console.log)
-    //Mongoose.user.find().then(r=>console.log(r.map(r=>r.id)))
+    //Mongoose.user.updateMany({},{$set:{virtualBalance:100000}}).then(r=>console.log('================',r))
+    //Mongoose.user.find().then(r=>console.log(r.map(r=>r.virtualBalance)))
 
     app.post('/api/game/start', passportLib.isLogged, (req, res) => {
         Mongoose.game.start(req)
@@ -124,10 +115,12 @@ module.exports.controller = function (app) {
     app.post('/api/game/play/:id', async (req, res) => {
         if(test){
             const lastGame = await Mongoose.game.findOne().sort({createdAt: -1});
+            if(!lastGame) return res.sendStatus(200)
             req.params.id = lastGame.id
         }
         Mongoose.game.hideOpponentData(req)
             .then(r=> {
+                //console.log(r.players.length)
                 res.send(r)
             })
             .catch(e => {

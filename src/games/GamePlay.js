@@ -54,6 +54,7 @@ export default function GamePlay(props){
     }
 
     if(!game) return <div/>
+    if(!game.id) return navigate(`/games/${props.module}`)
     //game.player = game.players.find(p=>props.store.authenticatedUser && p.id===props.store.authenticatedUser.id)
     return(
         <div>

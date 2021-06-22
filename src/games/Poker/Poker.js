@@ -10,18 +10,19 @@ export default function Poker(props) {
     const myId = props.store.authenticatedUser && props.store.authenticatedUser.id
     function drawPlayer(p) {
         //return <div>{p.id}</div>
-        if(!game.data.hands[p.id]) game.data.hands[p.id] = [0,0]
+        if(game.data.hands && !game.data.hands[p.id]) game.data.hands[p.id] = [0,0]
         return <div key={p.id} className="row">
 
             <div className={`${p.id === myId ? 'bg-success' : ''} col-4`}>
-                {game.data.hands[p.id].map((h,i)=><PokerCard {...h} key={i}/>)}
+                {game.data.hands && game.data.hands[p.id].map((h,i)=><PokerCard {...h} key={i}/>)}
             </div>
-            <div className="col-6">
-                Bet: {game.data.bets[game.data.round][p.id]}
+            <div className="col-6 d-flex flex-column justify-content-center">
+                {game.data.bets[game.data.round][p.id] && <div>Bet: {game.data.bets[game.data.round][p.id]}</div>}
                 {!!game.activePlayer && game.activePlayer.id === p.id && <GameBetForm callBet={game.maxBet - game.data.bets[game.data.round][p.id]} userInfo={userInfo} game={game} {...props}/>}
-                {!!game.activePlayer && game.activePlayer.id === p.id && <div> Player turn {game.timeLeft && <div>Time left: {game.timeLeft}</div>}</div>}
-                {!!game.winners.length && game.data.results && <strong className="d-block">{game.data.results[p.id].name}</strong>}
+                {!!game.activePlayer && game.activePlayer.id === p.id && <div> Player turn {!!game.timeLeft && <div>Time left: {game.timeLeft}</div>}</div>}
                 {game.winners.includes(p.id) && <WinnerSign/>}
+                {!!game.winners.length && game.data.results && <strong className="d-block">{game.data.results[p.id].name}</strong>}
+
             </div>
             <div className="col-2"><UserAvatar {...p}/> Stake: {game.stakes[p.id]}</div>
         </div>
