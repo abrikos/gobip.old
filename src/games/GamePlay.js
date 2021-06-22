@@ -8,6 +8,7 @@ import UserAvatar from "../pages/cabinet/UserAvatar";
 import {Button} from "react-bootstrap";
 import {A,navigate} from "hookrouter";
 import TicTacToe from "./TicTacToe/TicTacToe";
+import ReferralProgram from "../pages/cabinet/ReferralProgram";
 
 export default function GamePlay(props){
     const [error,setError] = useState({})
@@ -58,13 +59,14 @@ export default function GamePlay(props){
     //game.player = game.players.find(p=>props.store.authenticatedUser && p.id===props.store.authenticatedUser.id)
     return(
         <div>
+            <ReferralProgram redirect={game.link} {...props}/>
             <small className="float-right">{game.type} "{game.moduleHuman}"</small>
             <h1>{game.name}</h1>
             <A href={`/games/${game.module}`}>&lt; Back to list </A>
             <GameUserInfo type={game.type} {...props}/>
             <hr/>
             <small className="d-block text-center">{game.description}</small>
-            {!!game.timeFinishLeft && <div>Reload: {game.timeFinishLeft}</div>}
+            {!!game.reloadTimer && <div style={{height:10, background:`linear-gradient(90deg, rgba(0,255,0,.8), rgba(0,255,0,0) ${game.reloadTimer}%)`}}></div>}
             {error.message && <div className="alert alert-danger">{error.message}</div>}
             {game.module === 'RoPaSci' && <RoPaSci game={game} userInfo={userInfo} onBet={loadGame} doTurn={doTurn} {...props}/>}
             {game.module === 'Reversi' && <Reversi game={game} userInfo={userInfo} onBet={loadGame} doTurn={doTurn} {...props}/>}
@@ -77,7 +79,8 @@ export default function GamePlay(props){
                     :
                     <Button onClick={doJoin}>Join</Button>}
             </div>}
-            {!!game.waitList.length && <div>Wait list
+            {!!game.waitList.length && <div>
+                <h3 className="text-center">Wait list</h3>
                 {game.waitList.map(p => <UserAvatar key={p.id} {...p}/>)}
             </div>}
         </div>

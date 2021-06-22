@@ -13,7 +13,7 @@ export default function RoPaSci(props) {
     function drawPlayer(p) {
         const result = game.data.turns.find(ch => ch.userId === p.id);
         const winner = !!game.winners.length && game.winners.find(w => w === p.id);
-        return <div className="w-50 p-2">
+        return <div className="w-50 p-2" key={p.id}>
             <div key={p.id} className={`${p.id === myId ? 'border-success' : ''} p-3 border w-100 d-flex justify-content-between`}>
                 <div className=""><UserAvatar horizontal {...p}/></div>
                 <div className="d-flex align-items-center">
@@ -31,10 +31,12 @@ export default function RoPaSci(props) {
 
     return (
         <div>
-            {!game.data.turns.map(t=>t.userId).includes(myId) && game.players.length > 1 ? game.players.map(p => p.id).includes(myId) && <div className="text-center">
+            {!game.data.turns.map(t => t.userId).includes(myId) && game.players.length > 1 ? game.players.map(p => p.id).includes(myId) && <div className="text-center">
                 Make your choice:<br/>
                 {game.data.variants.map(v => <span key={v} className="pointer" onClick={() => props.doTurn(v)}><img alt={v} src={images[v]} key={v} className={`choice`}/></span>)}
-            </div>:<div className="text-center">Wait for opponent</div>}
+            </div>
+                :
+                !game.reloadTimer && <div className="text-center">Wait for opponent</div>}
             <div className="d-flex justify-content-around">
                 {game.players.map(drawPlayer)}
             </div>

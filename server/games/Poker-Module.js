@@ -7,7 +7,7 @@ const PokerModule = {
     label: 'Texas Hold`Em Poker',
     useWaitList: true,
     shiftFirstTurn: true,
-    //noTimer: true,
+    useTimer: true,
     defaultData: {
         hands: {},
         desk: [],
@@ -20,10 +20,6 @@ const PokerModule = {
         initialStake: 100
     },
     rounds: ['blinds', 'pre-flop', 'flop', 'turn', 'river', 'finish'],
-
-    get setTimer(){
-        return !this.noTimer
-    },
 
     onJoinDoTurn(game, req) {
         const data = game.data;
@@ -92,6 +88,7 @@ const PokerModule = {
     },
 
     doFold(game,req){
+        console.log('doFold');
         const player = game.players.find(p=>p.equals(req.session.userId));
         game.players = game.players.filter(p=>!p.equals(req.session.userId));
         if(this.useWaitList) game.waitList.push(player);
@@ -103,7 +100,7 @@ const PokerModule = {
     hasWinners(game) {
         const data = game.data;
         if (data.round > 4) {
-            //console.log('FINISH');
+            console.log('===============FINISH');
             let maxPriority = 0;
             let maxSum = 0;
             for (const c in data.hands) {

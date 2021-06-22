@@ -5,7 +5,7 @@ import {A, navigate} from "hookrouter";
 import GameUserInfo from "./GameUserInfo";
 
 export default function GameList(props) {
-    const [module, setModule] = useState({name: 'TicTacToe'})
+    const [module, setModule] = useState({})
     const [modules, setModules] = useState([])
     const [list, setList] = useState([])
 
@@ -38,6 +38,7 @@ export default function GameList(props) {
     }
 
     function gameList(type) {
+        if(!module.name) return <div/>
         return <div>
             {props.store.authenticatedUser && <Button onClick={() => startGame(type)} className="d-block m-auto">Start new <strong className="d-block">"{module.label}"</strong> (<i>{type} balance</i>)</Button>}
             {list.filter(g => g.type === type).map(g => <div key={g.id}><A href={g.link}>{g.name}</A></div>)}

@@ -39,7 +39,7 @@ modelSchema.methods.test = function (req) {
 }
 
 modelSchema.statics.deleteForgottenGames = async function () {
-    const games = await this.find({updatedAt: {$lt: moment().utc().add(-5, 'hours').format('YYYY-MM-DD hh:mm')}})
+    const games = await this.find({updatedAt: {$lt: moment().utc().add(-1, 'hours').format('YYYY-MM-DD hh:mm')}})
         .populate('players', ['name', 'photo', 'realBalance', 'virtualBalance']);
     for (const game of games) {
         for (const p of game.players) {
@@ -105,8 +105,10 @@ modelSchema.statics.leaveGame = function (req) {
 modelSchema.statics.doTurn = async function (req) {
     this.findById(req.params.id).populate('players', ['name', 'photo', 'realBalance', 'virtualBalance'])
         .then(async game => {
-            if (!game.activePlayer.equals(req.session.userId)) return;
+            if (!Games[game.module].noCheckTurnsOrder && !game.activePlayer.equals(req.session.userId)) return;
+            game.autoFold = game.autoFold.filter(u => !u.equals(req.session.userId))
             game.doModelTurn(req);
+
             //game.doModelBet(req, req.body.bet * 1)
         })
         .catch(console.log)
@@ -118,14 +120,14 @@ modelSchema.methods.doModelTurn = async function (req) {
     const game = this;
     const module = Games[game.module];
     module.doTurn(game, req);
-    console.log('TURN', game.iamPlayer(req).name, req.body)
+    console.log('TURN', game.iamPlayer(req) && game.iamPlayer(req).name, req.body)
     if (module.hasWinners(game)) {
         game.payToWinners();
         //await game.reload();
     }else {
         game.activePlayerIdx++;
         if (game.activePlayerIdx >= game.players.length) game.activePlayerIdx = 0;
-        if (module.startTimer) game.activePlayerTime = moment().unix();
+        if (module.useTimer && game.players.length > 1) game.activePlayerTime = moment().unix();
     }
     await game.save()
 }
@@ -245,9 +247,11 @@ modelSchema.statics.modules = function () {
 
 modelSchema.statics.timeFoldPlayers = function () {
     this.find({activePlayerTime: {$lt: moment().unix() - process.env.GAME_TURN_TIME, $gt: 0}})
+        .populate('players', ['name', 'photo', 'realBalance', 'virtualBalance'])
+        .populate('winners', ['name', 'photo', 'realBalance', 'virtualBalance'])
         .then(async games => {
             for (const g of games) {
-                if (Games[g.module].noTimer) {
+                if (!Games[g.module].useTimer) {
                     g.activePlayerTime = 0;
                     g.save()
                     continue;
@@ -256,18 +260,21 @@ modelSchema.statics.timeFoldPlayers = function () {
                 if (g.winners.length) continue;
                 if (!g.players.length) continue;
                 const req = {
-                    session: {userId: g.players[g.activePlayerIdx]},
+                    session: {userId: g.players[g.activePlayerIdx].id},
                 };
                 g.autoFold.push(req.session.userId);
-                await g.doModelBet(req, -1);
-                if (g.autoFold.filter(u => u.equals(req.session.userId)).length > 2) {
-                    g.players = g.players.filter(u => u.equals(req.session.userId))
+                req.body = {bet:-1};
+                await g.doModelTurn(req);
+                console.log('gggggggggggg', req.session.userId, g.autoFold.filter(u => u.equals(req.session.userId)).length)
+                if (g.autoFold.filter(u => u.equals(req.session.userId)).length > 1) {
+                    g.players = g.players.filter(u => !u.equals(req.session.userId))
+                    console.log('PLAYERS', g.players.length)
+                    console.log('WAITLIST 1', g.waitList.length)
                     console.log('USER', req.session.userId)
-                    console.log('AUTOFOLD', g.autoFold)
-                    console.log('WAIT LIST', g.waitList)
-                    console.log('AUTOFOLD LENGTH', g.autoFold.filter(u => u.equals(req.session.userId)).length)
+                    console.log('AUTOFOLD LENGTH', g.autoFold.filter(u => !u.equals(req.session.userId)).length)
                     g.waitList = g.waitList.filter(u => !u.equals(req.session.userId))
                     g.autoFold = g.autoFold.filter(u => !u.equals(req.session.userId))
+                    console.log('WAITLIST 2', g.waitList.length)
                     await g.save()
                 }
             }
@@ -300,12 +307,16 @@ modelSchema.virtual('activePlayer')
 
 modelSchema.virtual('timeLeft')
     .get(function () {
-        return !Games[this.module].noTimer && this.activePlayerTime && this.activePlayerTime + process.env.GAME_TURN_TIME * 1 - moment().unix();
+        if(!Games[this.module].useTimer || !this.activePlayerTime) return false;
+        const t = this.activePlayerTime + process.env.GAME_TURN_TIME * 1 - moment().unix();
+        return t / (process.env.GAME_TURN_TIME * 1) * 100;
     });
 
-modelSchema.virtual('timeFinishLeft')
+modelSchema.virtual('reloadTimer')
     .get(function () {
-        return this.finishTime && this.finishTime + process.env.GAME_RELOAD_TIME * 1 - moment().unix();
+        if(!this.finishTime) return;
+        const t = this.finishTime + process.env.GAME_RELOAD_TIME * 1 - moment().unix();
+        return t / (process.env.GAME_RELOAD_TIME * 1) * 100;
     });
 
 modelSchema.virtual('link')

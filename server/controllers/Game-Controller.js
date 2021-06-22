@@ -10,43 +10,18 @@ const CronJob = require('cron').CronJob;
 
 module.exports.controller = function (app) {
     const c2 = new CronJob('* * * * * *', async function () {
-        //Mongoose.game.timeFoldPlayers();
-        //Mongoose.game.reloadFinished();
+        Mongoose.game.timeFoldPlayers();
+        Mongoose.game.reloadFinished();
     }, null, true, 'America/Los_Angeles')
 
     const c3 = new CronJob('* * * * * *', async function () {
-        //Mongoose.game.deleteForgottenGames();
+        Mongoose.game.deleteForgottenGames();
     }, null, true, 'America/Los_Angeles')
 
-    const test = true;
+    const test = false;
     //doTestRoPaSci();
     doTestPoker();
 
-
-    async function doTestRoPaSci() {
-        async function doTurn(game, turn, userId) {
-            req.body.turn = turn;
-            req.session.userId = userId
-            await game.doModelTurn(req);
-        }
-        if (!test) return
-        const {USER1, USER2, USER3} = process.env;
-        const req = {
-            session: {userId: USER1},
-            body: {
-                module: {name:'RoPaSci'},
-                type: 'virtual'
-            }
-        }
-        //START
-        let game = await Mongoose.game.start(req);
-
-        //JOIN small blind
-        req.session.userId = USER3
-        await game.doModelJoin(req, true);
-        await doTurn(game,'paper',USER1);
-        await doTurn(game,'rock',USER3);
-    }
 
     async function doTestPoker() {
         async function doBet(game, bet, userId) {
@@ -68,20 +43,25 @@ module.exports.controller = function (app) {
         //JOIN small blind
         req.session.userId = USER2
         await game.doModelJoin(req, true);
-        return;
+return
         //Join player 3
         req.session.userId = USER3
         delete req.body.bet;
         await game.doModelJoin(req, true);
 
-        //console.log('....... Active player:', game.activePlayer.name)
+
         await doBet(game, 10, USER2)
+        await doBet(game, 10, USER3)
+
+return
         await doBet(game, 30, USER3)
         await doBet(game, 10, USER1)
         await doBet(game, 10, USER2)
         await doBet(game, 0, USER1)
+        await doBet(game, 10, USER1)
 
-        await doBet(game, 0, USER1)
+return
+
         await doBet(game, 0, USER2)
         await doBet(game, 0, USER3)
 
@@ -205,20 +185,8 @@ module.exports.controller = function (app) {
 
     })
 
-    /*app.post('/api/game/cabinet/user/info', passport.isLogged, async (req, res) => {
-        Mongoose.user.findById(req.session.userId)
-            .populate('gameWallet')
-            .then(async r => {
-                const {realBalance, virtualBalance} = r;
-                res.send({address: r.gameWallet && r.gameWallet.address, realBalance, virtualBalance})
-            })
-            .catch(e => {
-                res.status(500).send(app.locals.adaptError(e))
-            })
-    })*/
-
     app.post('/api/game/bet/:id', passport.isLogged, async (req, res) => {
-        Mongoose.game.doBet(req)
+        Mongoose.game.doTurn(req)
         res.sendStatus(200)
     })
 

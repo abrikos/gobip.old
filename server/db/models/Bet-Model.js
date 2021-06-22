@@ -17,7 +17,7 @@ const modelSchema = new Schema({
         value: {type: Number, default: 0, min: 0},
         closed: Boolean,
         closeTx: String,
-        pair: {type: String, required: true, validate: {validator: v => v.match(/(\w+)\/(\w+)/)}, message: p => `${p.value} is not a valid pair`}
+        pair: {type: String, required: true, validateX: {validator: v => v.match(/(\w+)\/(\w+)/)}, message: p => `${p.value} is not a valid pair`}
     },
     {
         timestamps: {createdAt: 'createdAt'},

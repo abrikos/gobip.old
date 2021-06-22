@@ -1,15 +1,41 @@
-.poker-card
-  width: 100px
-.bet
-  border-radius: 30px
-  display: flex
-  justify-content: center
-  width: 60px
-.hand-turn
-  box-shadow: inset 1px 1px 60px green
+.poker
+  .gauge
+    height: 10px
+    background: linear-gradient(90deg, rgba(255,0,0,.8), rgba(255,0,0,0) 10.71%)
+  .iam-player
+    .player
+      .player-wrapper
+        display: flex
+        justify-content: space-around
+        div
+          //border: 1px solid red
+  .other-players
+    display: flex
+    justify-content: center
+    flex-wrap: wrap
+    .player
+      width: 25%
+      .player-wrapper
+        font-size: .7em
+        border: 1px solid silver
+        margin: 4px
+        padding: 4px
+      .user-avatar
+        flex-direction: row !important
+    .poker-card
+      width: 50px
+  .poker-card
+    width: 100px
+  .bet
+    border-radius: 30px
+    display: flex
+    justify-content: center
+    width: 60px
+  .hand-turn
+    box-shadow: inset 1px 1px 60px green
 
-.winner
-  background-image: url("../../files/win.png")
-  background-size: contain
-  background-repeat: no-repeat
-  background-position: center
+  .winner
+    background-image: url("../../files/win.png")
+    background-size: contain
+    background-repeat: no-repeat
+    background-position: center

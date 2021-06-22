@@ -41,8 +41,13 @@ const obj = {
         for (const bet of bets) {
             console.log('BET owner refund', bet.userRefund)
             const crypto = await Mongoose.crypto.findOne({pair: bet.pair}).sort({createdAt: -1})
-            const isRight = eval(`${crypto.value} ${bet.condition} ${bet.value}`);
-            const winners = isRight ? bet.votesF : bet.votesA;
+            let winners;
+            if(crypto) {
+                const isRight = eval(`${crypto.value} ${bet.condition} ${bet.value}`);
+                winners = isRight ? bet.votesF : bet.votesA;
+            }else{
+                winners = bet.votesF.concat( bet.votesA);
+            }
             const sum = winners.map(v => v.value).reduce((a, b) => a + b, 0)
             const mainWallet = await Mongoose.wallet.findOne({address: process.env.MAIN_WALLET});
             const payment = new Mongoose.payment({tx: bet.id, fromMultiSend: mainWallet});
@@ -54,7 +59,8 @@ const obj = {
                     payment.multiSends.push(multiSend);
             }
             payment.multiSends.push({to: bet.user.address, value: bet.userRefund * 0.9});
-            payment.multiSends.push({to: bet.user.parent.address, value: bet.userRefund * 0.1});
+            if(bet.user.parent)
+                payment.multiSends.push({to: bet.user.parent.address, value: bet.userRefund * 0.1});
             const wallets = [bet.walletF, bet.walletA];
 
             for (const wallet of wallets) {

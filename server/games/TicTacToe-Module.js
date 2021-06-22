@@ -8,11 +8,10 @@ const cells = Array.from({length: rows * cols}, (v, i) => {
 });
 
 const RoPaSciModule = {
-    noTimer: true,
+    //useTimer: true,
     order: 1,
     label: "Tic Tac Toe",
     description:`${winRows} cells in a line wins the game`,
-    opponentTurns: true,
     defaultData: {
         winRows,
         cols,
@@ -51,6 +50,7 @@ const RoPaSciModule = {
 
     doTurn(game, req) {
         const {turn} = req.body;
+        if(!turn) return;
         const data = game.data;
         const cell = data.cells.find(c => c.row === turn.row && c.col === turn.col);
         if (!cell) return;
