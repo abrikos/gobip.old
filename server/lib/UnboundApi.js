@@ -7,7 +7,7 @@ const UnboundApi = {
         data.value = tx.data.value * 1e-18;
         data.coin = tx.data.coin.symbol;
         Mongoose.unbound.create(tx)
-            .catch(e => console.log('Unbound exists'))
+            .catch(e => {})
     },
 
     async daily(limit, match) {

@@ -31,6 +31,7 @@ export default function Routes(store) {
         "/banners/:type": (params) => <Banners limit={100} store={store}  {...params}/>,
         "/lottery/winners": (params) => <BannerLottery store={store}  {...params}/>,
         "/games": (params) => <GameList store={store} {...params}/>,
+        "/games/:module": (params) => <GameList store={store} {...params}/>,
         "/swap-routes": (params) => <SwapRoutes store={store} {...params}/>,
         "/game/:module/:id": (params) => <GamePlay store={store} {...params}/>,
         "/login": () => <Login store={store}/>,

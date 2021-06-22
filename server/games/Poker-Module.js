@@ -1,6 +1,7 @@
 import PokerApi from "./PokerApi";
 
 const PokerModule = {
+    testMode: true,
     order: 2,
     label: 'Texas Hold`Em Poker',
     waitList: true,
@@ -55,10 +56,6 @@ const PokerModule = {
         return Object.values(bets).reduce((a, b) => a + b, 0);
     },
 
-    getMaxBet(game) {
-        return Math.max.apply(null, Object.values(game.data.bets[game.data.round]));
-    },
-
     getBank(game) {
         let bank = 0;
         if (!game.data.bets) return;
@@ -67,9 +64,13 @@ const PokerModule = {
         }
         return bank;
     },
-
+    onLeave(game, req) {
+        const data = game.data;
+        game.data = data;
+    },
     canJoin(game, req) {
-        return game.data.round === 0 && !(this._betsCount(game.data) > 1 && game.activePlayerIdx === 0);
+        console.log('CAN JOIN', game.data, this._betsCount(game.data))
+        return game.data.round === 0 && !(this._betsCount(game.data) > 1 && game.players.length < 2);
     },
 
     canLeave(game, req) {

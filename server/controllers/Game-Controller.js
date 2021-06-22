@@ -18,7 +18,7 @@ module.exports.controller = function (app) {
         Mongoose.game.deleteForgottenGames();
     }, null, true, 'America/Los_Angeles')
 
-    const test = true;
+    const test = false;
     //doTestRoPaSci();
     doTestPoker();
 
@@ -73,7 +73,7 @@ module.exports.controller = function (app) {
         req.session.userId = USER3
         delete req.body.bet;
         await game.doModelJoin(req, true);
-        console.log(game.data.bets)
+        console.log(game.data)
         return;
         //console.log('....... Active player:', game.activePlayer.name)
         await doBet(game, 10, USER2)
@@ -155,14 +155,9 @@ module.exports.controller = function (app) {
         res.sendStatus(200)
     });
 
-    app.post('/api/game/turn/:id', passportLib.isLogged, (req, res) => {
-
-    });
-
     app.post('/api/game/modules', (req, res) => {
         res.send(Mongoose.game.modules())
     });
-
 
     app.post('/api/game/list', (req, res) => {
         const {module} = req.body;
@@ -170,7 +165,9 @@ module.exports.controller = function (app) {
             .sort({updatedAt:-1})
             .select(['name', 'type', 'module'])
             //.populate('players', ['name','photo','realBalance','virtualBalance'])
-            .then(r => res.send(r))
+            .then(r => {
+                res.send(r)
+            })
             .catch(e => {
                 res.status(500).send(app.locals.adaptError(e))
             })
@@ -215,7 +212,7 @@ module.exports.controller = function (app) {
 
     })
 
-    app.post('/api/game/cabinet/user/info', passport.isLogged, async (req, res) => {
+    /*app.post('/api/game/cabinet/user/info', passport.isLogged, async (req, res) => {
         Mongoose.user.findById(req.session.userId)
             .populate('gameWallet')
             .then(async r => {
@@ -225,7 +222,7 @@ module.exports.controller = function (app) {
             .catch(e => {
                 res.status(500).send(app.locals.adaptError(e))
             })
-    })
+    })*/
 
     app.post('/api/game/bet/:id', passport.isLogged, async (req, res) => {
         Mongoose.game.doBet(req)

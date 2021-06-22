@@ -76,10 +76,13 @@ modelSchema.methods.doModelLeave = function (req, forgotten) {
     const game = this;
     if (!game.canLeave(req) && !forgotten) return;
     Games[game.module].onLeave(game, req);
-    const player = game.players.find(p => p.equals(req.session.userId));
+    const prevIndex = game.players.map(p => p.id).indexOf(req.session.id) - 1;
+    game.activePlayerIdx = prevIndex < 0 ? 0 : prevIndex;
+    let player = game.players.find(p => p.equals(req.session.userId));
+    if (!player) player = game.waitList.find(p => p.equals(req.session.userId));
     game.players = game.players.filter(p => !p.equals(req.session.userId));
     game.waitList = game.waitList.filter(p => !p.equals(req.session.userId));
-    const myStake = game.stakes[req.session.userId];
+    const myStake = game.stakes[req.session.userId] * 1;
     player[`${game.type}Balance`] += myStake;
     player.save();
     delete game.stakes[req.session.userid];
@@ -98,6 +101,7 @@ modelSchema.statics.canLeave = async function (req) {
 modelSchema.statics.leaveGame = function (req) {
     this.findById(req.params.id)
         .populate('players', ['name', 'photo', 'realBalance', 'virtualBalance'])
+        .populate('waitList', ['name', 'photo', 'realBalance', 'virtualBalance'])
         .then(game => {
             game.doModelLeave(req);
             game.save()
@@ -107,8 +111,10 @@ modelSchema.statics.leaveGame = function (req) {
 }
 
 modelSchema.statics.doBet = async function (req) {
-    const game = await this.findById(req.params.id).populate('players', ['name', 'photo', 'realBalance', 'virtualBalance'])
-    game.doModelBet(req)
+    this.findById(req.params.id).populate('players', ['name', 'photo', 'realBalance', 'virtualBalance'])
+        .then(game => game.doModelBet(req))
+        .catch(console.log)
+
 }
 
 modelSchema.methods.doModelBet = function (req) {
@@ -118,14 +124,14 @@ modelSchema.methods.doModelBet = function (req) {
         if (game.winners.length) {
             const message = `Cannot bet. There is winners "${game.name}"`
             console.log(message);
-            reject( {error: 500, message})
+            reject({error: 500, message})
         }
         await game.populate('players', ['name', 'photo', 'realBalance', 'virtualBalance']).execPopulate()
         if (!game.iamPlayer(req)) return game;
         console.log('BET', game.iamPlayer(req).name, bet)
-        if (!game.activePlayer.equals(req.session.userId)) {
+        if (game.activePlayer && !game.activePlayer.equals(req.session.userId)) {
             console.log('Not you turn');
-            reject( {error: 500, message: 'Not you turn'})
+            reject({error: 500, message: 'Not you turn'})
         }
         if (game.stakes[req.session.userId] < bet) {
             const message = 'Stake too low';
@@ -140,7 +146,7 @@ modelSchema.methods.doModelBet = function (req) {
         }
         game.changeStake(req, game.stakes[req.session.userId] - bet)
         game.activePlayerTime = moment().unix();
-        if(game.winners.length) game.payToWinners();
+        if (game.winners.length) game.payToWinners();
         await game.save();
         resolve(game)
     })
@@ -239,11 +245,16 @@ modelSchema.methods.reload = async function () {
     this.history.push({data: this.data, winners: this.winners, date: new Date()});
     this.winners = [];
     this.data = Games[this.module].defaultData;
+
     await this
         .populate('waitList', ['name', 'photo', 'realBalance', 'virtualBalance'])
         .populate('players', ['name', 'photo', 'realBalance', 'virtualBalance'])
         .execPopulate()
     const players = this.players.concat(this.waitList);
+    if (!players.length) {
+        this.delete();
+        return;
+    }
     if (Games[this.module].shiftFirstTurn) {
         players.push(players.shift());
     }
@@ -264,11 +275,7 @@ modelSchema.methods.reload = async function () {
 modelSchema.statics.modules = function () {
     const modules = [];
     for (const k of Object.keys(Games)) {
-        modules.push({
-            name: k,
-            label: Games[k].label || k,
-            order: Games[k].order
-        })
+        modules.push({name: k, ...Games[k]})
     }
     return modules.sort((a, b) => a.order * 1 > b.order * 1);
 }
@@ -314,11 +321,6 @@ modelSchema.statics.start = async function (req) {
     await g.doModelJoin(req, true);
     return g;
 }
-
-modelSchema.virtual('maxBet')
-    .get(function () {
-        return Games[this.module].getMaxBet(this);
-    });
 
 modelSchema.virtual('description')
     .get(function () {

@@ -33,23 +33,24 @@ export default function GameBetForm(props) {
     }
 
     if(game.winners.length || !(props.store.authenticatedUser && game.activePlayer && props.store.authenticatedUser.id === game.activePlayer.id)) return <div/>
+    const maxBet = game.data.bets[game.data.round];
     return (
         <Form onSubmit={doBet} className="d-flex">
             {/*{game.data.betActions && game.data.betActions.includes('check') && <Button onClick={doCheck}>Check</Button>}*/}
-            {!game.maxBet && <Button onClick={doCheck} variant="success">Check</Button>}
+            {!maxBet && <Button onClick={doCheck} variant="success">Check</Button>}
             {!!callBet && <Button onClick={doCall} variant="success">Call&nbsp;{callBet}</Button>}
             <InputGroup>
                 <InputGroup.Prepend>
                     <Button onClick={()=>setValue(value+50)}>+50</Button>
                 </InputGroup.Prepend>
-                <FormControl name="bet" value={value} onChange={e=>setValue(e.target.value * 1)} type="number" min={game.maxBet} max={balance}/>
+                <FormControl name="bet" value={value} onChange={e=>setValue(e.target.value * 1)} type="number" min={maxBet} max={balance}/>
                 <InputGroup.Append>
                     <Button type="submit" >Bet</Button>
                 </InputGroup.Append>
             </InputGroup>
 
 
-            {game.maxBet && <Button variant="danger" onClick={doFold}>Fold</Button>}
+            {maxBet && <Button variant="danger" onClick={doFold}>Fold</Button>}
         </Form>
     )
 }

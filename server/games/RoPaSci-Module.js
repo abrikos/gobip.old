@@ -62,7 +62,6 @@ const RoPaSciModule = {
         const data = game.data;
         data.turns = data.turns.filter(t => t.userId !== req.session.userId)
         game.data = data;
-
     },
     canLeave(game, req) {
         return true;
