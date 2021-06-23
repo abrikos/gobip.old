@@ -8,13 +8,14 @@ const PokerModule = {
     useWaitList: true,
     shiftFirstTurn: true,
     useTimer: true,
+    roundsCount:6,
     defaultData: {
         hands: {},
         desk: [],
         round: 0,
         roundName: 'pre-flop',
         finish: false,
-        bets: [{}, {}, {}, {}, {}, {}],
+        //bets: [{}, {}, {}, {}, {}, {}],
         results: {},
         betActions: ['call', 'bet', 'check', 'ford'],
         initialStake: 100
@@ -54,7 +55,7 @@ const PokerModule = {
     },
 
     _bigBlindCheck(game, data, req) {
-        return game.activePlayerIdx === 0 && data.round === 1 && !data.bets[data.round][req.session.userId]
+        return game.activePlayerIdx === 0 && data.round === 1 && !game.bets[data.round][req.session.userId]
     },
 
     _sumBets(bets) {
@@ -63,8 +64,8 @@ const PokerModule = {
 
     getBank(game) {
         let bank = 0;
-        if (!game.data.bets) return;
-        for (const round of game.data.bets) {
+        if (!game.bets) return;
+        for (const round of game.bets) {
             bank += this._sumBets(round)
         }
         return bank;
@@ -80,7 +81,7 @@ const PokerModule = {
         game.data = data;
     },
     canJoin(game, req) {
-        return game.data.round === 0 && !(this._betsCount(game.data) > 1 && game.players.length < 2);
+        return game.data.round === 0 && !(this._betsCount(game) > 1 && game.players.length < 2);
     },
 
     canLeave(game, req) {
@@ -135,18 +136,18 @@ const PokerModule = {
 
         const data = game.data;
 
-        const maxBet = Math.max.apply(null, Object.values(data.bets[data.round]));
-        const beforeBet = data.bets[data.round][req.session.userId];
+        const maxBet = Math.max.apply(null, Object.values(game.bets[data.round]));
+        const beforeBet = game.bets[data.round][req.session.userId];
 
         if (req.body.bet >= 0) {
-            if (!beforeBet) data.bets[data.round][req.session.userId] = 0;
-            data.bets[data.round][req.session.userId] += req.body.bet * 1;
-            if (data.bets[data.round][req.session.userId] < maxBet && !(game.activePlayerIdx === 0 && data.round === 0)) {
-                return console.log( 'Bet too small. Min: ' + (maxBet - beforeBet) + ' Curr: ' + data.bets[data.round][req.session.userId])
+            if (!beforeBet) game.bets[data.round][req.session.userId] = 0;
+            game.bets[data.round][req.session.userId] += req.body.bet * 1;
+            if (game.bets[data.round][req.session.userId] < maxBet && !(game.activePlayerIdx === 0 && data.round === 0)) {
+                return console.log( 'Bet too small. Min: ' + (maxBet - beforeBet) + ' Curr: ' + game.bets[data.round][req.session.userId])
             }
         }
 
-        if ((this._isCall(game, data) && this._betsCount(data) > 1) || this._bigBlindCheck(game, data, req)) {
+        if ((this._isCall(game, data) && this._betsCount(game) > 1) || this._bigBlindCheck(game, data, req)) {
             game.activePlayerIdx = -1;
             data.round++;
             console.log('======== NEW ROUND ', this._roundName(data), data.round)
@@ -157,7 +158,7 @@ const PokerModule = {
             console.log('small blind')
             game.activePlayerIdx = 0; // will be added +1 in model method
         }
-        game.changeStake(req, game.stakes[req.session.userId] - bet)
+        game.changeStake(req.session.userId, game.stakes[req.session.userId] - bet)
         game.data = data;
         return {}
     },
@@ -195,12 +196,12 @@ const PokerModule = {
         game.data = data;
     },
 
-    _betsCount(data) {
-        return Object.keys(data.bets[data.round]).length
+    _betsCount(game) {
+        return Object.keys(game.bets[game.data.round]).length
     },
 
     _isCall(game, data) {
-        let sums = Object.values(data.bets[data.round]);
+        let sums = Object.values(game.bets[data.round]);
         const unique = [...new Set(sums)];
         return sums.length === game.players.length && unique.length === 1
     },

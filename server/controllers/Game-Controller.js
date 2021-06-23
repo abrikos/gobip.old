@@ -10,15 +10,15 @@ const CronJob = require('cron').CronJob;
 
 module.exports.controller = function (app) {
     const c2 = new CronJob('* * * * * *', async function () {
-        Mongoose.game.timeFoldPlayers();
-        Mongoose.game.reloadFinished();
+        //Mongoose.game.timeFoldPlayers();
+        //Mongoose.game.reloadFinished();
     }, null, true, 'America/Los_Angeles')
 
     const c3 = new CronJob('* * * * * *', async function () {
-        Mongoose.game.deleteForgottenGames();
+        //Mongoose.game.deleteForgottenGames();
     }, null, true, 'America/Los_Angeles')
 
-    const test = false;
+    const test = true;
     //doTestRoPaSci();
     doTestPoker();
 
