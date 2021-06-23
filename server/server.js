@@ -50,9 +50,9 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
 app.locals.adaptError = (e) => {
-    const msg =  e.response ? e.response.data.error.message : e.message;
+    const message =  e.response ? e.response.data.error.message : e.message;
     console.log(e)
-    return msg;
+    return {message};
 };
 
 

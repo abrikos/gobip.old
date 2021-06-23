@@ -1,5 +1,4 @@
 import PokerApi from "./PokerApi";
-import moment from "moment";
 
 const PokerModule = {
     testMode: true,
@@ -8,42 +7,42 @@ const PokerModule = {
     useWaitList: true,
     shiftFirstTurn: true,
     useTimer: true,
-    roundsCount:6,
+    roundsCount: 6,
+    initialStake: 100,
     defaultData: {
         hands: {},
         desk: [],
-        round: 0,
         roundName: 'pre-flop',
         finish: false,
         //bets: [{}, {}, {}, {}, {}, {}],
         results: {},
         betActions: ['call', 'bet', 'check', 'ford'],
-        initialStake: 100
+
     },
     rounds: ['blinds', 'pre-flop', 'flop', 'turn', 'river', 'finish'],
 
-    onJoinDoTurn(game, req) {
+    onJoin(game, userId) {
         const data = game.data;
         let doTurn = false;
-        if (game.players.length === 1) {
-            //BIG blind
-            req.body.bet = game.minBet * 2;
-            doTurn = true;
-            //console.log('BIG BLIND', req.body)
-        } else if (game.players.length === 2) {
+        if (game.players.length === 2) {
             //SMALL blind
-            req.body.bet = game.minBet * 1;
-            doTurn = true;
-            //console.log('SMALL BLIND', req.body)
+            this.doTurn(game, game.players[0].id, {turn: {bet: game.minBet}})
+            this.doTurn(game, game.players[1].id, {turn: {bet: game.minBet / 2}})
+            game.activePlayerIdx = 1;
         }
-        if(doTurn) data.bets[data.round][req.session.userId] = 0;
+
+        //if (doTurn) this._insertBet(game, req, 0);
         if (game.module === 'Poker') {
-            data.hands[req.session.userId] = PokerApi.randomSet(this._allCards(data), 2);
+            data.hands[userId] = PokerApi.randomSet(this._allCards(data), 2);
         } else {
-            data.hands[req.session.userId] = [1, 2, 3, 4, 5, 6].sort(() => Math.random() - 0.5).slice(0, 2);
+            data.hands[userId] = [1, 2, 3, 4, 5, 6].sort(() => Math.random() - 0.5).slice(0, 2);
         }
         game.data = data;
-        return doTurn;
+    },
+
+    _insertBet(game, userId, value) {
+        game.bets.push({round: game.round, userId: userId, value})
+
     },
 
     _allCards(data) {
@@ -54,23 +53,22 @@ const PokerModule = {
         return allHands
     },
 
-    _bigBlindCheck(game, data, req) {
-        return game.activePlayerIdx === 0 && data.round === 1 && !game.bets[data.round][req.session.userId]
+    _playerBet(game, userId) {
+        return game.playersBets[userId];
     },
 
-    _sumBets(bets) {
-        return Object.values(bets).reduce((a, b) => a + b, 0);
+    _bigBlindCheck(game, data, userId) {
+        return game.activePlayerIdx === 0 && game.round === 1 && !this._playerBet(game, userId)
     },
 
     getBank(game) {
         let bank = 0;
-        if (!game.bets) return;
-        for (const round of game.bets) {
-            bank += this._sumBets(round)
+        for (const bet of game.bets) {
+            bank += bet.value
         }
         return bank;
     },
-    onLeave(game, req) {
+    onLeave(game, userId) {
         const data = game.data;
         /*if(game.players.length === 1){
             game.activePlayerIdx = 1;
@@ -80,19 +78,20 @@ const PokerModule = {
         }*/
         game.data = data;
     },
-    canJoin(game, req) {
-        return game.data.round === 0 && !(this._betsCount(game) > 1 && game.players.length < 2);
+
+    canJoin(game) {
+        return game.bets.map(b => b.value).reduce((a, b) => a + b, 0) <= game.minBet * 1.5;
     },
 
     canLeave(game, req) {
         return true;
     },
 
-    doFold(game,req){
+    doFold(game, userId) {
         console.log('doFold');
-        const player = game.players.find(p=>p.equals(req.session.userId));
-        game.players = game.players.filter(p=>!p.equals(req.session.userId));
-        if(this.useWaitList) game.waitList.push(player);
+        const player = game.players.find(p => p.equals(userId));
+        game.players = game.players.filter(p => !p.equals(userId));
+        if (this.useWaitList) game.waitList.push(player);
         if (game.players.length === 1) {
             game.winners = game.players;
         }
@@ -100,7 +99,7 @@ const PokerModule = {
 
     hasWinners(game) {
         const data = game.data;
-        if (data.round > 4) {
+        if (game.round > 4) {
             console.log('===============FINISH');
             let maxPriority = 0;
             let maxSum = 0;
@@ -120,72 +119,78 @@ const PokerModule = {
         return game.winners.length;
     },
 
-    doTurn(game, req) {
-        const {bet} = req.body;
+    _roundBets(game) {
+        return game.bets.filter(b => b.round === game.round)
+    },
+
+    doTurn(game, userId, body) {
+        const {bet} = body.turn;
         if (game.winners.length) {
             const message = `Cannot bet. There is winners "${game.name}"`
             console.log(message);
             return
         }
-        console.log('BET', game.iamPlayer(req).name, bet)
-        if (game.stakes[req.session.userId] < bet) {
+        console.log('BET', game.iamPlayer(userId).name, bet)
+        if (game.stakes[userId] < bet) {
             const message = 'Stake too low';
             return console.log('model bet error:', message);
         }
-        if (bet < 0) return this.doFold(game,req);
+        if (bet < 0) return this.doFold(game, userId);
 
         const data = game.data;
 
-        const maxBet = Math.max.apply(null, Object.values(game.bets[data.round]));
-        const beforeBet = game.bets[data.round][req.session.userId];
 
-        if (req.body.bet >= 0) {
-            if (!beforeBet) game.bets[data.round][req.session.userId] = 0;
-            game.bets[data.round][req.session.userId] += req.body.bet * 1;
-            if (game.bets[data.round][req.session.userId] < maxBet && !(game.activePlayerIdx === 0 && data.round === 0)) {
-                return console.log( 'Bet too small. Min: ' + (maxBet - beforeBet) + ' Curr: ' + game.bets[data.round][req.session.userId])
+        const maxBet = game.maxBet;
+        if (bet >= 0) {
+            //if (!beforeBet) this._insertBet(game, req, 0);
+            if (game.playersBets[userId] + bet < maxBet && !(game.activePlayerIdx === 0 && game.round === 0)) {
+                return {error:'Call to ' + (maxBet) + ', or rise. Your bet: ' + bet}
             }
+            this._insertBet(game, userId, bet * 1)
         }
-
-        if ((this._isCall(game, data) && this._betsCount(game) > 1) || this._bigBlindCheck(game, data, req)) {
+        if ((this._isCall(game, data) && this._betsCount(game) > 1) || this._bigBlindCheck(game, data, userId)) {
             game.activePlayerIdx = -1;
-            data.round++;
-            console.log('======== NEW ROUND ', this._roundName(data), data.round)
-            data.roundName = this._roundName(data);
-            if(data.round < 5) this._fillDesk(game, data);
+            game.round++;
+            console.log('======== NEW ROUND ', this._roundName(game), game.round)
+            data.roundName = this._roundName(game);
+            if (game.round < 5) this._fillDesk(game, data);
 
-        } else if (data.round === 0 && game.activePlayerIdx === 1 && game.players.length === 2) {
-            console.log('small blind')
-            game.activePlayerIdx = 0; // will be added +1 in model method
+        } else if (game.round === 0 && game.activePlayerIdx === 1 && game.players.length === 2) {
+            console.log('small blind do bet')
+            //game.activePlayerIdx = 0; // will be added +1 in model method
         }
-        game.changeStake(req.session.userId, game.stakes[req.session.userId] - bet)
+        if(game.round===2 && game.activePlayerIdx === -1 ){
+            game.activePlayerIdx = 0
+        }
+
+        game.changeStake(userId, game.stakes[userId] - bet)
         game.data = data;
         return {}
     },
 
-    hideOpponentData(game, req) {
+    hideOpponentData(game, userId) {
         //return game;
         const data = game.data;
         for (const k of Object.keys(data.hands)) {
-            if (k !== req.session.userId) {
+            if (k !== userId) {
                 data.hands[k] = [0, 0]
             }
         }
-        if (data.round < 2)
+        if (game.round < 2)
             data.desk = Array(data.desk.length).fill(0)
-        //data.hands = data.hands.filter(h=>h[req.session.userId])
-        //game.data.hands = game.data.hands.map(h=>h.userId===req.session.userId? h :[0,0])
+        //data.hands = data.hands.filter(h=>h[userId])
+        //game.data.hands = game.data.hands.map(h=>h.userId===userId? h :[0,0])
         game.data = data;
         return game;
     },
 
-    _roundName(data) {
-        return this.rounds[data.round];
+    _roundName(game) {
+        return this.rounds[game.round];
     },
 
     _fillDesk(game, data) {
-        if (data.round < 2) return;
-        const amountOfCards = data.round === 2 ? 3 : 1;
+        if (game.round < 2) return;
+        const amountOfCards = game.round === 2 ? 3 : 1;
         let newCards;
         if (game.module === 'Poker') {
             newCards = PokerApi.randomSet(this._allCards(data), amountOfCards);
@@ -197,11 +202,11 @@ const PokerModule = {
     },
 
     _betsCount(game) {
-        return Object.keys(game.bets[game.data.round]).length
+        return this._roundBets(game).length
     },
 
     _isCall(game, data) {
-        let sums = Object.values(game.bets[data.round]);
+        let sums = Object.values(game.playersBets);
         const unique = [...new Set(sums)];
         return sums.length === game.players.length && unique.length === 1
     },

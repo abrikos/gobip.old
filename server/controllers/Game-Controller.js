@@ -11,7 +11,7 @@ const CronJob = require('cron').CronJob;
 module.exports.controller = function (app) {
     const c2 = new CronJob('* * * * * *', async function () {
         //Mongoose.game.timeFoldPlayers();
-        //Mongoose.game.reloadFinished();
+        Mongoose.game.reloadFinished();
     }, null, true, 'America/Los_Angeles')
 
     const c3 = new CronJob('* * * * * *', async function () {
@@ -25,10 +25,9 @@ module.exports.controller = function (app) {
 
     async function doTestPoker() {
         async function doBet(game, bet, userId) {
-            req.body = {bet};
-            req.session.userId = userId;
-            await game.doModelTurn(req);
+            await game.doModelTurn(userId, {turn: {bet}});
         }
+
         if (!test) return
         const {USER1, USER2, USER3} = process.env;
         const req = {
@@ -40,25 +39,27 @@ module.exports.controller = function (app) {
         }
         //START
         let game = await Mongoose.game.start(req);
+
         //JOIN small blind
-        req.session.userId = USER2
-        await game.doModelJoin(req, true);
-return
+        await game.doModelJoin(USER2, true).catch(console.log);
+
         //Join player 3
-        req.session.userId = USER3
-        delete req.body.bet;
-        await game.doModelJoin(req, true);
+        await game.doModelJoin(USER3, true).catch(console.log);
+        await doBet(game, 5, USER2).catch(console.log)
 
+        await doBet(game, 10, USER3).catch(console.log)
+        console.log('TODO: must be BigBlainds turn (close preflop)')
+        //await doBet(game, 0, USER1).catch(console.log)
 
-        await doBet(game, 10, USER2)
-        await doBet(game, 10, USER3)
-
+        //await doBet(game, 0, USER1).catch(console.log)
+        //await doBet(game, 0, USER2).catch(console.log)
+        //await doBet(game, 0, USER3).catch(console.log)
 return
-        await doBet(game, 30, USER3)
-        await doBet(game, 10, USER1)
-        await doBet(game, 10, USER2)
-        await doBet(game, 0, USER1)
-        await doBet(game, 10, USER1)
+        await doBet(game, 30, USER3).catch(console.log)
+        await doBet(game, 10, USER1).catch(console.log)
+        await doBet(game, 10, USER2).catch(console.log)
+        await doBet(game, 0, USER1).catch(console.log)
+        await doBet(game, 10, USER1).catch(console.log)
 
 return
 
@@ -103,29 +104,26 @@ return
                 //console.log(r.players.length)
                 res.send(r)
             })
-            .catch(e => {
-                res.status(500).send(app.locals.adaptError(e))
-            })
+            .catch(e => {res.status(500).send(app.locals.adaptError(e))})
     });
 
     app.post('/api/game/join/:id', passportLib.isLogged, (req, res) => {
         Mongoose.game.doJoin(req)
-        res.sendStatus(200)
+            .then(()=>res.sendStatus(200))
+            .catch(e => {res.status(500).send(app.locals.adaptError(e))})
+
     });
 
     app.post('/api/game/turn/:id', passportLib.isLogged, (req, res) => {
         Mongoose.game.doTurn(req)
-        res.sendStatus(200)
-    });
-
-    app.post('/api/game/can-leave/:id', passportLib.isLogged, (req, res) => {
-        Mongoose.game.canLeave(req)
-            .then(canLeave=>res.send({canLeave}))
+            .then(()=>res.sendStatus(200))
+            .catch(e => {res.status(500).send(app.locals.adaptError(e))})
     });
 
     app.post('/api/game/leave/:id', passportLib.isLogged, (req, res) => {
         Mongoose.game.leaveGame(req)
-        res.sendStatus(200)
+            .then(()=>res.sendStatus(200))
+            .catch(e => {res.status(500).send(app.locals.adaptError(e))})
     });
 
     app.post('/api/game/modules', (req, res) => {
@@ -183,11 +181,6 @@ return
                 res.status(500).send(app.locals.adaptError(e))
             })
 
-    })
-
-    app.post('/api/game/bet/:id', passport.isLogged, async (req, res) => {
-        Mongoose.game.doTurn(req)
-        res.sendStatus(200)
     })
 
 };

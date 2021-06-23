@@ -15,19 +15,23 @@ export default function Poker(props) {
 
     function drawPlayer(p) {
         if (game.data.hands && !game.data.hands[p.id]) game.data.hands[p.id] = [0, 0]
+
+        const bet = game.playersBets ? game.playersBets[p.id] || 0 : 0;
+        //const bet = 0;
         return <div key={p.id} className="player">
             <div className="player-wrapper">
-                <div><UserAvatar {...p}/></div>
-                <div className="text-center">
-                    {game.data.hands && game.data.hands[p.id].map((h, i) => <PokerCard {...h} key={i}/>)}
+                <div>
+                    <div className="text-center">
+                        <div>Bet: {bet}</div>
+                        <div className="text-info">{game.blinds[p.id] && `${game.blinds[p.id]} blind`} &nbsp;</div>
+                    </div>
                 </div>
-                <div className="text-center">
-                    Stake: {game.stakes[p.id]}
-                    {game.data.bets[game.data.round][p.id] && <div>Bet: {game.data.bets[game.data.round][p.id]}</div>}
+                <div className="d-flex">
+                    {game.data.hands && game.data.hands[p.id].map((h, i) => <PokerCard {...h} key={i}/>)}
                 </div>
 
                 <div>
-                    {!!game.activePlayer && game.activePlayer.id === p.id && <GameBetForm callBet={game.maxBet - game.data.bets[game.data.round][p.id]} userInfo={userInfo} game={game} {...props}/>}
+                    {!!game.activePlayer && game.activePlayer.id === p.id && <GameBetForm callBet={game.maxBet - bet*1} userInfo={userInfo} game={game} {...props}/>}
                     {game.players.length > 1 && !!game.activePlayer && game.activePlayer.id === p.id && <span> Player turn </span>}
 
                 </div>
@@ -35,6 +39,12 @@ export default function Poker(props) {
                     {game.winners.includes(p.id) && <WinnerSign/>}
                     {game.data.results && <strong className="d-block">{game.data.results[p.id].name}</strong>}
                 </div>}
+                <div>
+                    <UserAvatar {...p}/>
+                    <div className="text-center">
+                        Stake: {game.stakes[p.id]}
+                    </div>
+                </div>
             </div>
             {!!game.activePlayer && game.activePlayer.id === p.id && <TimeLeft game={game}/>}
         </div>
