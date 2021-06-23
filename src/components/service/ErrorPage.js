@@ -11,7 +11,7 @@ export default function ErrorPage(props) {
             message = <span>{props.message}</span>;
             break;
         case 401:
-            message = <span>Authorisation required <LoginFormGoogle type="button" store={props.store}/></span>;
+            message = <span>Authorisation required <LoginFormGoogle type="button" {...props}/></span>;
             break;
         case 404:
             message = <span>Page not found</span>;

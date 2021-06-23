@@ -39,7 +39,7 @@ modelSchema.methods.test = function (req) {
 }
 
 modelSchema.statics.deleteForgottenGames = async function () {
-    const games = await this.find({updatedAt: {$lt: moment().utc().add(-1, 'hours').format('YYYY-MM-DD hh:mm')}})
+    const games = await this.find({updatedAt: {$lt: moment().utc().add(-6, 'hours').format('YYYY-MM-DD hh:mm')}})
         .populate('players', ['name', 'photo', 'realBalance', 'virtualBalance']);
     for (const game of games) {
         for (const p of game.players) {
@@ -118,9 +118,9 @@ modelSchema.statics.doTurn = async function (req) {
 
 modelSchema.methods.doModelTurn = async function (req) {
     const game = this;
+    console.log('TURN', game.iamPlayer(req) && game.iamPlayer(req).name)
     const module = Games[game.module];
     module.doTurn(game, req);
-    console.log('TURN', game.iamPlayer(req) && game.iamPlayer(req).name, req.body)
     if (module.hasWinners(game)) {
         game.payToWinners();
         //await game.reload();

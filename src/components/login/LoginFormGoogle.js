@@ -1,9 +1,8 @@
 import GoogleLogin from "react-google-login";
-import React from "react";
+import React, {useEffect} from "react";
 import {Button} from "react-bootstrap";
 
 export default function LoginFormGoogle(props) {
-    //const [user, setUser] = useState()
     const responseGoogle = (response) => {
         console.log(response)
         props.store.api(`/login/google`, response)
@@ -13,10 +12,11 @@ export default function LoginFormGoogle(props) {
             })
     }
 
+
     return <span className={props.className + ' pointer'}>
         {/*<Button onClick={test}>Test</Button>*/}
-        {process.env.REACT_APP_GOOGLE_ID && <GoogleLogin
-            clientId={process.env.REACT_APP_GOOGLE_ID}
+        {props.store && props.store.params.googleId && <GoogleLogin
+            clientId={props.store.params.googleId}
             render={renderProps => {
                 if(props.type==='button')
                     return <Button onClick={renderProps.onClick} disabled={renderProps.disabled}>Login</Button>

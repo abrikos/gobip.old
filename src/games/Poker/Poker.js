@@ -14,7 +14,6 @@ export default function Poker(props) {
     const players = game.players.filter(p => p.id !== myId);
 
     function drawPlayer(p) {
-        if (!p) return <div></div>
         if (game.data.hands && !game.data.hands[p.id]) game.data.hands[p.id] = [0, 0]
         return <div key={p.id} className="player">
             <div className="player-wrapper">
@@ -37,7 +36,7 @@ export default function Poker(props) {
                     {game.data.results && <strong className="d-block">{game.data.results[p.id].name}</strong>}
                 </div>}
             </div>
-            {!!game.activePlayer && game.activePlayer.id === player.id && <TimeLeft game={game}/>}
+            {!!game.activePlayer && game.activePlayer.id === p.id && <TimeLeft game={game}/>}
         </div>
     }
 
@@ -46,7 +45,7 @@ export default function Poker(props) {
         <div className='poker'>
             <div>
                 <div className="iam-player">
-                    {drawPlayer(player)}
+                    {player && drawPlayer(player)}
                 </div>
                 {game.data.desk.map((p, i) => <PokerCard {...p} key={i}/>)}
                 <div className="other-players">

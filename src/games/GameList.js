@@ -47,7 +47,7 @@ export default function GameList(props) {
 
     return (
         <div>
-            <GameUserInfo type={'any'} {...props}/>
+            {props.store.authenticatedUser && <GameUserInfo type={'any'} {...props}/>}
             <hr/>
             <Nav variant="tabs" className="mb-2" onSelect={m => {
                 setModule(modules.find(m1 => m1.name === m));

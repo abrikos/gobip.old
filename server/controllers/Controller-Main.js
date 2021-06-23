@@ -62,7 +62,11 @@ module.exports.controller = function (app) {
     });
 
     app.post('/api/params', (req, res) => {
-        res.send(MinterApi.params)
+        const params = {
+            googleId: process.env.GOOGLE_ID,
+            ...MinterApi.params
+        }
+        res.send(params)
     });
 
     app.get('/api/share', (req, res) => {

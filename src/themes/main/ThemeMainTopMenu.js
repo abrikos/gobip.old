@@ -27,7 +27,7 @@ export default function ThemeMainTopMenu(props) {
                     :
                     <Nav.Link as={"span"} key={i}><A href={item.href} className="text-light">{item.label}</A></Nav.Link>)}
                 <Nav.Item className="nav-link">
-                    {props.store.authenticatedUser ? <A href="/logout" className={'text-light'}>Logout</A> : <LoginFormGoogle className="text-light" store={props.store}/>}
+                    {props.store.authenticatedUser ? <A href="/logout" className={'text-light'}>Logout</A> : <LoginFormGoogle className="text-light" {...props}/>}
                 </Nav.Item>
             </Nav>
             {/*<Form inline>

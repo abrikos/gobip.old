@@ -63,7 +63,7 @@ export default function GamePlay(props){
             <small className="float-right">{game.type} "{game.moduleHuman}"</small>
             <h1>{game.name}</h1>
             <A href={`/games/${game.module}`}>&lt; Back to list </A>
-            <GameUserInfo type={game.type} {...props}/>
+            {props.store.authenticatedUser && <GameUserInfo type={game.type} {...props}/>}
             <hr/>
             <small className="d-block text-center">{game.description}</small>
             {!!game.reloadTimer && <div style={{height:10, background:`linear-gradient(90deg, rgba(0,255,0,.8), rgba(0,255,0,0) ${game.reloadTimer}%)`}}></div>}

@@ -16,10 +16,8 @@ export default function Application() {
         //let isSubscribed = true
         //startWebSocket();
         //setInterval(checkWebsocket, 1000);
-        store.getParams()
-            .then(setParams)
-        store.getUser()
-            .then(setAuthUser)
+        store.getParams().then(setParams)
+        store.getUser().then(setAuthUser)
 
         //return () => isSubscribed = false;
         //const t = params.getCookie('theme');

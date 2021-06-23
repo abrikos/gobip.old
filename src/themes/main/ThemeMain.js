@@ -33,7 +33,7 @@ export default function ThemeMain(props) {
         {path: '/admin/start', label: 'Admin', icon: faCrown, type: 'admin'},
         {path: '/support', label: 'Support', icon: faQuestionCircle, type: 'admin'},
         {path: '/logout', label: 'Logout', icon: faSignOutAlt, type: 'logged'},
-        {path: '/login', component: <LoginFormGoogle store={props.store}/>, icon: faSignInAlt, type: 'not-logged'},
+        {path: '/login', component: <LoginFormGoogle {...props}/>, icon: faSignInAlt, type: 'not-logged'},
 
 
     ]
