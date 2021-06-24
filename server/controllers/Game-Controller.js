@@ -45,34 +45,16 @@ module.exports.controller = function (app) {
 
         //Join player 3
         await game.doModelJoin(USER3, true).catch(console.log);
+        await doBet(game, 15, USER2).catch(console.log)
+
+        await doBet(game, 25, USER3).catch(console.log)
+        await doBet(game, 15, USER1).catch(console.log)
         await doBet(game, 5, USER2).catch(console.log)
 
-        await doBet(game, 10, USER3).catch(console.log)
-        console.log('TODO: must be BigBlainds turn (close preflop)')
-        //await doBet(game, 0, USER1).catch(console.log)
-
-        //await doBet(game, 0, USER1).catch(console.log)
-        //await doBet(game, 0, USER2).catch(console.log)
-        //await doBet(game, 0, USER3).catch(console.log)
-return
-        await doBet(game, 30, USER3).catch(console.log)
-        await doBet(game, 10, USER1).catch(console.log)
-        await doBet(game, 10, USER2).catch(console.log)
         await doBet(game, 0, USER1).catch(console.log)
-        await doBet(game, 10, USER1).catch(console.log)
+        await doBet(game, 0, USER2).catch(console.log)
+        await doBet(game, 0, USER3).catch(console.log)
 
-return
-
-        await doBet(game, 0, USER2)
-        await doBet(game, 0, USER3)
-
-        await doBet(game, 0, USER1)
-        await doBet(game, 0, USER2)
-        await doBet(game, 0, USER3)
-
-        await doBet(game, 0, USER1)
-        await doBet(game, 0, USER2)
-        await doBet(game, 0, USER3)
         //console.log(game.activePlayer)
         //await doBet(game, 0, USER3)
 

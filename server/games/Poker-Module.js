@@ -19,7 +19,7 @@ const PokerModule = {
         betActions: ['call', 'bet', 'check', 'ford'],
 
     },
-    rounds: ['blinds', 'pre-flop', 'flop', 'turn', 'river', 'finish'],
+    rounds: ['pre-flop', 'flop', 'turn', 'river', 'finish'],
 
     onJoin(game, userId) {
         const data = game.data;
@@ -143,23 +143,24 @@ const PokerModule = {
         const maxBet = game.maxBet;
         if (bet >= 0) {
             //if (!beforeBet) this._insertBet(game, req, 0);
-            if (game.playersBets[userId] + bet < maxBet && !(game.activePlayerIdx === 0 && game.round === 0)) {
-                return {error:'Call to ' + (maxBet) + ', or rise. Your bet: ' + bet}
+            if (game.playersBets[userId] + bet < maxBet) {
+                return {error: 'Call to ' + (maxBet) + ', or rise. Your bet: ' + bet}
             }
             this._insertBet(game, userId, bet * 1)
         }
-        if ((this._isCall(game, data) && this._betsCount(game) > 1) || this._bigBlindCheck(game, data, userId)) {
+        if ((this._isCall(game, data) && this._betsCount(game) > 1)) {
             game.activePlayerIdx = -1;
             game.round++;
-            console.log('======== NEW ROUND ', this._roundName(game), game.round)
             data.roundName = this._roundName(game);
+            console.log('======== NEW ROUND ', data.roundName, game.round)
+
             if (game.round < 5) this._fillDesk(game, data);
 
         } else if (game.round === 0 && game.activePlayerIdx === 1 && game.players.length === 2) {
             console.log('small blind do bet')
             //game.activePlayerIdx = 0; // will be added +1 in model method
         }
-        if(game.round===2 && game.activePlayerIdx === -1 ){
+        if (game.round === 2 && game.activePlayerIdx === -1) {
             game.activePlayerIdx = 0
         }
 
@@ -176,10 +177,6 @@ const PokerModule = {
                 data.hands[k] = [0, 0]
             }
         }
-        if (game.round < 2)
-            data.desk = Array(data.desk.length).fill(0)
-        //data.hands = data.hands.filter(h=>h[userId])
-        //game.data.hands = game.data.hands.map(h=>h.userId===userId? h :[0,0])
         game.data = data;
         return game;
     },
@@ -189,8 +186,8 @@ const PokerModule = {
     },
 
     _fillDesk(game, data) {
-        if (game.round < 2) return;
-        const amountOfCards = game.round === 2 ? 3 : 1;
+        if (game.round < 1) return;
+        const amountOfCards = game.round === 1 ? 3 : 1;
         let newCards;
         if (game.module === 'Poker') {
             newCards = PokerApi.randomSet(this._allCards(data), amountOfCards);
@@ -207,6 +204,7 @@ const PokerModule = {
 
     _isCall(game, data) {
         let sums = Object.values(game.playersBets);
+        console.log(sums)
         const unique = [...new Set(sums)];
         return sums.length === game.players.length && unique.length === 1
     },

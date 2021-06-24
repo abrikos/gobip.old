@@ -23,7 +23,7 @@ export default function Poker(props) {
                 <div>
                     <div className="text-center">
                         <div>Bet: {bet}</div>
-                        <div className="text-info">{game.blinds[p.id] && `${game.blinds[p.id]} blind`} &nbsp;</div>
+                        <div className="text-info">{game.blinds && game.blinds[p.id] && `${game.blinds[p.id]} blind`} &nbsp;</div>
                     </div>
                 </div>
                 <div className="d-flex">

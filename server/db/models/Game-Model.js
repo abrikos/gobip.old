@@ -327,9 +327,14 @@ modelSchema.virtual('playersBets')
     .get(function () {
         const obj = {}
         for(const p of this.players) {
-            obj[p.id] = 0;
+            //obj[p.id] = 0;
             for (const b of this.bets.filter(b => b.round === this.round && b.userId===p.id)) {
-                obj[b.userId] += b.value
+                if(b.value>=0){
+                    if(!obj[p.id]) {
+                        obj[p.id] = 0
+                    }
+                    obj[b.userId] += b.value
+                }
             }
         }
         return obj;
