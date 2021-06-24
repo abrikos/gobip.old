@@ -55,6 +55,13 @@ module.exports.controller = function (app) {
         await doBet(game, 0, USER2).catch(console.log)
         await doBet(game, 0, USER3).catch(console.log)
 
+        await doBet(game, 0, USER1).catch(console.log)
+        await doBet(game, 0, USER2).catch(console.log)
+        await doBet(game, 0, USER3).catch(console.log)
+
+        await doBet(game, 0, USER1).catch(console.log)
+        await doBet(game, 0, USER2).catch(console.log)
+        await doBet(game, 0, USER3).catch(console.log)
         //console.log(game.activePlayer)
         //await doBet(game, 0, USER3)
 

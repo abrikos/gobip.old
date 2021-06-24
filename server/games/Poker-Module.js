@@ -9,6 +9,7 @@ const PokerModule = {
     useTimer: true,
     roundsCount: 6,
     initialStake: 100,
+    customTurn: true,
     defaultData: {
         hands: {},
         desk: [],
@@ -21,14 +22,17 @@ const PokerModule = {
     },
     rounds: ['pre-flop', 'flop', 'turn', 'river', 'finish'],
 
+    initTable(game){
+        this.doTurn(game, game.players[0].id, {turn: {bet: game.minBet}})
+        this.doTurn(game, game.players[1].id, {turn: {bet: game.minBet / 2}})
+        game.activePlayerIdx = 1;
+    },
+
     onJoin(game, userId) {
         const data = game.data;
-        let doTurn = false;
         if (game.players.length === 2) {
             //SMALL blind
-            this.doTurn(game, game.players[0].id, {turn: {bet: game.minBet}})
-            this.doTurn(game, game.players[1].id, {turn: {bet: game.minBet / 2}})
-            game.activePlayerIdx = 1;
+            this.initTable(game)
         }
 
         //if (doTurn) this._insertBet(game, req, 0);
@@ -99,7 +103,7 @@ const PokerModule = {
 
     hasWinners(game) {
         const data = game.data;
-        if (game.round > 4) {
+        if (game.round > 3) {
             console.log('===============FINISH');
             let maxPriority = 0;
             let maxSum = 0;
@@ -130,7 +134,7 @@ const PokerModule = {
             console.log(message);
             return
         }
-        console.log('BET', game.iamPlayer(userId).name, bet)
+        console.log('Value:', bet, 'PlayerIds:', game.activePlayerIdx)
         if (game.stakes[userId] < bet) {
             const message = 'Stake too low';
             return console.log('model bet error:', message);
@@ -148,17 +152,18 @@ const PokerModule = {
             }
             this._insertBet(game, userId, bet * 1)
         }
-        if ((this._isCall(game, data) && this._betsCount(game) > 1)) {
-            game.activePlayerIdx = -1;
+        if (this._isCall(game, data)) {
+            game.activePlayerIdx = 0;
             game.round++;
             data.roundName = this._roundName(game);
-            console.log('======== NEW ROUND ', data.roundName, game.round)
-
-            if (game.round < 5) this._fillDesk(game, data);
-
+            console.log('============NEW ROUND ', data.roundName, game.round)
+            if (game.round < 4) this._fillDesk(game, data);
         } else if (game.round === 0 && game.activePlayerIdx === 1 && game.players.length === 2) {
             console.log('small blind do bet')
             //game.activePlayerIdx = 0; // will be added +1 in model method
+        } else {
+            game.activePlayerIdx++;
+            if (game.activePlayerIdx >= game.players.length) game.activePlayerIdx = 0;
         }
         if (game.round === 2 && game.activePlayerIdx === -1) {
             game.activePlayerIdx = 0
@@ -204,7 +209,6 @@ const PokerModule = {
 
     _isCall(game, data) {
         let sums = Object.values(game.playersBets);
-        console.log(sums)
         const unique = [...new Set(sums)];
         return sums.length === game.players.length && unique.length === 1
     },

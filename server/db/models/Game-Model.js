@@ -89,7 +89,7 @@ modelSchema.methods.doModelLeave = function (userId, forgotten) {
             //TODO refund bet of last player to his stake
             game.winners = game.players;
             await game.payToWinners();
-            await game.reload();
+            await game.newTable();
             console.log('fddddddddddf', game.stakesArray)
         }
         await game.save();
@@ -136,10 +136,12 @@ modelSchema.methods.doModelTurn = async function (userId, body) {
         if (turnResult.error) return reject({message:turnResult.error})
         if (module.hasWinners(game)) {
             await game.payToWinners();
-            //await game.reload();
+            //await game.newTable();
         } else {
-            game.activePlayerIdx++;
-            if (game.activePlayerIdx >= game.players.length) game.activePlayerIdx = 0;
+            if(!module.customTurn) {
+                game.activePlayerIdx++;
+                if (game.activePlayerIdx >= game.players.length) game.activePlayerIdx = 0;
+            }
             if (module.useTimer && game.players.length > 1) game.activePlayerTime = moment().unix();
         }
         await game.save()
@@ -230,17 +232,18 @@ modelSchema.methods.payToWinners = async function () {
 modelSchema.statics.reloadFinished = async function () {
     const games = await this.find({finishTime: {$lt: moment().unix() - process.env.GAME_RELOAD_TIME * 1, $gt: 0}});
     for (const game of games) {
-        await game.reload()
+        await game.newTable()
         await game.save();
     }
 }
 
-modelSchema.methods.reload = async function () {
-    console.log('RELOAD game')
+modelSchema.methods.newTable = async function () {
+    console.log('newTable of game')
+    const module = Games[this.module];
     this.finishTime = 0;
     this.history.push({data: this.data, winners: this.winners, date: new Date()});
     this.winners = [];
-    this.data = Games[this.module].defaultData;
+    this.data = module.defaultData;
 
     await this
         .populate('waitList', ['name', 'photo', 'realBalance', 'virtualBalance'])
@@ -251,20 +254,17 @@ modelSchema.methods.reload = async function () {
         this.delete();
         return;
     }
-    if (Games[this.module].shiftFirstTurn) {
+    if (module.shiftFirstTurn) {
         players.push(players.shift());
     }
-    this.players = [];
+    this.players = players;
     this.activePlayerTime = 0;
     this.activePlayerIdx = 0;
     this.waitList = [];
     this.bets = [];
     this.stakesArray = this.stakesArray.filter(s => players.map(p => p.id).includes(s.userId));
-
+    module.initTable(this)
     await this.save();
-    for (const p of players) {
-        await this.doModelJoin(p.id)
-    }
 }
 
 modelSchema.statics.modules = function () {
