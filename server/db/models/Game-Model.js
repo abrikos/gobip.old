@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const name = 'game';
 
+const stakeSchema = new Schema({userId:{type: mongoose.Schema.Types.ObjectId, ref: 'User'}, value:Number})
 
 const modelSchema = new Schema({
         players: [{type: mongoose.Schema.Types.ObjectId, ref: 'User'}],
@@ -22,7 +23,7 @@ const modelSchema = new Schema({
         activePlayerIdx: {type: Number, default: 0},
         activePlayerTime: {type: Number, default: 0},
         minBet: {type: Number, default: process.env.GAME_MIN_BET},
-        stakesArray: [Object],
+        stakesArray: [stakeSchema],
         //data: {type: Object, default: {}},
         history: [{type: Object}],
         //wallet: {type: mongoose.Schema.Types.ObjectId, ref: 'Wallet'},
@@ -150,11 +151,11 @@ modelSchema.methods.doModelTurn = async function (userId, body) {
 }
 
 modelSchema.methods.changeStake = function (userId, value) {
-    const s = this.stakesArray.find(ss => ss.userId === userId);
+    const s = this.stakesArray.find(ss => ss.userId.equals( userId));
     if (!s) {
         this.stakesArray.push({userId, value})
     } else {
-        s.value = value;
+        s.value += value;
     }
 }
 
@@ -176,7 +177,6 @@ modelSchema.methods.doModelJoin = async function (userId) {
             await game.populate('players', ['name', 'photo', 'realBalance', 'virtualBalance']).execPopulate()
             console.log('JOIN', game.iamPlayer(userId).name, userId)
             if (!game.stakes[userId]) {
-                game.changeStake(userId, 0);
                 const canPay = await game.fromBalanceToStake(userId, module.initialStake);
                 if (canPay.error) {
                     return reject({message: 'Join error:' + canPay.error});
@@ -197,7 +197,7 @@ modelSchema.methods.fromBalanceToStake = async function (userId, amount) {
     if (player[`${this.type}Balance`] < amount) return {error: 500, message: 'Insufficient funds'}
     player[`${this.type}Balance`] -= amount;
     await player.save();
-    this.changeStake(userId, this.stakes[userId] + amount)
+    this.changeStake(userId, amount)
     return {}
 }
 
@@ -219,7 +219,7 @@ modelSchema.methods.payToWinners = async function () {
         const amount = bank / this.winners.length;
         console.log('winner', p.name, amount, this.stakes)
         if (this.stakes[p.id]) {
-            this.changeStake(p.id, this.stakes[p.id] + amount)
+            this.changeStake(p.id,  amount)
         } else {
             p[`${this.type}Balance`] += amount;
             console.log('Balance:', p[`${this.type}Balance`])
@@ -291,7 +291,7 @@ modelSchema.statics.timeFoldPlayers = function () {
                 if (!g.players.length) continue;
                 const userId = g.players[g.activePlayerIdx].id;
                 g.autoFold.push(userId);
-                await g.doModelTurn(userId, {bet: -1});
+                await g.doModelTurn(userId, {turn: {bet: -1}});
                 if (g.autoFold.filter(u => u.equals(userId)).length > 1) {
                     g.players = g.players.filter(u => !u.equals(userId))
                     console.log('PLAYERS', g.players.length)
@@ -314,6 +314,11 @@ modelSchema.statics.start = async function (req) {
     await g.doModelJoin(req.session.userId);
     return g;
 }
+
+modelSchema.virtual('bank')
+    .get(function () {
+        return Games[this.module].getBank(this)
+    });
 
 modelSchema.virtual('blinds')
     .get(function () {

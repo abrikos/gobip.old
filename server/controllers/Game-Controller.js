@@ -59,12 +59,11 @@ module.exports.controller = function (app) {
         await doBet(game, 0, USER2).catch(console.log)
         await doBet(game, 0, USER3).catch(console.log)
 
-        await doBet(game, 0, USER1).catch(console.log)
-        await doBet(game, 0, USER2).catch(console.log)
-        await doBet(game, 0, USER3).catch(console.log)
+        await doBet(game, 10, USER1).catch(console.log)
+        await doBet(game, 10, USER2).catch(console.log)
+        await doBet(game, -1, USER3).catch(console.log)
         //console.log(game.activePlayer)
         //await doBet(game, 0, USER3)
-
 
         //Mongoose.game.findOne().populate('players').sort({createdAt: -1}).then(r => console.log('FIND DATA', r.data.bets))
 

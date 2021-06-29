@@ -1,4 +1,5 @@
 import PokerApi from "./PokerApi";
+import moment from "moment";
 
 const PokerModule = {
     testMode: true,
@@ -23,9 +24,13 @@ const PokerModule = {
     rounds: ['pre-flop', 'flop', 'turn', 'river', 'finish'],
 
     initTable(game){
+        if(!game.players.length) return
         this.doTurn(game, game.players[0].id, {turn: {bet: game.minBet}})
-        this.doTurn(game, game.players[1].id, {turn: {bet: game.minBet / 2}})
-        game.activePlayerIdx = 1;
+        if(game.players.length > 1) {
+            this.doTurn(game, game.players[1].id, {turn: {bet: game.minBet / 2}})
+            game.activePlayerIdx = 1;
+            game.activePlayerTime = moment().unix();
+        }
     },
 
     onJoin(game, userId) {
@@ -45,8 +50,8 @@ const PokerModule = {
     },
 
     _insertBet(game, userId, value) {
+        game.changeStake(userId, value * -1)
         game.bets.push({round: game.round, userId: userId, value})
-
     },
 
     _allCards(data) {
@@ -72,6 +77,7 @@ const PokerModule = {
         }
         return bank;
     },
+
     onLeave(game, userId) {
         const data = game.data;
         /*if(game.players.length === 1){
@@ -93,12 +99,14 @@ const PokerModule = {
 
     doFold(game, userId) {
         console.log('doFold');
+        if(game.activePlayerIdx === game.players.length - 1) this._newRound(game);
         const player = game.players.find(p => p.equals(userId));
         game.players = game.players.filter(p => !p.equals(userId));
         if (this.useWaitList) game.waitList.push(player);
         if (game.players.length === 1) {
             game.winners = game.players;
         }
+        return {}
     },
 
     hasWinners(game) {
@@ -152,12 +160,8 @@ const PokerModule = {
             }
             this._insertBet(game, userId, bet * 1)
         }
-        if (this._isCall(game, data)) {
-            game.activePlayerIdx = 0;
-            game.round++;
-            data.roundName = this._roundName(game);
-            console.log('============NEW ROUND ', data.roundName, game.round)
-            if (game.round < 4) this._fillDesk(game, data);
+        if (this._isCall(game)) {
+            this._newRound(game)
         } else if (game.round === 0 && game.activePlayerIdx === 1 && game.players.length === 2) {
             console.log('small blind do bet')
             //game.activePlayerIdx = 0; // will be added +1 in model method
@@ -169,9 +173,18 @@ const PokerModule = {
             game.activePlayerIdx = 0
         }
 
-        game.changeStake(userId, game.stakes[userId] - bet)
         game.data = data;
         return {}
+    },
+
+    _newRound(game){
+        const data = game.data;
+        game.activePlayerIdx = 0;
+        game.round++;
+        data.roundName = this._roundName(game);
+        console.log('============NEW ROUND ', data.roundName, game.round)
+        if (game.round < 4) this._fillDesk(game, data);
+        game.data = data;
     },
 
     hideOpponentData(game, userId) {
@@ -207,7 +220,7 @@ const PokerModule = {
         return this._roundBets(game).length
     },
 
-    _isCall(game, data) {
+    _isCall(game) {
         let sums = Object.values(game.playersBets);
         const unique = [...new Set(sums)];
         return sums.length === game.players.length && unique.length === 1
