@@ -18,18 +18,41 @@ module.exports.controller = function (app) {
         //Mongoose.game.deleteForgottenGames();
     }, null, true, 'America/Los_Angeles')
 
-    const test = true;
+    const {USER1, USER2, USER3} = process.env;
+    const test = false;
     //doTestRoPaSci();
-    doTestPoker();
+    //test && doTestPoker();
+    test && TesticTac();
 
+    async function TesticTac(){
+        async function doBet(game, row,col, userId) {
+            await game.doModelTurn(userId, {turn: {row,col}});
+        }
+        const req = {
+            session: {userId: USER1},
+            body: {
+                module: {name:'TicTacToe'},
+                type: 'virtual'
+            }
+        }
+        //START
+        let game = await Mongoose.game.start(req);
+        //JOIN small blind
+        await game.doModelJoin(USER2, true).catch(console.log);
+        await doBet(game, 4,4, USER1)
+        await doBet(game, 4,3, USER2)
+        await doBet(game, 4,5, USER1)
+        await doBet(game, 5,5, USER2)
+        //await doBet(game, 4,6, USER1)
+        //await doBet(game, 1,1, USER2)
+    }
 
     async function doTestPoker() {
         async function doBet(game, bet, userId) {
             await game.doModelTurn(userId, {turn: {bet}});
         }
 
-        if (!test) return
-        const {USER1, USER2, USER3} = process.env;
+
         const req = {
             session: {userId: USER1},
             body: {

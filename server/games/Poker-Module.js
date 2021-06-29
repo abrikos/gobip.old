@@ -72,6 +72,7 @@ const PokerModule = {
 
     getBank(game) {
         let bank = 0;
+        if(!game.bets) return 0;
         for (const bet of game.bets) {
             bank += bet.value
         }

@@ -2,16 +2,18 @@ import moment from "moment";
 
 const cols = 10;
 const rows = 10;
-const winRows = 5;
+const winRows = 3;
 const cells = Array.from({length: rows * cols}, (v, i) => {
     return {col: i % rows, row: Math.ceil((i + 1) / rows) - 1}
 });
 
 const RoPaSciModule = {
     //useTimer: true,
+    initialStake: 100,
     order: 1,
     label: "Tic Tac Toe",
     description:`${winRows} cells in a line wins the game`,
+    shiftFirstTurn: true,
     defaultData: {
         winRows,
         cols,
@@ -25,6 +27,9 @@ const RoPaSciModule = {
         return game;
     },
 
+    onJoin(){
+        return {}
+    },
 
     hasWinners(game) {
         const data = game.data;
@@ -48,16 +53,23 @@ const RoPaSciModule = {
         return cols * turn.row + turn.col;
     },
 
-    doTurn(game, req) {
-        const {turn} = req.body;
+    initTable(game){
+        const data = game.data;
+        data.cells = cells;
+        game.data = data;
+    },
+
+    doTurn(game, userId, body) {
+        const {turn} = body;
         if(!turn) return;
         const data = game.data;
         const cell = data.cells.find(c => c.row === turn.row && c.col === turn.col);
         if (!cell) return;
         if (cell.userId) return;
-        cell.userId = req.session.userId;
+        cell.userId = userId;
         //data.turns.push({turn, userId: req.session.userId});
         game.data = data;
+        return {}
     },
 
     isWinner(game) {
@@ -80,10 +92,10 @@ const RoPaSciModule = {
         return [];
     },
 
-    nextTurn(game, req) {
+    /*nextTurn(game, req) {
         console.log(game.players.map(p => p.id).indexOf(req.session.userId))
         return game.players.map(p => p.id).indexOf(req.session.userId) + 1;
-    },
+    },*/
 
     getBank(game) {
         return Object.values(game.stakes).reduce((a, b) => a + b, 0)

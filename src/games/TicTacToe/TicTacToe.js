@@ -6,8 +6,6 @@ import TimeLeft from "../TimeLeft";
 
 export default function TicTacToe(props) {
     const {game} = props;
-    const cols = Array.from({length: game.data.cols}, (v, i) => i);
-    const rows = Array.from({length: game.data.rows}, (v, i) => i);
 
     const myId = props.store.authenticatedUser && props.store.authenticatedUser.id
 

@@ -62,12 +62,9 @@ modelSchema.statics.leaveGame = function (req) {
             .populate('players', ['name', 'photo', 'realBalance', 'virtualBalance'])
             .populate('waitList', ['name', 'photo', 'realBalance', 'virtualBalance'])
             .then(game => {
-                game.doModelLeave(req)
+                game.doModelLeave(req.session.userId)
                     .then(resolve)
                     .catch(reject);
-
-                game.save()
-
             })
     })
 }
@@ -86,13 +83,14 @@ modelSchema.methods.doModelLeave = function (userId, forgotten) {
         game.players = game.players.filter(p => !p.equals(userId));
         game.waitList = game.waitList.filter(p => !p.equals(userId));
         Games[game.module].onLeave(game, userId);
-        if (game.players.length < 2) {
+        this.stakesArray = this.stakesArray.filter(s=>!s.userId.equals(userId))
+        /*if (game.players.length < 2) {
             //TODO refund bet of last player to his stake
             game.winners = game.players;
             await game.payToWinners();
             await game.newTable();
             console.log('fddddddddddf', game.stakesArray)
-        }
+        }*/
         await game.save();
         resolve()
     })
@@ -323,6 +321,7 @@ modelSchema.virtual('bank')
 modelSchema.virtual('blinds')
     .get(function () {
         const obj = {blinds: 2};
+        if(!this.players) return obj;
         if (this.players[0]) obj[this.players[0].id] = 'Big'
         if (this.players[1]) obj[this.players[1].id] = 'Small'
         return obj;
@@ -331,6 +330,7 @@ modelSchema.virtual('blinds')
 modelSchema.virtual('playersBets')
     .get(function () {
         const obj = {}
+        if(!this.players) return obj;
         for(const p of this.players) {
             //obj[p.id] = 0;
             for (const b of this.bets.filter(b => b.round === this.round && b.userId===p.id)) {
@@ -347,6 +347,7 @@ modelSchema.virtual('playersBets')
 
 modelSchema.virtual('maxBet')
     .get(function () {
+        if(!this.bets) return 0;
         const roundBets = this.bets.filter(b => b.round === this.round);
         const obj ={}
         for(const b of roundBets){
@@ -403,6 +404,7 @@ modelSchema.virtual('data')
 modelSchema.virtual('stakes')
     .get(function () {
         const obj = {};
+        if(!this.stakesArray) return obj;
         for (const s of this.stakesArray) {
             obj[s.userId] = s.value;
         }
