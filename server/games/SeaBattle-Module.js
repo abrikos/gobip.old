@@ -9,7 +9,7 @@ const obj = {
     //useTimer: true,
     initialStake: 100,
     order: 1,
-    label: "Sea batle",
+    label: "Sea battle",
     description: ``,
     shiftFirstTurn: true,
     defaultData: {
@@ -32,23 +32,20 @@ const obj = {
         return {}
     },
 
-    _randomShips() {
+    _randomShips(fleet = [], length = 4) {
         const ships = [0, 5, 3, 2, 1];
         const orientations = ['row', 'col'];
         const directions = [1, -1];
-        const cells = [];
-        for (let length = 1; length < ships; length++) {
-            const count = ships[length];
-            const rnd = Math.floor(Math.random() * rows * cols);
-            const cellStart = cells.find(c => c.id === rnd);
-            const direction = directions[Math.floor(Math.random() * directions.length)];
-            const orientation = orientations[Math.floor(Math.random() * orientations.length)];
-            for (let i = 0; i < count; i++) {
-                cells.push(cell)
-            }
-            console.log(cellStart, rnd)
+        const count = ships[length];
+        if(!count) return fleet;
+        const freeCells = cells.filter(c=>!fleet.find(f=>f.id===c.id));
+        const cell = freeCells[Math.floor(Math.random() * freeCells.length)];
+        const direction = directions[Math.floor(Math.random() * directions.length)];
+        const orientation = orientations[Math.floor(Math.random() * orientations.length)];
+        for (let i = 0; i < count; i++) {
+            fleet.push(cell)
         }
-        return cells;
+
     },
 
     hasWinners(game) {
