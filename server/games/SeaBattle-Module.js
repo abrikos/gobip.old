@@ -1,18 +1,16 @@
-import moment from "moment";
-
 const cols = 10;
 const rows = 10;
 const winRows = 3;
-const cells = Array.from({length: rows * cols}, (v, i) => {
-    return {col: i % rows, row: Math.ceil((i + 1) / rows) - 1}
+const cells = Array.from({length: rows * cols}, (v, id) => {
+    return {id, col: id % rows, row: Math.ceil((id + 1) / rows) - 1}
 });
 
-const RoPaSciModule = {
+const obj = {
     //useTimer: true,
     initialStake: 100,
     order: 1,
-    label: "Tic Tac Toe",
-    description:`${winRows} cells in a line wins the game`,
+    label: "Sea batle",
+    description: ``,
     shiftFirstTurn: true,
     defaultData: {
         winRows,
@@ -20,14 +18,37 @@ const RoPaSciModule = {
         rows,
         cells,
         initialStake: 100,
-        turns: []
+        fleets: {},
     },
     hideOpponentData(game, req) {
         return game;
     },
 
-    onJoin(){
+    onJoin(game, userId) {
+        const data = game.data;
+        console.log('TO DO FLEEETSSSS', userId)
+        data.fleets[userId] = this._randomShips()
+        game.data = data;
         return {}
+    },
+
+    _randomShips() {
+        const ships = [0, 5, 3, 2, 1];
+        const orientations = ['row', 'col'];
+        const directions = [1, -1];
+        const cells = [];
+        for (let length = 1; length < ships; length++) {
+            const count = ships[length];
+            const rnd = Math.floor(Math.random() * rows * cols);
+            const cellStart = cells.find(c => c.id === rnd);
+            const direction = directions[Math.floor(Math.random() * directions.length)];
+            const orientation = orientations[Math.floor(Math.random() * orientations.length)];
+            for (let i = 0; i < count; i++) {
+                cells.push(cell)
+            }
+            console.log(cellStart, rnd)
+        }
+        return cells;
     },
 
     hasWinners(game) {
@@ -52,7 +73,8 @@ const RoPaSciModule = {
         return cols * turn.row + turn.col;
     },
 
-    initTable(game){
+    initTable(game) {
+        console.log('INIT TABLE')
         const data = game.data;
         data.cells = cells;
         game.data = data;
@@ -60,7 +82,7 @@ const RoPaSciModule = {
 
     doTurn(game, userId, body) {
         const {turn} = body;
-        if(!turn) return;
+        if (!turn) return;
         const data = game.data;
         const cell = data.cells.find(c => c.row === turn.row && c.col === turn.col);
         if (!cell) return;
@@ -73,7 +95,7 @@ const RoPaSciModule = {
 
     isWinner(game) {
         //const vectors = [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]]
-        const vectors =[ [0,1]]
+        const vectors = [[0, 1]]
         for (const cell of game.data.cells.filter(c => c.userId)) {
             for (const vector of vectors) {
                 const ids = []
@@ -118,4 +140,4 @@ const RoPaSciModule = {
     },
 
 }
-export default RoPaSciModule
+export default obj

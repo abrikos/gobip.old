@@ -11,20 +11,20 @@ export default function GameList(props) {
 
 
     useEffect(() => {
-        if (!modules.length) loadTypes();
+        loadModules();
         loadList();
         const timer = setInterval(loadList, 5000)
         return () => clearInterval(timer);
-    }, [module.name])
+    }, [props.module])
 
 
     function loadList() {
-        if (!module) return;
-        props.store.api('/game/list', {module: module.name}, true)
+        if (!props.module) return;
+        props.store.api('/game/list', {module: props.module}, true)
             .then(setList)
     }
 
-    function loadTypes() {
+    function loadModules() {
         props.store.api('/game/modules')
             .then(r => {
                 setModules(r);
@@ -54,7 +54,7 @@ export default function GameList(props) {
                 loadList();
             }} activeKey={module.name}>
                 {modules.map((t) => <Nav.Item key={t.name} className="nav-item">
-                    <Nav.Link eventKey={t.name}>{t.label}</Nav.Link>
+                    <A href={`/games/${t.name}`} className={`nav-link ${t.name===props.module ? 'active':''}`}>{t.label}</A>
                 </Nav.Item>)}
             </Nav>
             {module.testMode && <div className="alert alert-warning text-center">!!! TEST MODE !!!</div>}
