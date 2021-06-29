@@ -26,6 +26,8 @@ const modelSchema = new Schema({
         toJSON: {virtuals: true}
     });
 
+
+
 modelSchema.virtual('balance')
     .get(function () {
         return this.balanceReal ? this.balanceReal.toFixed(1) * 1 : 0

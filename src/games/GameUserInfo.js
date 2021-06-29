@@ -26,7 +26,7 @@ export default function GameUserInfo(props) {
                     <div className="col">
                         Balance real: <MinterValue value={userInfo.realBalance} {...props}/>{' '}
                         {!!userInfo.realBalance && <ButtonLoading size={'sm'} url={'/game/cabinet/wallet/withdraw'}  {...props} confirmMessage={'Withdraw?'}>Withdraw</ButtonLoading>}
-                        <small className="d-block">to top up <MinterAddressLink address={userInfo.address} short={0} {...props}/></small>
+                        <small className="d-block">to top up <MinterAddressLink address={userInfo.gameWallet.address} short={0} {...props}/></small>
                     </div>)}
             </div>
             {['virtual', 'any'].includes(props.type) && <div  className="col text-center">Balance virtual: <span className="text-success">{userInfo.virtualBalance.toLocaleString('ru')}</span></div>}

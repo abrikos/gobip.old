@@ -23,6 +23,7 @@ module.exports.controller = function (app) {
 
     app.post('/api/cabinet/user', passportLib.isLogged, (req, res) => {
         Mongoose.user.findById(req.session.userId)
+            .populate({path:'gameWallet', select:'address'})
             .then(user => {
                 res.send(user)
             })

@@ -4,7 +4,7 @@ import {Minter, prepareSignedTx, prepareTx, TX_TYPE} from "minter-js-sdk";
 import {generateWallet, walletFromMnemonic} from 'minterjs-wallet';
 
 const util = require("minterjs-util")
-
+const fetch = require('node-fetch');
 const networks = {
     main: {
         nodeApi: 'https://api.minter.one/v2',
@@ -36,6 +36,7 @@ const params = {
     }
 }
 
+
 const minter = new Minter({apiType: 'node', baseURL: `${params.network.url}/v2/`});
 const obj = {
     divider: 1e18,
@@ -54,8 +55,14 @@ const obj = {
             axios.get(url)
                 .then(r => resolve(r.data))
                 .catch(e => {
-                    const error = e.response ? JSON.parse(e.response.data).error : e.message;
-                    if (process.env.REACT_APP_LOG_ENABLE === '1' && !['302'].includes(error && error.code)) {
+                    let error;
+                    try {
+                        error = e.response ? JSON.parse(e.response.data).error : e.message;
+                    }catch (e2){
+                        error = e.response.data.match(/\{.*?\}\}/)
+                        error = JSON.parse(error[0]).error
+                    }
+                    if (process.env.REACT_APP_LOG_ENABLE === '1' && ![302,404].includes(error && error.code)) {
                         console.log('AXIOS ERORR:', error, url);
                     }
                     reject(error)
@@ -77,9 +84,13 @@ const obj = {
     async updateBalances() {
         const wallets = await Mongoose.wallet.find();
         for (const wallet of wallets) {
-            wallet.balanceReal = await this.walletBalance(wallet.address);
-            await wallet.save()
+            await this.setWalletBalance(wallet)
         }
+    },
+
+    async setWalletBalance(wallet){
+        wallet.balanceReal = await this.walletBalance(wallet.address);
+        await wallet.save()
     },
 
     async checkWithdrawals(tx) {

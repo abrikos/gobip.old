@@ -14,9 +14,22 @@ module.exports.controller = function (app) {
         Mongoose.game.reloadFinished();
     }, null, true, 'America/Los_Angeles')
 
-    const c3 = new CronJob('* * * * * *', async function () {
+    const c3 = new CronJob('*/10 * * * * *', async function () {
+        balances()
         //Mongoose.game.deleteForgottenGames();
     }, null, true, 'America/Los_Angeles')
+
+    async function balances(){
+        const users = await Mongoose.user.find().populate('gameWallet');
+        for(const user of users){
+            if(!user.gameWallet){
+                user.gameWallet = await MinterApi.newWallet('game','',user);
+                await user.save()
+            }
+            await MinterApi.setWalletBalance(user.gameWallet)
+        }
+    }
+
 
     const {USER1, USER2, USER3} = process.env;
     const test = false;
