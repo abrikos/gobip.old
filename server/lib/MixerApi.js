@@ -77,7 +77,7 @@ const obj = {
         Mongoose.payment.create(payment).catch(e => {
             console.log('ERROR: checkTransactions 1', e.message)
         });
-
+        Mongoose.transaction.create(tx).catch(console.log)
 
     },
 

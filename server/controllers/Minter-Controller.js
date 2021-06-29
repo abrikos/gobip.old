@@ -4,8 +4,8 @@ import UnboundApi from "server/lib/UnboundApi";
 import BannerApi from "server/lib/BannerApi";
 import MixerApi from "server/lib/MixerApi";
 import BetApi from "../lib/BetApi";
-import PokerApi from "../games/PokerApi";
 import SwapBotApi from "../lib/SwapRouteApi";
+import GameApi from "../lib/GameApi";
 
 const CronJob = require('cron').CronJob;
 
@@ -17,15 +17,17 @@ module.exports.controller = function (app) {
             const txs = await MinterApi.getTransactions();
 
             for (const tx of txs) {
-                PokerApi.checkTransaction(tx);
+                const found = await Mongoose.transaction.findOne({hash:tx.hash});
+                if(found) continue;
+                GameApi.checkTransaction(tx)
                 BetApi.checkTransaction(tx);
                 BannerApi.checkTransaction(tx);
                 UnboundApi.checkTransaction(tx);
                 MixerApi.checkTransaction(tx);
                 SwapBotApi.checkTransaction(tx);
                 MinterApi.checkWithdrawals(tx);
+
             }
-            PokerApi.setBalances()
             MinterApi.sendPayments();
         }, null, true, 'America/Los_Angeles'
     )

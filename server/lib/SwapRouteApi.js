@@ -61,11 +61,9 @@ const obj = {
             if (tx.data.coins[0].id === tx.data.coins[tx.data.coins.length - 1].id && tx.data.value_to_sell * 1 < tx.data.minimum_value_to_buy * 1) {
                 tx.coin = '';
                 tx.value = 0;
-                Mongoose.transaction.create(tx)
-                    .then(()=>{})
-                    .catch(()=>{})
             }
         }
+        Mongoose.transaction.create(tx).catch(console.log)
     },
 
     doingRoutes: false,

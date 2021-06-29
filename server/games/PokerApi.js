@@ -1,35 +1,4 @@
-import Mongoose from "../db/Mongoose";
-import MinterApi from "../lib/MinterApi";
-
 const PokerApi = {
-    async checkTransaction(tx) {
-        const pokerWallet = await Mongoose.wallet.findOne({address: tx.to});
-        if (!pokerWallet) return;
-        pokerWallet.balance = await MinterApi.walletBalance(tx.to);
-        pokerWallet.save()
-    },
-
-    async setBalances() {
-        const wallets = await Mongoose.wallet.find({type: 'poker', balanceReal: {$gt: 1}});
-        for (const pokerWallet of wallets) {
-            const user = await Mongoose.user.findOne({pokerWallet: pokerWallet.id})
-            if (!user) continue
-            const main = await MinterApi.getMainWallet()
-            await MinterApi.walletMoveFunds(pokerWallet, main.address)
-            user.realBalance += pokerWallet.balance;
-            pokerWallet.balance = 0;
-            await user.save();
-            await pokerWallet.save()
-        }
-    },
-
-    async newWallet(userId) {
-        const user = await Mongoose.user.findById(userId)
-        user.pokerWallet = await MinterApi.newWallet('poker', '', userId);
-        await user.save()
-        return user;
-    },
-
     _cards: {suits: ['S', 'C', 'D', 'H'], values: ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']},
 
     d: ['C9', 'C10', 'CJ', 'CQ', 'S9'],

@@ -94,6 +94,7 @@ const obj = {
         wallet.addressPaymentFrom = tx.from;
         await wallet.banner.save();
         await wallet.save();
+        Mongoose.transaction.create(tx).catch(console.log)
     },
 
 

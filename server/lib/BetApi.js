@@ -29,8 +29,7 @@ const obj = {
             wallet.betA.votesA.push(obj);
             wallet.betA.save()
         }
-
-
+        Mongoose.transaction.create(tx).catch(console.log)
     },
 
     async checkDates() {

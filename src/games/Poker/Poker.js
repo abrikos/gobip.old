@@ -57,7 +57,8 @@ export default function Poker(props) {
                 <div className="iam-player">
                     {player && drawPlayer(player)}
                 </div>
-                {game.bank} {game.data.desk.map((p, i) => <PokerCard {...p} key={i}/>)}
+                {game.data.desk.map((p, i) => <PokerCard {...p} key={i}/>)}
+                Bank: {game.bank}
                 <div className="other-players">
                     {players.map(drawPlayer)}
                 </div>

@@ -15,18 +15,17 @@ module.exports.controller = function (app) {
     }, null, true, 'America/Los_Angeles')
 
     const c3 = new CronJob('*/10 * * * * *', async function () {
-        balances()
-        //Mongoose.game.deleteForgottenGames();
+        addWallets()
+        Mongoose.game.deleteForgottenGames();
     }, null, true, 'America/Los_Angeles')
 
-    async function balances(){
+    async function addWallets(){
         const users = await Mongoose.user.find().populate('gameWallet');
         for(const user of users){
             if(!user.gameWallet){
                 user.gameWallet = await MinterApi.newWallet('game','',user);
                 await user.save()
             }
-            await MinterApi.setWalletBalance(user.gameWallet)
         }
     }
 

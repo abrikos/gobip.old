@@ -58,11 +58,16 @@ const obj = {
                     let error;
                     try {
                         error = e.response ? JSON.parse(e.response.data).error : e.message;
-                    }catch (e2){
-                        error = e.response.data.match(/\{.*?\}\}/)
-                        error = JSON.parse(error[0]).error
+                    } catch (e2) {
+                        try {
+                            error = e.response.data.match(/\{.*?\}\}/)
+                            error = JSON.parse(error[0]).error
+                        }catch (e3) {
+                            //console.log(e3, url)
+                        }
+
                     }
-                    if (process.env.REACT_APP_LOG_ENABLE === '1' && ![302,404].includes(error && error.code)) {
+                    if (process.env.REACT_APP_LOG_ENABLE === '1' && ![302, 404].includes(error && error.code)) {
                         console.log('AXIOS ERORR:', error, url);
                     }
                     reject(error)
@@ -88,7 +93,7 @@ const obj = {
         }
     },
 
-    async setWalletBalance(wallet){
+    async setWalletBalance(wallet) {
         wallet.balanceReal = await this.walletBalance(wallet.address);
         await wallet.save()
     },
@@ -212,18 +217,18 @@ const obj = {
         }
     },
 
-    async estimateSwap(coin0, coin1, valueToSell, type, swap_from='pool'){
+    async estimateSwap(coin0, coin1, valueToSell, type, swap_from = 'pool') {
         const action = `/estimate_coin_${type}?swap_from=${swap_from}&value_to_${type}=${valueToSell}&coin_to_buy=${coin0}&coin_to_sell=${coin1}`
         return this.get(action);
     },
 
-    async fromWalletToAddress(wallet,address,value){
+    async fromWalletToAddress(wallet, address, value) {
         const txParams = {
             type: TX_TYPE.SEND,
             data: {
                 to: address,
                 value,
-                coin:0
+                coin: 0
             },
         }
         wallet.txParams = txParams;
@@ -264,12 +269,12 @@ const obj = {
             txParams.data.coin = txParams.data.coin || 0;
         }
 
-        if (!txParams.data.list ) {
-            if(txParams.data.coin === 0)
+        if (!txParams.data.list) {
+            if (txParams.data.coin === 0)
                 txParams.data.value -= await this.getTxParamsCommission(txParams);
-        }else{
-            const mainCoin = txParams.data.list.find(l=>l.coin==='0');
-            if(mainCoin){
+        } else {
+            const mainCoin = txParams.data.list.find(l => l.coin === '0');
+            if (mainCoin) {
                 mainCoin.value -= await this.getTxParamsCommission(txParams);
             }
         }

@@ -2,6 +2,7 @@ import PokerApi from "./PokerApi";
 import moment from "moment";
 
 const PokerModule = {
+    maxPlayers: 6,
     testMode: true,
     order: 2,
     label: 'Texas Hold`Em Poker',
@@ -91,7 +92,7 @@ const PokerModule = {
     },
 
     canJoin(game) {
-        return game.bets.map(b => b.value).reduce((a, b) => a + b, 0) <= game.minBet * 1.5;
+        return game.bets.map(b => b.value).reduce((a, b) => a + b, 0) <= game.minBet * 1.5 && game.players.length <= this.maxPlayers;
     },
 
     canLeave(game, req) {

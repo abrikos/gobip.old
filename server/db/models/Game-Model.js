@@ -44,15 +44,12 @@ modelSchema.statics.deleteForgottenGames = async function () {
     const games = await this.find({updatedAt: {$lt: moment().utc().add(-6, 'hours').format('YYYY-MM-DD hh:mm')}})
         .populate('players', ['name', 'photo', 'realBalance', 'virtualBalance']);
     for (const game of games) {
+        console.log('Delete game', game.name)
         for (const p of game.players) {
-            try {
-                game.doModelLeave({session: {userId: p.id}}, true);
-            } catch (e) {
-
-            }
-            console.log('Delete game', game.id)
-            game.delete()
+                game.doModelLeave( p.id, true)
+                    .catch(console.log)
         }
+        await game.delete()
     }
 }
 
@@ -83,15 +80,12 @@ modelSchema.methods.doModelLeave = function (userId, forgotten) {
         game.players = game.players.filter(p => !p.equals(userId));
         game.waitList = game.waitList.filter(p => !p.equals(userId));
         Games[game.module].onLeave(game, userId);
-        this.stakesArray = this.stakesArray.filter(s=>!s.userId.equals(userId))
-        /*if (game.players.length < 2) {
-            //TODO refund bet of last player to his stake
-            game.winners = game.players;
-            await game.payToWinners();
-            await game.newTable();
-            console.log('fddddddddddf', game.stakesArray)
-        }*/
-        await game.save();
+        try{
+            this.stakesArray = this.stakesArray.filter(s=>!s.userId.equals(userId))
+        }catch (e) {
+
+        }
+        await game.save()
         resolve()
     })
 }
