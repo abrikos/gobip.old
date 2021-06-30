@@ -46,7 +46,7 @@ modelSchema.statics.deleteForgottenGames = async function () {
     for (const game of games) {
         console.log('Delete game', game.name)
         for (const p of game.players) {
-                game.doModelLeave( p.id, true)
+                await  game.doModelLeave( p.id, true)
                     .catch(console.log)
         }
         await game.delete()
@@ -122,7 +122,7 @@ modelSchema.methods.doModelTurn = async function (userId, body) {
     return new Promise(async (resolve, reject) => {
         const game = this;
         if (!game.iamPlayer(userId)) return reject('You are not in the players list' + userId)
-        if (!game.activePlayer.equals(userId)) return reject('Not your turn ' + userId)
+        if (!game.activePlayer.equals(userId)) return reject('Not your turn ' + userId + ' - '+ game.activePlayer.id)
         console.log('TURN', game.iamPlayer(userId) && game.iamPlayer(userId).name)
         const module = Games[game.module];
         const turnResult = module.doTurn(game, userId, body);
@@ -132,14 +132,20 @@ modelSchema.methods.doModelTurn = async function (userId, body) {
             //await game.newTable();
         } else {
             if(!module.customTurn) {
-                game.activePlayerIdx++;
-                if (game.activePlayerIdx >= game.players.length) game.activePlayerIdx = 0;
+                game.nextPlayer()
             }
             if (module.useTimer && game.players.length > 1) game.activePlayerTime = moment().unix();
         }
         await game.save()
         resolve()
     })
+}
+
+modelSchema.methods.nextPlayer = function () {
+    const game = this;
+    game.activePlayerIdx++;
+    if (game.activePlayerIdx >= game.players.length) game.activePlayerIdx = 0;
+    if(Games[game.module].useTimer) game.activePlayerTime = moment().unix();
 }
 
 modelSchema.methods.changeStake = function (userId, value) {

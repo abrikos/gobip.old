@@ -3,7 +3,6 @@ import {MinterAddressLink} from "../../components/minter/MinterLink";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import options from "./BetBalanceChartOptions";
-import CopyButton from "../../components/copy-button/CopyButton";
 import {A} from "hookrouter";
 import MinterValue from "../../components/minter/MinterValue";
 import PairPrice from "./PairPrice";

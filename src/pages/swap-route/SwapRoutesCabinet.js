@@ -7,7 +7,6 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faEdit, faTrash} from "@fortawesome/free-solid-svg-icons";
 import "./swap-route.sass"
 import ButtonLoading from "../../components/ButtonLoading";
-import CopyButton from "../../components/copy-button/CopyButton";
 import Loader from "../../components/Loader";
 import ReferralProgram from "../cabinet/ReferralProgram";
 

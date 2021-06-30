@@ -1,7 +1,6 @@
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faAward} from "@fortawesome/free-solid-svg-icons";
 import React from "react";
-import winsign from "files/win.png"
 
 export default function WinnerSign(){
     return <div className="w-100 h-100 border border-success text-center">

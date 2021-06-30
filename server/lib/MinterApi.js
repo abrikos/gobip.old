@@ -2,9 +2,8 @@ import axios from "axios";
 import Mongoose from "server/db/Mongoose";
 import {Minter, prepareSignedTx, prepareTx, TX_TYPE} from "minter-js-sdk";
 import {generateWallet, walletFromMnemonic} from 'minterjs-wallet';
-
 const util = require("minterjs-util")
-const fetch = require('node-fetch');
+
 const networks = {
     main: {
         nodeApi: 'https://api.minter.one/v2',

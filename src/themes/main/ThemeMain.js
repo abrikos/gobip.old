@@ -2,19 +2,7 @@ import React from "react";
 import "themes/main/theme-main.sass"
 import ThemeMainTopMenu from "./ThemeMainTopMenu";
 import {A} from "hookrouter";
-import {
-    faBlender,
-    faCoins,
-    faCrown,
-    faDollarSign, faExchangeAlt, faGamepad, faHandsHelping,
-    faHome,
-    faImages, faQuestionCircle,
-    faRecycle,
-    faRobot,
-    faSignInAlt,
-    faSignOutAlt,
-    faUserCog
-} from "@fortawesome/free-solid-svg-icons";
+import {faBlender, faCoins, faCrown, faExchangeAlt, faGamepad, faHome, faImages, faQuestionCircle, faRecycle, faSignInAlt, faSignOutAlt, faUserCog} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {Banners} from "pages/banner/Banners";
 import LoginFormGoogle from "../../components/login/LoginFormGoogle";
@@ -25,7 +13,7 @@ export default function ThemeMain(props) {
         {path: '/', label: 'Home', icon: faHome},
         {path: '/exchange', label: 'Exchange rates', icon: faExchangeAlt},
         {path: '/swap-routes', label: 'Swap routes', icon: faRecycle},
-        {path: '/games', label: 'Games', icon: faGamepad},
+        {path: '/games/SeaBattle', label: 'Games', icon: faGamepad},
         {path: '/mixer', label: props.store.network.coin + ' Mixer', icon: faBlender},
         {path: '/lottery/winners', label: 'Banner lottery', icon: faImages},
         {path: '/bet', label: 'Crypto bets', icon: faCoins},

@@ -1,5 +1,5 @@
 import GoogleLogin from "react-google-login";
-import React, {useEffect} from "react";
+import React from "react";
 import {Button} from "react-bootstrap";
 
 export default function LoginFormGoogle(props) {

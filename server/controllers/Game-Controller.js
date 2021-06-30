@@ -10,7 +10,7 @@ const CronJob = require('cron').CronJob;
 
 module.exports.controller = function (app) {
     const c2 = new CronJob('* * * * * *', async function () {
-        //Mongoose.game.timeFoldPlayers();
+        Mongoose.game.timeFoldPlayers();
         Mongoose.game.reloadFinished();
     }, null, true, 'America/Los_Angeles')
 
@@ -31,14 +31,14 @@ module.exports.controller = function (app) {
 
 
     const {USER1, USER2, USER3} = process.env;
-    const test = true;
+    const test = false;
     //doTestRoPaSci();
     //test && doTestPoker();
     test && Test2();
 
     async function Test2(){
-        async function doBet(game, row,col, userId) {
-            await game.doModelTurn(userId, {turn: {row,col}});
+        async function doBet(game, turn, userId) {
+            await game.doModelTurn(userId, {turn});
         }
         const req = {
             session: {userId: USER1},
@@ -51,13 +51,17 @@ module.exports.controller = function (app) {
         let game = await Mongoose.game.start(req);
         //JOIN small blind
         await game.doModelJoin(USER2, true).catch(console.log);
-return
-        await doBet(game, 4,4, USER1)
-        await doBet(game, 4,3, USER2)
-        await doBet(game, 4,5, USER1)
-        await doBet(game, 5,5, USER2)
-        //await doBet(game, 4,6, USER1)
-        //await doBet(game, 1,1, USER2)
+        await doBet(game, 33, USER1)
+        await doBet(game, 61, USER2)
+        await doBet(game, 71, USER2)
+        await doBet(game, 81, USER2)
+
+        await doBet(game, 34, USER2)
+        await doBet(game, 35, USER2)
+        await doBet(game, 36, USER2)
+        await doBet(game, 37, USER2)
+
+        await doBet(game, 63, USER2)
     }
 
     async function doTestPoker() {

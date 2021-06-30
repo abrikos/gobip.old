@@ -4,7 +4,6 @@ import PokerCard from "./PokerCard";
 import React from "react";
 import GameBetForm from "../GameBetForm";
 import WinnerSign from "../WinnerSign";
-import Loader from "../../components/Loader";
 import TimeLeft from "../TimeLeft";
 
 export default function Poker(props) {

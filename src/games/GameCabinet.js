@@ -1,5 +1,3 @@
-import {useEffect, useState} from "react";
-import {Button} from "react-bootstrap";
 import GameUserInfo from "./GameUserInfo";
 
 export default function GameCabinet(props){

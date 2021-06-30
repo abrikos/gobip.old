@@ -6,7 +6,7 @@ import GameUserInfo from "./GameUserInfo";
 import Poker from "./Poker/Poker";
 import UserAvatar from "../pages/cabinet/UserAvatar";
 import {Button} from "react-bootstrap";
-import {A,navigate} from "hookrouter";
+import {A, navigate} from "hookrouter";
 import TicTacToe from "./TicTacToe/TicTacToe";
 import ReferralProgram from "../pages/cabinet/ReferralProgram";
 import "./games.sass"
