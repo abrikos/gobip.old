@@ -2,10 +2,7 @@ import moment from "moment";
 
 const cols = 10;
 const rows = 10;
-const winRows = 3;
-const cells = Array.from({length: rows * cols}, (v, i) => {
-    return {col: i % rows, row: Math.ceil((i + 1) / rows) - 1}
-});
+const winRows = 5;
 
 const RoPaSciModule = {
     //useTimer: true,
@@ -18,7 +15,6 @@ const RoPaSciModule = {
         winRows,
         cols,
         rows,
-        cells,
         initialStake: 100,
         turns: []
     },
@@ -28,6 +24,13 @@ const RoPaSciModule = {
 
     onJoin(){
         return {}
+    },
+
+    getCells(){
+        return Array.from({length: rows * cols}, (v, i) => {
+            return {col: i % rows, row: Math.ceil((i + 1) / rows) - 1}
+        });
+
     },
 
     hasWinners(game) {
@@ -54,7 +57,7 @@ const RoPaSciModule = {
 
     initTable(game){
         const data = game.data;
-        data.cells = cells;
+        data.cells = this.getCells();
         game.data = data;
     },
 
@@ -72,8 +75,8 @@ const RoPaSciModule = {
     },
 
     isWinner(game) {
-        //const vectors = [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]]
-        const vectors =[ [0,1]]
+        const vectors = [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]]
+        //const vectors =[ [0,1]]
         for (const cell of game.data.cells.filter(c => c.userId)) {
             for (const vector of vectors) {
                 const ids = []
