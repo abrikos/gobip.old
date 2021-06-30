@@ -18,6 +18,7 @@ const modelSchema = new Schema({
         type: String,
         dataStr: String,
         bets: [Object],
+        stake: {type: Number, default: 100},
         round: {type: Number, default: 0},
         finishTime: {type: Number, default: 0},
         activePlayerIdx: {type: Number, default: 0},
@@ -85,7 +86,12 @@ modelSchema.methods.doModelLeave = function (userId, forgotten) {
         }catch (e) {
 
         }
-        await game.save()
+        if(!game.players.length){
+            await game.delete()
+        }else{
+            await game.save()
+        }
+
         resolve()
     })
 }
@@ -175,7 +181,7 @@ modelSchema.methods.doModelJoin = async function (userId) {
             await game.populate('players', ['name', 'photo', 'realBalance', 'virtualBalance']).execPopulate()
             console.log('JOIN', game.iamPlayer(userId).name, userId)
             if (!game.stakes[userId]) {
-                const canPay = await game.fromBalanceToStake(userId, module.initialStake);
+                const canPay = await game.fromBalanceToStake(userId, game.stake);
                 if (canPay.error) {
                     return reject({message: 'Join error:' + canPay.error});
                 }
@@ -305,8 +311,8 @@ modelSchema.statics.timeFoldPlayers = function () {
 }
 
 modelSchema.statics.start = async function (req) {
-    const {module, type} = req.body;
-    const g = new this({module: module.name, type, data: Games[module.name].defaultData});
+    const {module, type, stake} = req.body;
+    const g = new this({module: module.name, type, data: Games[module.name].defaultData, stake});
     g.name = randomWords({exactly: 1, wordsPerString: 3, formatter: (word, i) => i ? word : word.slice(0, 1).toUpperCase().concat(word.slice(1))})[0];
     console.log(g.module, ' ========START GAME=======', g.name, g.id)
     await g.doModelJoin(req.session.userId);

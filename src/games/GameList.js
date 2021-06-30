@@ -32,15 +32,22 @@ export default function GameList(props) {
             })
     }
 
-    function startGame(type) {
-        props.store.api('/game/start', {module, type})
+    function startGame(e) {
+        e.preventDefault();
+        const form = props.store.formToObject(e.target)
+        props.store.api('/game/start', {module, ...form})
             .then(g => navigate(g.link))
     }
 
     function gameList(type) {
         if(!module.name) return <div/>
         return <div>
-            {props.store.authenticatedUser && <Button onClick={() => startGame(type)} className="d-block m-auto">Start new <strong className="d-block">"{module.label}"</strong> (<i>{type} balance</i>)</Button>}
+            <form onSubmit={startGame}>
+                <input type="hidden" name="type" value={type}/>
+                Stake:<input type="number" name="stake" className="form-control" defaultValue={module.initialStake}/>
+                {props.store.authenticatedUser && <Button variant="success" type="submit" className="d-block m-auto">Start new <strong className="d-block">"{module.label}"</strong> (<i>{type} balance</i>)</Button>}
+            </form>
+
             {list.filter(g => g.type === type).map(g => <div key={g.id}><A href={g.link}>{g.name}</A></div>)}
         </div>
     }
@@ -49,24 +56,32 @@ export default function GameList(props) {
         <div>
             {props.store.authenticatedUser && <GameUserInfo type={'any'} {...props}/>}
             <hr/>
-            <Nav variant="tabs" className="mb-2" onSelect={m => {
-                setModule(modules.find(m1 => m1.name === m));
-                loadList();
-            }} activeKey={module.name}>
-                {modules.map((t) => <Nav.Item key={t.name} className="nav-item">
-                    <A href={`/games/${t.name}`} className={`nav-link ${t.name===props.module ? 'active':''}`}>{t.label}</A>
-                </Nav.Item>)}
-            </Nav>
-            {module.testMode && <div className="alert alert-warning text-center">!!! TEST MODE !!!</div>}
-            <div className="row my-2" key={module}>
-                <div className="col">
-                    {gameList('virtual')}
+            <div className="row">
+                <div className="col-sm-4">
+                    <Nav variant="pills" className="flex-column mb-2" onSelect={m => {
+                        setModule(modules.find(m1 => m1.name === m));
+                        loadList();
+                    }} activeKey={module.name}>
+                        {modules.map((t) => <Nav.Item key={t.name} className="nav-item">
+                            <A href={`/games/${t.name}`} className={`nav-link ${t.name===props.module ? 'active':''}`}>{t.label}</A>
+                        </Nav.Item>)}
+                    </Nav>
                 </div>
-                <div className="col">
-                    {!module.testMode && gameList('real')}
-                </div>
+                <div className="col-sm">
+                    {module.testMode && <div className="alert alert-warning text-center">!!! TEST MODE !!!</div>}
+                    <div className="row my-2" key={module}>
+                        <div className="col">
+                            {gameList('virtual')}
+                        </div>
+                        <div className="col">
+                            {!module.testMode && gameList('real')}
+                        </div>
 
+                    </div>
+                </div>
             </div>
+
+
 
         </div>
     )

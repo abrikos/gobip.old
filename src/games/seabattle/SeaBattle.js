@@ -6,7 +6,7 @@ export default function SeaBattle(props) {
     const {game, myId} = props;
     const myFleet = game.data.fields && game.data.fields.my;
     const otherFleet = game.data.fields && game.data.fields.other;
-    const myTurn = game.activePlayer.id === myId;
+    const myTurn = game.activePlayer && game.activePlayer.id === myId;
 
     function click(cell) {
         if (!myTurn || cell.pointer || cell.hit || cell.miss || cell.near) return;
