@@ -105,7 +105,7 @@ modelSchema.statics.doTurn = function (req) {
     return new Promise((resolve, reject) => {
         this.findById(req.params.id).populate('players', ['name', 'photo', 'realBalance', 'virtualBalance'])
             .then(game => {
-                if (!Games[game.module].noCheckTurnsOrder && !game.activePlayer.equals(req.session.userId)) return;
+                if (!Games[game.module].noCheckTurnsOrder && !game.activePlayer.equals(req.session.userId)) return reject({message:'Not your turn'});
                 game.autoFold = game.autoFold.filter(u => !u.equals(req.session.userId))
                 game.doModelTurn(req.session.userId, req.body)
                     .then(resolve)

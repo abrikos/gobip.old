@@ -31,19 +31,19 @@ module.exports.controller = function (app) {
 
 
     const {USER1, USER2, USER3} = process.env;
-    const test = false;
+    const test = true;
     //doTestRoPaSci();
     //test && doTestPoker();
-    test && TesticTac();
+    test && Test2();
 
-    async function TesticTac(){
+    async function Test2(){
         async function doBet(game, row,col, userId) {
             await game.doModelTurn(userId, {turn: {row,col}});
         }
         const req = {
             session: {userId: USER1},
             body: {
-                module: {name:'TicTacToe'},
+                module: {name:'SeaBattle'},
                 type: 'virtual'
             }
         }
@@ -51,6 +51,7 @@ module.exports.controller = function (app) {
         let game = await Mongoose.game.start(req);
         //JOIN small blind
         await game.doModelJoin(USER2, true).catch(console.log);
+return
         await doBet(game, 4,4, USER1)
         await doBet(game, 4,3, USER2)
         await doBet(game, 4,5, USER1)

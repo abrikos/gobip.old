@@ -1,13 +1,15 @@
+$cell: 30px
 .SeaBattle
   .battle-table
     margin: auto
-    width: 200px
+    width: $cell * 10
     display: flex
     flex-wrap: wrap
     div
+      font-size: .7em
       border: 1px solid silver
-      width: 20px
-      height: 20px
+      width: $cell
+      height: $cell
       display: flex
       align-items: center
       justify-content: center
@@ -27,3 +29,5 @@
       background-color: black
     div.border
       background-color: gray
+    div.free
+      background-color: yellow

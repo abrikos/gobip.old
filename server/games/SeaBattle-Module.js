@@ -8,20 +8,36 @@ const obj = {
     label: "Sea battle",
     description: ``,
     shiftFirstTurn: true,
+    customTurn: true,
     defaultData: {
         rows,
         cols,
         initialStake: 100,
-        fleets: {},
+        fields: {},
     },
-    hideOpponentData(game, req) {
+    hideOpponentData(game, userId) {
+        let my, other;
+        for (const uid in game.data.fields) {
+            if (uid === userId) {
+                my = game.data.fields[uid]
+            } else {
+                other = game.data.fields[uid]
+                //.map(c=>c.hit || c.near)
+            }
+        }
+        const data = game.data;
+        data.fields = {my, other}
+        game.data = data;
         return game;
     },
 
     onJoin(game, userId) {
         const data = game.data;
-        console.log('TO DO FLEEETSSSS', userId)
-        data.fleets[userId] = this.randomShips()
+        if (game.players.length === 2) {
+            data.fields[userId] = this.randomShips(this.getCells());
+            const opponent = game.players.find(p => !p.equals(userId));
+            data.fields[opponent.id] = this.randomShips(this.getCells());
+        }
         game.data = data;
         return {}
     },
@@ -59,11 +75,7 @@ const obj = {
         const {turn} = body;
         if (!turn) return;
         const data = game.data;
-        const cell = data.cells.find(c => c.row === turn.row && c.col === turn.col);
-        if (!cell) return;
-        if (cell.userId) return;
-        cell.userId = userId;
-        //data.turns.push({turn, userId: req.session.userId});
+
         game.data = data;
         return {}
     },
@@ -101,108 +113,86 @@ const obj = {
 
     getCells() {
         return Array.from({length: rows * cols}, (v, id) => {
-            return {id, col: id % rows, row: Math.ceil((id + 1) / rows) - 1}
+            return {row: Math.ceil((id + 1) / rows) - 1, col: id % rows, id}
         });
     },
 
-    randomShips(fleet = [], shipLength = 4) {
-        const cells = this.getCells();
+
+    randomShips(field = [], shipSize = 4) {
         const ships = [0, 5, 3, 2, 1];
-        const orientations = [['row', 'col'], ['col', 'row']];
-        const count = ships[shipLength];
-        if (!count) return fleet;
-
+        const count = ships[shipSize];
+        if (!count) return field;
         for (let i = 0; i < count; i++) {
-            //const orientation = orientations[Math.floor(Math.random() * orientations.length)];
             const isRow = Math.floor(Math.random() * 2);
+            //const isRow = 1;
             const orientCount = isRow ? rows : cols;
-            const orientation = isRow ? 'row' : 'col';
-            const noFleetCells = cells
-                .filter(c => !fleet.find(f => f.id === c.id))
-                .filter(c => c[orientation] < orientCount - shipLength);
+            const shiftDirection = isRow ? 'col' : 'row';
+            const shiftDirectionOther = isRow ? 'row' : 'col';
+            const noFleetCells = field
+                //.filter(c => c.row < 5)
+                //.filter(c => c[shiftDirection] < orientCount - shipSize + 1)
+                .filter(c => !c.border && !c.shipSize)
             let availableCells = [];
-            for (let orient = 0; orient < orientCount; orient++) {
-                const bar = cells
-                    .filter(c => c[orientation] === orient)
-                    .filter(c => noFleetCells.find(nfc => nfc.id === c.id))
-                for (const c of bar) {
-                    let available = true;
-                    for (let test = 0; test < shipLength; test++) {
-                        if (!noFleetCells.find(nfc => nfc.id === c.id)) {
-                            available = false;
-                            break;
-                        }
+            for (const c of noFleetCells) {
+                let available = true;
+                for (let shift = 0; shift < shipSize; shift++) {
+                    if (!available) continue
+                    const next = field.find(c2 => c2[shiftDirection] === c[shiftDirection] + shift && c2[shiftDirectionOther]===c[shiftDirectionOther])
+                    if (!next || !noFleetCells.find(nfc => nfc.id === next.id)) {
+                        available = false;
                     }
-                    if (available) availableCells.push(c)
                 }
+
+                if (available) {
+                    availableCells.push(c)
+                }
+
             }
+            //console.log(shipSize, noFleetCells.length, availableCells.length)
             //console.log(Math.max.apply(null, freeCells.map(c=>c.row)))
-            const acId = shipLength === 4 ? 4 : Math.floor(Math.random() * availableCells.length);
+            const acId = Math.floor(Math.random() * availableCells.length);
             const cell = availableCells[acId];
-            if (!cell) return fleet
-            console.log(noFleetCells.length)
-            fleet = fleet.concat(this.placeShip(cell.id, shipLength, isRow, fleet))
-        }
-
-        this.randomShips(fleet, shipLength - 1)
-        return fleet;
-    },
-
-    _cellInFleet(id, fleet) {
-        const exist = fleet.find(c => c.id === id);
-        if (exist) {
-            console.log('Exist', exist)
-        }
-        return !!exist;
-    },
-
-    placeShip(id, shipLength, isRow, fleet) {
-        const exist = fleet.find(c => c.id === id);
-        if (exist) {
-            console.log('Exist', exist)
-            return fleet;
-        }
-        const cells = this.getCells();
-        const cell = cells[id];
-        const orientation1 = isRow ? 'row' : 'col';
-        const orientation2 = !isRow ? 'row' : 'col';
-        const ship = []
-        for (let j = 0; j < shipLength; j++) {
-            const c = cells.find(c => c[orientation1] === cell[orientation1] + j && c[orientation2] === cell[orientation2])
-            if (!this._cellInFleet(c.id, fleet)) {
-                c.shipLength = shipLength
-                ship.push(c)
+            if (!cell) {
+                return field
             }
+
+            this.placeShip(cell.id, shipSize, isRow, field)
         }
-        console.log(ship)
-        return fleet.concat(ship.concat(this.placeBorders(ship, fleet)))
+
+        return this.randomShips(field, shipSize - 1)
+
     },
 
-    placeBorders(ship,fleet) {
-        const cells = this.getCells();
+    placeShip(id, shipSize, isRow, field) {
+        const cell = field[id];
+        const orientation1 = !isRow ? 'row' : 'col';
+        const orientation2 = isRow ? 'row' : 'col';
+        const ship = []
+        for (let j = 0; j < shipSize; j++) {
+            const c = field.find(c => c[orientation1] === cell[orientation1] + j && c[orientation2] === cell[orientation2])
+            c.shipSize = shipSize
+            if (c.border) delete c.border
+            ship.push(c)
+        }
+        this.placeBorders(ship, field)
+    },
+
+    placeBorders(ship, field) {
         const vectors = [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]]
-        const borders = []
         for (const c of ship) {
             for (const vector of vectors) {
-                const c2 = cells.find(c3 => c3.row === c.row + vector[0] && c3.col === c.col + vector[1]);
-                if (c2 && !ship.find(c => c.id == c2.id) && !fleet.find(c => c.id == c2.id) && !borders.find(c => c.id === c2.id)) {
-                    const border = 1;
-                    borders.push({border, ...c2})
+                const c2 = field.find(c3 => c3.row === c.row + vector[0] && c3.col === c.col + vector[1]);
+                if (c2 && !field.find(c => c.id == c2.id && c.shipSize)) {
+                    c2.border = 1;
                 }
             }
         }
-        console.log(borders)
-        return borders;
     },
 
-    test() {
-        let fleet = obj.placeShip(4, 4, 1, []);
-        fleet = fleet.concat(obj.placeShip(6, 3, 1, fleet));
-    }
 
 }
 
-obj.randomShips()
+//console.log(obj.randomShips(obj.getCells(),4))
 //obj.randomShips()
 
 export default obj

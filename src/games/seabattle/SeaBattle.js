@@ -1,32 +1,32 @@
 import React from "react";
 import GamePlayer from "../GamePlayer";
 import "./seabattle.sass"
+import {Button} from "react-bootstrap";
 
 export default function SeaBattle(props) {
     const {game, myId} = props;
-    const cells = Array.from({length: game.data.rows * game.data.cols}, (v, id) => {
-        return {id, col: id % game.data.rows, row: Math.ceil((id + 1) / game.data.rows) - 1}
-    })
+    const myFleet = game.data.fields && game.data.fields.my;
+    const otherFleet = game.data.fields && game.data.fields.other;
 
 
     function DrawCell(cell) {
-        const ship = game.data.fleets[myId].find(c => c.id === cell.id && c.shipLength);
-        const border = game.data.fleets[myId].find(c => c.id === cell.id && c.border);
-        return <div className={`${border ? 'border' : ''} ${ship ? 'ship' + ship.shipLength : ''}`}>
-            {ship && ship.shipLength}
+        return <div className={`${cell.border ? 'border' : ''} ${cell.shipSize ? 'ship' + cell.shipSize : ''} ${cell.free?'free':''}`}>
+            {cell.row},{cell.col}
         </div>
     }
 
     return <div className="SeaBattle">
-        {game.players.length > 1 && game.players.map(p => p.id).includes(myId) && <div className="battle-table">
-            {/*{game.data.cells.map((cell, i) => <div key={i} onClick={() => game.activePlayer.id === myId && !cell.userId && props.doTurn(cell)}
-                                                   className={cellClass(cell)}>
-                <span></span>
-            </div>)}*/}
-            {cells.map((cell, i) => <DrawCell key={i} {...cell}/>)}
+        {game.players.length > 1 && game.players.map(p => p.id).includes(myId) && <div className="d-flex">
+            <div className="battle-table">
+                {myFleet && myFleet.map((cell, i) => <DrawCell key={i} {...cell}/>)}
+            </div>
+            <div className="battle-table">
+                {otherFleet && otherFleet.map((cell, i) => <DrawCell key={i} {...cell}/>)}
+            </div>
         </div>}
         <div className="d-flex justify-content-around">
-            {game.players.map(p => <GamePlayer key={p.id} game={game} myId={myId} player={p}/>)}
+            <GamePlayer game={game} myId={myId} player={game.players.find(p => p.id === myId)}/>
+            <GamePlayer game={game} player={game.players.find(p => p.id !== myId)}/>
         </div>
     </div>
 }
