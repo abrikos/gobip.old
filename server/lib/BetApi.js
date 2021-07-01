@@ -64,9 +64,12 @@ const obj = {
                 if (value >= 0)
                     payment.multiSends.push(multiSend);
             }
-            payment.multiSends.push({to: bet.user.address, value: bet.userRefund * 0.9});
-            if (bet.user.parent)
-                payment.multiSends.push({to: bet.user.parent.address, value: bet.userRefund * 0.1});
+            const toParent = bet.userRefund * process.env.REFERRAL_PERCENT / 100;
+            payment.multiSends.push({to: bet.user.address, value: bet.userRefund - toParent});
+            if (bet.user.parent) {
+                payment.multiSends.push({to: bet.user.parent.address, value: toParent});
+                Mongoose.referral.create({type: bet.name, amount:toParent, parent: bet.user.parent, referral: bet.user});
+            }
             const wallets = [bet.walletF, bet.walletA];
 
             for (const wallet of wallets) {

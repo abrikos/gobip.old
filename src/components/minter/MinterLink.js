@@ -5,7 +5,7 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import React from "react";
 
 MinterAddressLink.propTypes = {
-    address: PropTypes.string.isRequired,
+    address: PropTypes.string,
     short: PropTypes.number,
 };
 MinterTxLink.propTypes = {
@@ -14,6 +14,7 @@ MinterTxLink.propTypes = {
 
 
 export function MinterAddressLink(props) {
+    if(!props.address) return '';
     const address = props.short ? props.address.substr(0, props.short) + '...' : props.address;
     return <span><a href={props.store.network.explorer + 'address/' + props.address} target="_blank" style={{fontFamily: 'monospace'}}>{address}</a> <CopyButton text={props.address}/> </span>
 }

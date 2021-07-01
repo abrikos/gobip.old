@@ -27,15 +27,22 @@ const obj = {
                 .then(() => {
                     //console.log()
                 })
+                .catch(e => {
+                    console.log('PoolsCoins', e.message)
+                })
         }
     },
 
     async coins() {
+        if (MinterApi.params.network.chainId === 2) return;
         const res = await MinterApi.get('/coins', true);
         for (const c of res.data) {
             Mongoose.coin.findOneAndUpdate({id: c.id}, {symbol: c.symbol}, {new: true, upsert: true})
                 .then(() => {
                     //console.log()
+                })
+                .catch(e => {
+                    console.log('Update coins', e.message)
                 })
         }
         //console.log(res.data)
@@ -51,11 +58,10 @@ const obj = {
                 route.wallet.balance = balance;
                 route.wallet.save()
                 if (balance >= process.env.SWAP_PAY_PER_ROUTE * 1) {
-                    if(route.user.parent) {
+                    if (route.user.parent) {
                         const amount = balance * process.env.REFERRAL_PERCENT / 100;
                         await MinterApi.fromWalletToAddress(route.wallet, route.user.parent.address, amount);
-                        const ref = Mongoose.referral.create({type:'swap-route payed', amount, parent: route.user.parent, referral:route.user});
-                        await ref.save();
+                        Mongoose.referral.create({type: 'swap-route payed', amount, parent: route.user.parent, referral: route.user});
                     }
                     await MinterApi.walletMoveFunds(route.wallet, process.env.MAIN_WALLET)
                     route.payDate = new Date();
