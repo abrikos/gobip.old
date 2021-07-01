@@ -162,7 +162,7 @@ module.exports.controller = function (app) {
         const {module} = req.body;
         Mongoose.game.find({module})
             .sort({updatedAt:-1})
-            .select(['name', 'type', 'module'])
+            .select(['name', 'type', 'module', 'stake'])
             //.populate('players', ['name','photo','realBalance','virtualBalance'])
             .then(r => {
                 res.send(r)
@@ -176,7 +176,7 @@ module.exports.controller = function (app) {
         Mongoose.user.findById(req.session.userId)
             .then(r => {
                 if (!r.realBalance) return res.status(500).send('Insufficient funds')
-                MinterApi.fromMainTo(r.address, r.realBalance - process.env.GAME_WITHDRAW_FEE)
+                MinterApi.fromMainTo(r.address, r.realBalance * (1 - process.env.GAME_WITHDRAW_FEE/100))
                     .then(tx => {
                         r.realBalance = 0;
                         r.save()

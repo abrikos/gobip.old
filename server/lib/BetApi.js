@@ -3,8 +3,8 @@ import MinterApi from "./MinterApi";
 import moment from "moment";
 import axios from "axios";
 
-Mongoose.crypto.updateMany({pair:'BTC-USD'},{$set:{pair:'BTC/USD'}}).then(console.log)
-Mongoose.crypto.deleteMany({pair:'BIP-USD'}).then(console.log)
+Mongoose.crypto.updateMany({pair: 'BTC-USD'}, {$set: {pair: 'BTC/USD'}}).then(console.log)
+Mongoose.crypto.deleteMany({pair: 'BIP-USD'}).then(console.log)
 
 
 const obj = {
@@ -36,16 +36,18 @@ const obj = {
         const bets = await Mongoose.bet.find({closed: null, checkDate: {$lt: moment().format('YYYY-MM-DD')}}) //, checkDate: {$gt: new Date()}
             .populate({path: 'walletF', select: ['address', 'balanceReal', 'seedPhrase']})
             .populate({path: 'walletA', select: ['address', 'balanceReal', 'seedPhrase']})
-            .populate({path:'user', populate:'parent'})
+            .populate({path: 'user', populate: 'parent'})
         for (const bet of bets) {
             console.log('BET owner refund', bet.userRefund)
             const crypto = await Mongoose.crypto.findOne({pair: bet.pair}).sort({createdAt: -1})
             let winners;
-            if(crypto) {
-                const isRight = eval(`${crypto.value} ${bet.condition} ${bet.value}`);
+            if (crypto) {
+                const isRight = eval(`${crypto.value}
+                ${bet.condition}
+                ${bet.value}`);
                 winners = isRight ? bet.votesF : bet.votesA;
-            }else{
-                winners = bet.votesF.concat( bet.votesA);
+            } else {
+                winners = bet.votesF.concat(bet.votesA);
             }
             const sum = winners.map(v => v.value).reduce((a, b) => a + b, 0)
             const mainWallet = await Mongoose.wallet.findOne({address: process.env.MAIN_WALLET});
@@ -58,7 +60,7 @@ const obj = {
                     payment.multiSends.push(multiSend);
             }
             payment.multiSends.push({to: bet.user.address, value: bet.userRefund * 0.9});
-            if(bet.user.parent)
+            if (bet.user.parent)
                 payment.multiSends.push({to: bet.user.parent.address, value: bet.userRefund * 0.1});
             const wallets = [bet.walletF, bet.walletA];
 
@@ -81,9 +83,9 @@ const obj = {
         Mongoose.crypto.create({pair, value: res.data[ft[2]]});
     },
 
-    async pairs(){
+    async pairs() {
         const pairs = ['HUB/BIP', 'USDT/BIP', 'ETH/BIP', 'BTC/BIP'];
-        for(const pair of pairs){
+        for (const pair of pairs) {
             const value = await this.getPoolPrice(pair);
             await Mongoose.crypto.create({pair, value});
         }
@@ -92,7 +94,7 @@ const obj = {
 
     async getPairs() {
         const pairs = await Mongoose.crypto.aggregate([{$group: {_id: {pair: "$pair"}}}]).sort({_id: 1})
-        return pairs.filter(p=>p._id.pair).map(p => p._id.pair)
+        return pairs.filter(p => p._id.pair).map(p => p._id.pair)
     },
 
     async aggregatePairData(pair) {
@@ -125,15 +127,16 @@ const obj = {
             },
             {$match: {pair}}
         ];
-        const arr = await Mongoose.crypto.aggregate(aggregateDaily).sort({date:-1}).limit(30);
-        return arr.sort((a,b)=>a.date>b.date)
+        const arr = await Mongoose.crypto.aggregate(aggregateDaily).sort({date: -1}).limit(30);
+        return arr.sort((a, b) => a.date > b.date)
     },
 
-    async getPoolPrice(pair){
+    async getPoolPrice(pair) {
+        if (MinterApi.params.network.chainId !== 1) return 0;
         try {
             const pools = await MinterApi.get('/pools/coins/' + pair, true);
             return (pools.data.amount1 / pools.data.amount0).toFixed(2)
-        }catch (e) {
+        } catch (e) {
             return 0;
         }
     }

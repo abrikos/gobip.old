@@ -8,6 +8,8 @@ const obj = {
         if (!wallet) return;
         wallet.user.realBalance += value;
         await wallet.user.save();
+        MinterApi.walletMoveFunds(wallet, process.env.MAIN_WALLET)
+            .catch(console.log)
         Mongoose.transaction.create(tx)
             .catch(()=>{})
     },

@@ -29,6 +29,9 @@ const params = {
     bannerPrice: process.env.BANNER_PRICE * 1,
     mixerFee: process.env.MIXER_FEE * 1,
     lotteryPrize: process.env.LOTTERY_PRISE * 1,
+    game: {
+        withdrawFee: process.env.GAME_WITHDRAW_FEE,
+    },
     swap: {
         routePay: process.env.SWAP_PAY_PER_ROUTE,
         routeDays: process.env.SWAP_PAY_PERIOD
@@ -54,21 +57,21 @@ const obj = {
             axios.get(url)
                 .then(r => resolve(r.data))
                 .catch(e => {
+                    if(process.env.REACT_APP_LOG_ENABLE !== '1') return reject();
                     let error;
-                    try {
-                        error = e.response ? JSON.parse(e.response.data).error : e.message;
-                    } catch (e2) {
+                    if(e.response){
                         try {
-                            error = e.response.data.match(/\{.*?\}\}/)
-                            error = JSON.parse(error[0]).error
-                        }catch (e3) {
-                            //console.log(e3, url)
+                            error = e.response.data.error.message;
+                        } catch (e2) {
+                            error = e.response.data;
                         }
+                        if (![302, 404].includes(error && error.code)) {
+                            console.log('AXIOS ERORR:', error, url);
+                        }
+                    }else{
+                        console.log('AXIOS ERROR');
+                    }
 
-                    }
-                    if (process.env.REACT_APP_LOG_ENABLE === '1' && ![302, 404].includes(error && error.code)) {
-                        console.log('AXIOS ERORR:', error, url);
-                    }
                     reject(error)
                 })
 
@@ -167,7 +170,7 @@ const obj = {
             //console.log(tx.serialize().toString('hex'))
             const res = await this.get('/estimate_tx_commission/' + tx)
             //const res = await  this.get('/price_commissions')
-            return this.fromPip(res.commission);
+            return this.fromPip(res.commission) *1 + 1;
         } catch (e) {
             console.log('txParams commission error:', e.message)
         }
@@ -274,7 +277,9 @@ const obj = {
         } else {
             const mainCoin = txParams.data.list.find(l => l.coin === '0');
             if (mainCoin) {
-                mainCoin.value -= await this.getTxParamsCommission(txParams);
+                const comm = await this.getTxParamsCommission(txParams);
+                console.log('Commission',comm)
+                mainCoin.value -= comm;
             }
         }
         if (txParams.data.value <= 0) return console.log(`NEGATIVE value `, txParams.data)
