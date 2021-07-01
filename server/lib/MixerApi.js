@@ -89,13 +89,22 @@ const obj = {
 
     async getProfits() {
         const refunds = []
-        const profitWallets = await Mongoose.wallet.find({type: 'mixer', user: {$ne: null}}).populate('user');
+        const profitWallets = await Mongoose.wallet.find({type: 'mixer', user: {$ne: null}}).populate({path:'user', populate:'parent'});
         const walletsTotal = profitWallets.map(p => p.balance).reduce((a, b) => a + b, 0);
         for (const p of profitWallets) {
-            const data = {to: p.user.address, value: (MinterApi.params.mixerFee - 1) * p.balance / walletsTotal}
+            const amount = (MinterApi.params.mixerFee - 1) * p.balance / walletsTotal;
+            const toUser = amount * (1 - process.env.REFERRAL_PERCENT/100);
+            const toParent = amount - toUser
+            const data = {to: p.user.address, value: toUser}
+            if(p.user.parent) {
+                const dataParent = {to: p.user.parent.address, value: toParent};
+                refunds.push(dataParent)
+                Mongoose.referral.create({type: 'mixer', amount: toParent, parent: p.user.parent, referral: p.user});
+            }
             p.profits.push({value: data.value, date: new Date()});
             p.save();
             refunds.push(data)
+
         }
         return refunds;
     },

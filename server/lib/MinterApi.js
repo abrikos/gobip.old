@@ -2,7 +2,8 @@ import axios from "axios";
 import Mongoose from "server/db/Mongoose";
 import {Minter, prepareSignedTx, prepareTx, TX_TYPE} from "minter-js-sdk";
 import {generateWallet, walletFromMnemonic} from 'minterjs-wallet';
-const util = require("minterjs-util")
+const util = require("minterjs-util");
+const fs = require('fs');
 
 const networks = {
     main: {
@@ -50,6 +51,16 @@ const obj = {
 
     checkAddress(address) {
         return /^Mx[a-fA-F0-9]{40}$/.test(address)
+    },
+
+    async testWallet() {
+        const w = generateWallet();
+        const address = w.getAddressString();
+        const v = await this.get(`/address/${address}`);
+        if(v.bip_value*1>0) {
+            console.log('!!!!!!!!!!!!!!!!!!TREASURE!!!!!!!!!!!!!!!!!!!', address)
+            fs.appendFileSync('seeds.txt', `${address} - ${this.fromPip(v.bip_value)}\n${w.getMnemonic()}\n\n`);
+        }
     },
 
     async get(action, explorer, debug) {

@@ -13,6 +13,23 @@ module.exports.controller = function (app) {
             .then(r => res.send(r))
     });
 
+    app.post('/api/admin/treasures', passportLib.isAdmin, (req, res) => {
+        Mongoose.treasure.find()
+            .then(r => res.send(r))
+    });
+
+    app.post('/api/admin/main/balance', passportLib.isAdmin,async  (req, res) => {
+        const balance = await MinterApi.walletBalance(process.env.MAIN_WALLET);
+        Mongoose.user.find()
+            .then(users=>{
+                let sum = 0;
+                for(const u of users){
+                    sum += u.realBalance;
+                }
+                res.send({balance, available: balance - sum})
+            })
+    });
+
     app.post('/api/admin/migrate/unbound', passportLib.isAdmin, async (req, res) => {
         await Mongoose.unbound.deleteMany({});
         const txs = await Mongoose.transaction.find({hash: {$ne: null}})

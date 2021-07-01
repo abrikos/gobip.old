@@ -44,7 +44,7 @@ modelSchema.virtual('referralLog', {
     ref: 'referral',
     localField: '_id',
     foreignField: 'parent',
-    options:{sort:{createdAt:-1}},
+    options: {sort: {createdAt: -1}, limit: 100},
     justOne: false // set true for one-to-one relationship
 });
 

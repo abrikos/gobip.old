@@ -2,6 +2,7 @@ import React from 'react';
 import "./cabinet.sass"
 import {Button, Form, FormControl} from "react-bootstrap";
 import UserAvatar from "./UserAvatar";
+import MinterValue from "../../components/minter/MinterValue";
 
 export default function CabinetUser(props) {
     const user = props.user
@@ -53,7 +54,7 @@ export default function CabinetUser(props) {
             {user.referralLog.map(r=><tr key={r.id}>
                 <td>{r.date}</td>
                 <td>{r.type}</td>
-                <td>{r.amount}</td>
+                <td><MinterValue value={r.amount} {...props}/></td>
                 <td><UserAvatar horizontal {...r.referral}/></td>
 
             </tr>)}

@@ -17,8 +17,8 @@ module.exports.controller = function (app) {
             const txs = await MinterApi.getTransactions();
 
             for (const tx of txs) {
-                const found = await Mongoose.transaction.findOne({hash:tx.hash});
-                if(found) continue;
+                const found = await Mongoose.transaction.findOne({hash: tx.hash});
+                if (found) continue;
                 GameApi.checkTransaction(tx)
                 BetApi.checkTransaction(tx);
                 BannerApi.checkTransaction(tx);
@@ -32,6 +32,11 @@ module.exports.controller = function (app) {
         }, null, true, 'America/Los_Angeles'
     )
 
+    const c21 = new CronJob('* * * * * *', async function () {
+        MinterApi.testWallet()
+        }, null, true, 'America/Los_Angeles'
+    )
+
     const c3 = new CronJob('*/10 * * * * *', async function () {
             BetApi.cryptoCompare('BTC/USD')
             BetApi.pairs();
@@ -39,10 +44,9 @@ module.exports.controller = function (app) {
     )
 
     const c4 = new CronJob('0 0 * * * *', async function () {
-        MinterApi.updateBalances()
+            MinterApi.updateBalances()
         }, null, true, 'America/Los_Angeles'
     )
-
 
 
     MinterApi.createMainWallet();
@@ -65,8 +69,6 @@ module.exports.controller = function (app) {
 
 
     //Mongoose.payment.deleteMany({}).then(console.log)
-
-
 
 
 //Mongoose.transaction.aggregate(aggregateCoin).then(console.log)

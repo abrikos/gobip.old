@@ -86,7 +86,7 @@ modelSchema.methods.doModelLeave = function (userId, forgotten) {
         } catch (e) {
 
         }
-        if(game.players.length===1) {
+        if (game.players.length === 1) {
             game.activePlayerTime = 0;
             game.activePlayerIdx = 0;
         }
@@ -116,7 +116,7 @@ modelSchema.statics.doTurn = function (req) {
         this.findById(req.params.id).populate({
             path: 'players',
             select: ['name', 'photo', 'realBalance', 'virtualBalance'],
-            populate:{path:'parent',select: ['realBalance', 'virtualBalance'],}
+            populate: {path: 'parent', select: ['realBalance', 'virtualBalance'],}
         })
             .then(game => {
                 if (!Games[game.module].noCheckTurnsOrder && !game.activePlayer.equals(req.session.userId)) return reject({message: 'Not your turn'});
@@ -229,7 +229,7 @@ modelSchema.methods.payToWinners = async function () {
     const bank = Games[this.module].getBank(this);
     for (const p of this.winners) {
         const amount = bank / this.winners.length;
-        const toWinner = amount * (1 - process.env.REFERRAL_PERCENT/100);
+        const toWinner = amount * (1 - process.env.REFERRAL_PERCENT / 100);
         const toParent = amount - toWinner;
         console.log('winner', p.name, toWinner, 'toParent:', toParent)
         if (Games[this.module].prizeToStake) {
@@ -240,8 +240,10 @@ modelSchema.methods.payToWinners = async function () {
 
         p.parent[`${this.type}Balance`] += toParent;
         await p.parent.save();
-        const ref = this.model('referral')({type:this.module, amount:toParent, parent: p.parent, referral:p})
-        await ref.save()
+        if(this.type==='real') {
+            const ref = this.model('referral')({type: 'to games balance', amount: toParent, parent: p.parent, referral: p})
+            await ref.save()
+        }
         await p.save()
     }
     this.finishTime = moment().unix();
