@@ -10,7 +10,7 @@ import TicTacToe from "./TicTacToe/TicTacToe";
 import ReferralProgram from "../pages/cabinet/ReferralProgram";
 import "./games.sass"
 import SeaBattle from "./seabattle/SeaBattle";
-
+import * as Icon from "./icons";
 
 export default function GamePlay(props) {
     const [error, setError] = useState({})
@@ -60,10 +60,10 @@ export default function GamePlay(props) {
     //game.player = game.players.find(p=>props.store.authenticatedUser && p.id===props.store.authenticatedUser.id)
     const myId = props.store.authenticatedUser && props.store.authenticatedUser.id;
     return (
-        <div>
+        <div className="games">
             <ReferralProgram redirect={game.link} {...props}/>
             <small className="float-right">{game.type} "{game.moduleHuman}"</small>
-            <h1>{game.name}</h1>
+            <h1><img src={Icon[game.module]} className="game-icon" alt={game.module}/> {game.name}</h1>
             <A href={`/games/${game.module}`}>&lt; Back to list </A>
             {props.store.authenticatedUser && <GameUserInfo type={game.type} {...props}/>}
             <hr/>

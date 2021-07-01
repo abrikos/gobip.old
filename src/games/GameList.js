@@ -3,6 +3,7 @@ import {Button} from "react-bootstrap";
 import Nav from "react-bootstrap/Nav";
 import {A, navigate} from "hookrouter";
 import GameUserInfo from "./GameUserInfo";
+import * as Icon from "./icons";
 
 export default function GameList(props) {
     const [module, setModule] = useState({})
@@ -61,17 +62,20 @@ export default function GameList(props) {
     }
 
     return (
-        <div>
+        <div className="games">
             {props.store.authenticatedUser && <GameUserInfo type={'any'} {...props}/>}
             <hr/>
             <div className="row">
-                <div className="col-sm-4">
+                <div className="col-sm-5">
                     <Nav variant="pills" className="flex-column mb-2" onSelect={m => {
                         setModule(modules.find(m1 => m1.name === m));
                         loadList();
                     }} activeKey={module.name}>
                         {modules.map((t) => <Nav.Item key={t.name} className="nav-item">
-                            <A href={`/games/${t.name}`} className={`nav-link ${t.name === props.module ? 'active' : ''}`}>{t.label}</A>
+                            <A href={`/games/${t.name}`} className={`nav-link ${t.name === props.module ? 'active' : ''}`}>
+                                <img src={Icon[t.name]} className="game-icon" alt={t.name}/>
+                                {t.label}
+                            </A>
                         </Nav.Item>)}
                     </Nav>
                 </div>
