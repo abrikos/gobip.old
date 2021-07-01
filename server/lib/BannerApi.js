@@ -36,25 +36,29 @@ const obj = {
         const wallets = await Mongoose.wallet.find({type: 'banner', balanceReal: {$gt: 0}}).populate({path: 'banner', populate: 'user'});
         if (!wallets.length) return
         const mainWallet = await Mongoose.wallet.findOne({address: process.env.MAIN_WALLET});
-        const payment = new Mongoose.payment({tx: lottery.id})
+        //const payment = new Mongoose.payment({tx: lottery.id})
         const items = [];
         for (const wallet of wallets) {
-            //Collect from banners to Main
-            payment.singleSends.push({to: mainWallet.address, value: wallet.balance, fromAddress: wallet.address, fromSeed: wallet.seedPhrase})
+            //Move funds from each banner to main
+            console.log(await MinterApi.walletMoveFunds(wallet, mainWallet.address));
+            //payment.singleSends.push({to: mainWallet.address, value: wallet.balance, fromAddress: wallet.address, fromSeed: wallet.seedPhrase})
+            //Lottery tickets of each wallet
             for (let i = 0; i < wallet.balance; i++) {
                 items.push(wallet)
             }
         }
+        //Random from tickets
         const win = items.filter(i => i.banner.user.address)[Math.floor(Math.random() * items.filter(i => i.addressPaymentFrom).length)];
 
         lottery.banner = win.banner;
         //Pay to winner
-        payment.singleSends.push({saveResult: true, to: win.banner.user.address, value: MinterApi.params.lotteryPrize, fromAddress: mainWallet.address, fromSeed: mainWallet.seedPhrase})
+        console.log(MinterApi.fromMainTo(win.banner.user.address, MinterApi.params.lotteryPrize))
+        //payment.singleSends.push({saveResult: true, to: win.banner.user.address, value: MinterApi.params.lotteryPrize, fromAddress: mainWallet.address, fromSeed: mainWallet.seedPhrase})
         //console.log({saveResult: true, to: win.addressPaymentFrom, value: MinterApi.params.lotteryPrize, fromAddress: mainWallet.address, fromSeed: mainWallet.seedPhrase})
         console.log('Lottery liveTime', lottery.liveTime)
-        await payment.save()
+        //await payment.save()
         lottery.amount = MinterApi.params.lotteryPrize;
-        lottery.payment = payment;
+        //lottery.payment = payment;
         await lottery.save();
         await Mongoose.lottery.create({});
         console.log('LOTTERY created')

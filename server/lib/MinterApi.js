@@ -309,6 +309,7 @@ const obj = {
     },
 
     async sendSignedTx(txParams, seedPhrase) {
+        console.log(txParams.data)
         const tx = prepareSignedTx(txParams, {seedPhrase}).serializeToString();
         //process.env.REACT_APP_LOG_ENABLE === '1' && console.log('TRY send', txParams);
         return new Promise((resolve, reject) => {

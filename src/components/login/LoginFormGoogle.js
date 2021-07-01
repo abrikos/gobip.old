@@ -7,11 +7,11 @@ export default function LoginFormGoogle(props) {
         console.log(response)
         props.store.api(`/login/google`, response)
             .then(() => {
-                props.store.logIn()
+                props.store.logIn(props.redirect)
                 //.then(setUser)
             })
     }
-
+    const label = props.label || 'Login';
 
     return <span className={props.className + ' pointer'}>
         {/*<Button onClick={test}>Test</Button>*/}
@@ -19,8 +19,8 @@ export default function LoginFormGoogle(props) {
             clientId={props.store.params.googleId}
             render={renderProps => {
                 if(props.type==='button')
-                    return <Button onClick={renderProps.onClick} disabled={renderProps.disabled}>Login</Button>
-                return <span className="pointer" onClick={renderProps.onClick} disabled={renderProps.disabled}>Login</span>
+                    return <Button onClick={renderProps.onClick} disabled={renderProps.disabled}>{label}</Button>
+                return <span className="pointer" onClick={renderProps.onClick} disabled={renderProps.disabled}>{label}</span>
             }}
             buttonText="Вход"
             onSuccess={responseGoogle}

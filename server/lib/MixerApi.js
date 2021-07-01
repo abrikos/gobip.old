@@ -83,7 +83,8 @@ const obj = {
 
     async totalAmount() {
         const res = await Mongoose.wallet.find({balanceReal: {$gt: 0}, type: 'mixer'});
-        return res.reduce((n, {balance}) => n + balance, 0)
+        const main = await MinterApi.walletBalance(process.env.MAIN_WALLET);
+        return res.reduce((n, {balance}) => n + balance, 0) + main;
     },
 
 

@@ -94,7 +94,7 @@ export default function BannerCabinet(props) {
                 </li>
                 <li>Each banner participates in a lottery. The drawing takes place when the total amount of banner coins reaches <strong><MinterValue
                     value={amounts.prize} {...props}/></strong></li>
-                <li>The chance of winning the lottery depends on the number of coins on the banner's address. More coins - more chances.</li>
+                <li>The chance of winning the lottery depends on the number of coins on the banner's address. More coins - more chances</li>
 
             </ul>
         </div>

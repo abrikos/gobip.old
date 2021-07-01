@@ -7,6 +7,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import "themes/common.sass"
 import axios from "axios";
 import f2o from "form-to-object"
+import {navigate} from "hookrouter"
 
 export default function Application() {
     const [authenticatedUser, setAuthUser] = useState(false);
@@ -71,9 +72,12 @@ export default function Application() {
             return f2o(form)
         },
 
-        logIn() {
+        logIn(redirect) {
             this.getUser()
                 .then(setAuthUser)
+            if(redirect){
+                navigate(redirect)
+            }
         },
         async getParams(){
             return this.postData('/params');

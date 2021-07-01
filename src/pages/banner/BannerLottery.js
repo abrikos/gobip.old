@@ -18,11 +18,14 @@ export default function BannerLottery(props) {
 
 
         <ul className="alert alert-info">
-            <li>Registered users can add their banners to the right column of the site. Cost: <MinterValue value={props.store.params.bannerPrice} {...props}/></li>
-            <li>The lottery is drawn when the sum of balances of all wallets of active banners reaches <MinterValue value={amounts.prize - amounts.total} {...props}/></li>
-            <li>After that, the balance of the banner wallet is reset to zero</li>
+            <li>Registered users can add their banners to the right column of the site. Minimal cost: <MinterValue value={props.store.params.bannerPrice} {...props}/></li>
+            <li>Each banner participates in a lottery with a prize of  <MinterValue value={amounts.prize} {...props}/></li>
+            <li>The chance of winning the lottery depends on the number of coins on the banner's address. More coins - more chances</li>
+            <li>The lottery is drawn when the amount of paid banners reaches <MinterValue value={amounts.lotteryStartSum} {...props}/></li>
+            <li>There are <MinterValue value={amounts.lotteryStartSum - amounts.total} {...props}/> left until the next lottery draw</li>
+            <li>Banner balances are reset after each lottery draw</li>
             <li>Only banners with non-zero balance participate in the lottery</li>
-            <li>View your banners in  <A href="/cabinet/banners" className="btn btn-sm btn-primary">your account</A></li>
+            <li>View your banners in  <u><A href="/cabinet/banners" >your account</A></u></li>
         </ul>
         <h1>Banner lottery winners</h1>
         <div className="d-flex flex-wrap">
