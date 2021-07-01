@@ -5,14 +5,16 @@ $cell: 30px
     width: $cell * 10
     display: flex
     flex-wrap: wrap
+    border-collapse: collapse
     div
       font-size: .7em
-      border: 1px solid silver
+      //border: 1px solid silver
       width: $cell
       height: $cell
-      display: flex
       align-items: center
       justify-content: center
+      display: table-cell
+      box-shadow:    1px 0 0 0 gray,    0 1px 0 0 gray,    1px 1px 0 0 gray,      1px 0 0 0 gray inset,    0 1px 0 0 gray inset
       span
         width: 33px
         height: 30px
@@ -24,14 +26,14 @@ $cell: 30px
     div.hit
       background-color: red
     div.ship4
-      background-color: yellow
+      background-color: darkcyan
     div.ship3
       background-color: green
     div.ship2
       background-color: blue
     div.ship1
-      background-color: black
+      background-color: darkmagenta
     div.near
-      background-color: gray
+      background-color: silver
     div.miss
       background-image: radial-gradient(gray 10%, transparent 40%, white 40%)

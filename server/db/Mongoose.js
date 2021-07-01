@@ -15,6 +15,7 @@ import game from "server/db/models/Game-Model";
 import swaproute from "server/db/models/SwapRoute-Model";
 import coin from "server/db/models/Coin-Model";
 import pools from "server/db/models/Pools-Model";
+import referral from "server/db/models/Referral-Model";
 
 const mongoose = require("mongoose");
 require('dotenv').config();
@@ -43,7 +44,7 @@ const Mongoose = {
     isValidId: function (id) {
         return mongoose.Types.ObjectId.isValid(id)
     },
-    user, unbound, ethereum, training, wallet, payment, status, treasure, banner, lottery, crypto, bet, transaction, game,  coin, swaproute, pools
+    user, unbound, ethereum, training, wallet, payment, status, treasure, banner, lottery, crypto, bet, transaction, game,  coin, swaproute, pools, referral
 
 };
 export default Mongoose;

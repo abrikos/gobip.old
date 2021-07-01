@@ -12,6 +12,7 @@ const PokerModule = {
     roundsCount: 6,
     initialStake: 100,
     customTurn: true,
+    prizeToStake: true,
     defaultData: {
         hands: {},
         desk: [],

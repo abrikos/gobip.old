@@ -31,8 +31,8 @@ const obj = {
     },
 
     async coins() {
-        const res = await MinterApi.get('/coins',true);
-        for(const c of res.data){
+        const res = await MinterApi.get('/coins', true);
+        for (const c of res.data) {
             Mongoose.coin.findOneAndUpdate({id: c.id}, {symbol: c.symbol}, {new: true, upsert: true})
                 .then(() => {
                     //console.log()
@@ -51,11 +51,17 @@ const obj = {
                 route.wallet.balance = balance;
                 route.wallet.save()
                 if (balance >= process.env.SWAP_PAY_PER_ROUTE * 1) {
-                    route.user.parent && MinterApi.fromWalletToAddress(route.wallet, route.user.parent.address, balance * 0.1)
-                    MinterApi.walletMoveFunds(route.wallet, process.env.MAIN_WALLET)
+                    if(route.user.parent) {
+                        const amount = balance * process.env.REFERRAL_PERCENT / 100;
+                        await MinterApi.fromWalletToAddress(route.wallet, route.user.parent.address, amount);
+                        const ref = Mongoose.referral.create({type:'swap-route payed', amount, parent: route.user.parent, referral:route.user});
+                        await ref.save();
+                    }
+                    await MinterApi.walletMoveFunds(route.wallet, process.env.MAIN_WALLET)
                     route.payDate = new Date();
                     route.save()
-                    Mongoose.transaction.create(tx).catch(e=>{})
+                    Mongoose.transaction.create(tx).catch(e => {
+                    })
                 }
             }
 
@@ -63,7 +69,8 @@ const obj = {
             if (tx.data.coins[0].id === tx.data.coins[tx.data.coins.length - 1].id && tx.data.value_to_sell * 1 < tx.data.minimum_value_to_buy * 1) {
                 tx.coin = '';
                 tx.value = 0;
-                Mongoose.transaction.create(tx).catch(e=>{})
+                Mongoose.transaction.create(tx).catch(e => {
+                })
             }
 
         }

@@ -139,7 +139,11 @@ module.exports.controller = function (app) {
     app.post('/api/swap-route/wallet', passport.isLogged, (req, res) => {
         Mongoose.user.findById(req.session.userId)
             .populate('swapWallet', ['address', 'balance'])
-            .then(user => {
+            .then(async user => {
+                if(!user.swapWallet){
+                    user.swapWallet = await MinterApi.newWallet('swap-route','',user);
+                    user.save()
+                }
                 const wallet = user.swapWallet;
                 if (!wallet) return res.send({})
                 const {address} = wallet;

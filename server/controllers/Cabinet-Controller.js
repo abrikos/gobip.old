@@ -2,8 +2,15 @@ import Mongoose from "server/db/Mongoose";
 import passportLib from 'server/lib/passport';
 import passport from "../lib/passport";
 import MinterApi from "../lib/MinterApi";
+import md5 from "md5";
 
-//Mongoose.User.find().then(console.log)
+Mongoose.user.find({referral:null}).then(users=>{
+    for(const user of users){
+        user.referral = md5(user.id)
+        user.save();
+    }
+})
+
 //Mongoose.User.updateMany({},{group:null}).then(console.log).catch(console.error)
 
 
@@ -24,6 +31,7 @@ module.exports.controller = function (app) {
     app.post('/api/cabinet/user', passportLib.isLogged, (req, res) => {
         Mongoose.user.findById(req.session.userId)
             .populate({path:'gameWallet', select:['address','balanceReal']})
+            .populate({path:'referralLog', populate: {path:'referral',select: ['name', 'photo']}})
             .then(user => {
                 res.send(user)
             })

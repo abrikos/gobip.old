@@ -25,22 +25,30 @@ export default function SeaBattle(props) {
 
     function DrawCell(cell) {
         return <div className={className(cell)} onClick={() => click(cell)}>
-            {cell.id}
+
         </div>
     }
 
     return <div className="SeaBattle">
-        {game.players.length > 1 && game.players.map(p => p.id).includes(myId) && <div className="d-flex">
-            <div className="battle-table">
+        {game.players.length > 1 && game.players.map(p => p.id).includes(myId) && <div className="d-flex justify-content-around">
+            <div className="p-2">
+                <h3>My fleet</h3>
+                <div className="battle-table">
                 {myFleet && myFleet.map((cell, i) => <DrawCell key={i} {...cell}/>)}
+                </div>
             </div>
-            <div className="battle-table">
+            <div className={`p-2 ${game.activePlayer.id===myId ? 'border border-success':''}`}>
+                <h3>The enemy fleet</h3>
+                <div className="battle-table">
                 {otherFleet && otherFleet.map((cell, i) => <DrawCell key={i} click {...cell}/>)}
+                </div>
             </div>
         </div>}
         <div className="d-flex justify-content-around">
-            <GamePlayer game={game} myId={myId} player={game.players.find(p => p.id === myId)}/>
-            <GamePlayer game={game} player={game.players.find(p => p.id !== myId)}/>
+            <div className="w-50"><GamePlayer game={game} myId={myId} player={game.players.find(p => p.id === myId)}/></div>
+            <div className="w-50"><GamePlayer game={game} player={game.players.find(p => p.id !== myId)}/></div>
+
+
         </div>
     </div>
 }

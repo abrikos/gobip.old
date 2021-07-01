@@ -3,29 +3,21 @@ import UserAvatar from "../../pages/cabinet/UserAvatar";
 import "./ropasci.sass";
 import React from "react";
 import WinnerSign from "../WinnerSign";
+import GamePlayer from "../GamePlayer";
 
 export default function RoPaSci(props) {
-    const {game} = props;
-
-
-    const myId = props.store.authenticatedUser && props.store.authenticatedUser.id
+    const {game, myId} = props;
+    const iam = game.players.find(p => p.id === myId);
+    const opponent = game.players.find(p => p.id !== myId);
 
     function drawPlayer(p) {
+        if(!p) return <span/>
         const result = game.data.turns.find(ch => ch.userId === p.id);
         const winner = !!game.winners.length && game.winners.find(w => w === p.id);
-        return <div className="w-50 p-2" key={p.id}>
-            <div key={p.id} className={`${p.id === myId ? 'border-success' : ''} p-3 border w-100 d-flex justify-content-between`}>
-                <div className=""><UserAvatar horizontal {...p}/></div>
+        return <div className="" key={p.id}>
                 <div className="d-flex align-items-center">
                     {result && <img alt={result.turn} src={images[result.turn]} className={`choice`}/>}
                 </div>
-                <div className="d-flex justify-content-center align-items-center">
-                    {!game.finishTime && <span>Bet: {game.stakes[p.id]}</span>}
-                </div>
-                <div className="d-flex justify-content-center align-items-center">
-                    {winner && <WinnerSign/>}
-                </div>
-            </div>
         </div>
     }
 
@@ -38,7 +30,16 @@ export default function RoPaSci(props) {
                 :
                 !game.reloadTimer && <div className="text-center">Wait for opponent</div>}
             <div className="d-flex justify-content-around">
-                {game.players.map(drawPlayer)}
+                <div className="w-100">
+
+                    <GamePlayer game={game} myId={myId} player={iam}/>
+                    {drawPlayer(iam)}
+                </div>
+                <div className="w-100">
+
+                    <GamePlayer game={game} player={opponent}/>
+                    {drawPlayer(opponent)}
+                </div>
             </div>
         </div>
     )

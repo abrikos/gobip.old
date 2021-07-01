@@ -3,8 +3,13 @@ import MinterApi from "./MinterApi";
 import moment from "moment";
 import axios from "axios";
 
-Mongoose.crypto.updateMany({pair: 'BTC-USD'}, {$set: {pair: 'BTC/USD'}}).then(console.log)
-Mongoose.crypto.deleteMany({pair: 'BIP-USD'}).then(console.log)
+Mongoose.crypto.updateMany({pair: 'BTC-USD'}, {$set: {pair: 'BTC/USD'}}).then(r=> {
+    console.log('BTC-USD=>BTC/USD',r);
+    Mongoose.crypto.deleteMany({pair: 'BIP-USD'}).then(r2=> {
+        console.log('DELETE BIP-USD', r2)
+    })
+})
+
 
 
 const obj = {

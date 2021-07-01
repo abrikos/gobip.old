@@ -29,12 +29,13 @@ const params = {
     bannerPrice: process.env.BANNER_PRICE * 1,
     mixerFee: process.env.MIXER_FEE * 1,
     lotteryPrize: process.env.LOTTERY_PRISE * 1,
+    referralPercent: process.env.REFERRAL_PERCENT * 1,
     game: {
-        withdrawFee: process.env.GAME_WITHDRAW_FEE,
+        withdrawFee: process.env.GAME_WITHDRAW_FEE * 1,
     },
     swap: {
-        routePay: process.env.SWAP_PAY_PER_ROUTE,
-        routeDays: process.env.SWAP_PAY_PERIOD
+        routePay: process.env.SWAP_PAY_PER_ROUTE * 1,
+        routeDays: process.env.SWAP_PAY_PERIOD * 1
     }
 }
 

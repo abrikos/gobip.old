@@ -1,5 +1,4 @@
 import Mongoose from "server/db/Mongoose";
-import passportLib from 'server/lib/passport';
 import MinterApi from "../lib/MinterApi";
 
 const nodemailer = require('nodemailer');
@@ -80,28 +79,12 @@ module.exports.controller = function (app) {
 
     app.get('/api/referral/:referral', (req, res) => {
         res.cookie('referral', req.params.referral)
-        const parsed = req.query.redirect.match(/(\w+)\/([\w|\d]+)/);
-        const model = Mongoose[parsed[1]]
-        if(model){
-            model.findById(parsed[2])
-                .then(r=>{
-                    res.render('share',{
-                        header: r.name + ' ' + process.env.REACT_APP_SITE_TITLE,
-                        text: r.description || process.env.REACT_APP_SITE_DESCRIPTION,
-                        image: req.protocol + '://' + req.get('host') + '/logo.svg',
-                        url: req.query.redirect
-                    })
-                })
-                .catch(e => {res.status(500).send(app.locals.adaptError(e))})
-        }else{
-            res.render('share', {
-                header: process.env.REACT_APP_SITE_TITLE,
-                text: process.env.REACT_APP_SITE_DESCRIPTION,
-                image: req.protocol + '://' + req.get('host') + '/logo.svg',
-                url: req.query.redirect
-            });
-        }
-
+        res.render('share', {
+            header: process.env.REACT_APP_SITE_TITLE,
+            text: process.env.REACT_APP_SITE_DESCRIPTION,
+            image: req.protocol + '://' + req.get('host') + '/logo.svg',
+            url: req.query.redirect
+        });
     });
 
     app.post('/api/redirect/:strategy', (req, res) => {

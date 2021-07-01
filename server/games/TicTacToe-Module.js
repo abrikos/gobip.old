@@ -22,7 +22,10 @@ const RoPaSciModule = {
         return game;
     },
 
-    onJoin(){
+    onJoin(game){
+        if (game.players.length === 2) {
+            this.initTable(game)
+        }
         return {}
     },
 
@@ -105,9 +108,6 @@ const RoPaSciModule = {
 
     canJoin(game, req) {
         return game.players.length < 2;
-    },
-    onJoinDoTurn(game, req) {
-        return false;
     },
     onLeave(game, req) {
         game.data = this.defaultData;

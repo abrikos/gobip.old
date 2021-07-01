@@ -76,9 +76,6 @@ const obj = {
     canJoin(game, req) {
         return game.players.length < 2;
     },
-    onJoinDoTurn(game, req) {
-        return false;
-    },
     onLeave(game, req) {
         game.data = this.defaultData;
     },

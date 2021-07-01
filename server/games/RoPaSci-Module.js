@@ -2,23 +2,25 @@ const RoPaSciModule = {
     label: "Rock Paper Scissors",
     order:3,
     noCheckTurnsOrder: true,
+    initialStake: 100,
     defaultData: {
-        initialStake: 100,
+
         variants: ['rock', 'paper', 'scissors'],
         bets: [],
         turns: []
     },
-    hideOpponentData(game, req) {
+    hideOpponentData(game, userId) {
         if (game.finishTime) return game;
         const data = game.data;
         for (const t of data.turns) {
-            if (t.userId !== req.session.userId) t.turn = 'hidden'
+            if (t.userId !== userId) t.turn = 'hidden'
         }
 
         game.data = data;
         return game;
     },
 
+    initTable(){},
 
     hasWinners(game) {
         const data = game.data;
@@ -35,19 +37,19 @@ const RoPaSciModule = {
         }
         return true;
     },
-    nextTurn(game, req) {
-        console.log(game.players.map(p => p.id).indexOf(req.session.userId))
-        return game.players.map(p => p.id).indexOf(req.session.userId) + 1;
+    nextTurn(game, userId) {
+        console.log(game.players.map(p => p.id).indexOf(userId))
+        return game.players.map(p => p.id).indexOf(userId) + 1;
     },
     getBank(game) {
         return Object.values(game.stakes).reduce((a, b) => a + b, 0)
     },
 
-    doTurn(game, req) {
-        const {turn} = req.body;
+    doTurn(game, userId, body) {
+        const {turn} = body;
         const data = game.data;
-        if (data.turns.map(t => t.userId).includes(req.session.userId)) return;
-        data.turns.push({turn, userId: req.session.userId})
+        if (data.turns.map(t => t.userId).includes(userId)) return;
+        data.turns.push({turn, userId: userId})
         game.data = data;
         return true
     },
@@ -55,12 +57,12 @@ const RoPaSciModule = {
     canJoin(game, req) {
         return game.players.length < 2;
     },
-    onJoinDoTurn(game, req) {
-        return false;
+    onJoin(game, req) {
+        return true;
     },
-    onLeave(game, req) {
+    onLeave(game, userId) {
         const data = game.data;
-        data.turns = data.turns.filter(t => t.userId !== req.session.userId)
+        data.turns = data.turns.filter(t => t.userId !== userId)
         game.data = data;
     },
     canLeave(game, req) {

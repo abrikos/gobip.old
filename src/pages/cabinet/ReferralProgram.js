@@ -6,7 +6,7 @@ export default function ReferralProgram(props){
     const ref = document.location.origin + '/api/referral/' + props.store.authenticatedUser.referral + (props.redirect ? '?redirect=' + props.redirect : '');
     return  <div className="alert alert-success">
         <h4>Referral program</h4>
-        All your referrals will bring 10% of their profit
+        All your referrals will bring {props.store.params.referralPercent}% of their profit
         <hr/>
         <code>
             {ref} <CopyButton text={ref}/>

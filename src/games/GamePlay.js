@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from "react";
 import RoPaSci from "./RoPaSci/RoPaSci";
 import Reversi from "./Reversi/Reversi";
-import Dices from "./Dices/Dices";
 import GameUserInfo from "./GameUserInfo";
 import Poker from "./Poker/Poker";
 import UserAvatar from "../pages/cabinet/UserAvatar";
@@ -13,9 +12,9 @@ import "./games.sass"
 import SeaBattle from "./seabattle/SeaBattle";
 
 
-export default function GamePlay(props){
-    const [error,setError] = useState({})
-    const [game,setGame] = useState()
+export default function GamePlay(props) {
+    const [error, setError] = useState({})
+    const [game, setGame] = useState()
 
     useEffect(() => {
         loadGame();
@@ -23,22 +22,22 @@ export default function GamePlay(props){
         return () => clearInterval(timer);
     }, [])
 
-    function loadGame(){
-        props.store.api(`/game/play/${props.id}`,{},true)
-            .then(g=> {
-                if(!g) return navigate(`/games/${props.module}`)
+    function loadGame() {
+        props.store.api(`/game/play/${props.id}`, {}, true)
+            .then(g => {
+                if (!g) return navigate(`/games/${props.module}`)
                 setGame(g);
             })
     }
 
-    function doTurn(turn){
-        props.store.api(`/game/turn/${game.id}`,{turn})
+    function doTurn(turn) {
+        props.store.api(`/game/turn/${game.id}`, {turn})
             .then(loadGame)
             .catch(setError)
     }
 
 
-    function doLeave(){
+    function doLeave() {
         props.store.api(`/game/leave/${game.id}`)
             .then(loadGame)
         /*props.store.api(`/game/can-leave/${game.id}`)
@@ -51,16 +50,16 @@ export default function GamePlay(props){
             })*/
     }
 
-    function doJoin(){
+    function doJoin() {
         props.store.api(`/game/join/${game.id}`)
             .then(loadGame)
     }
 
-    if(!game) return <div/>
-    if(!game.id) return navigate(`/games/${props.module}`)
+    if (!game) return <div/>
+    if (!game.id) return navigate(`/games/${props.module}`)
     //game.player = game.players.find(p=>props.store.authenticatedUser && p.id===props.store.authenticatedUser.id)
     const myId = props.store.authenticatedUser && props.store.authenticatedUser.id;
-    return(
+    return (
         <div>
             <ReferralProgram redirect={game.link} {...props}/>
             <small className="float-right">{game.type} "{game.moduleHuman}"</small>
@@ -69,16 +68,15 @@ export default function GamePlay(props){
             {props.store.authenticatedUser && <GameUserInfo type={game.type} {...props}/>}
             <hr/>
             <small className="d-block text-center">{game.description}</small>
-            {!!game.reloadTimer && <div style={{height:10, background:`linear-gradient(90deg, rgba(0,255,0,.8), rgba(0,255,0,0) ${game.reloadTimer}%)`}}></div>}
+            {!!game.reloadTimer && <div style={{height: 10, background: `linear-gradient(90deg, rgba(0,255,0,.8), rgba(0,255,0,0) ${game.reloadTimer}%)`}}></div>}
             {error.message && <div className="alert alert-danger">{error.message}</div>}
-            {game.module === 'RoPaSci' && <RoPaSci game={game}  doTurn={doTurn} {...props}/>}
-            {game.module === 'Reversi' && <Reversi game={game}  doTurn={doTurn} {...props}/>}
-            {game.module === 'Dices' && <Dices game={game}  doTurn={doTurn} {...props}/>}
-            {game.module === 'Poker' && <Poker game={game}  doTurn={doTurn} {...props}/>}
-            {game.module === 'TicTacToe' && <TicTacToe game={game}  doTurn={doTurn} {...props}/>}
-            {game.module === 'SeaBattle' && <SeaBattle game={game} myId={myId}  doTurn={doTurn} {...props}/>}
+            {game.module === 'RoPaSci' && <RoPaSci game={game} myId={myId} doTurn={doTurn} {...props}/>}
+            {game.module === 'Reversi' && <Reversi game={game} myId={myId} doTurn={doTurn} {...props}/>}
+            {game.module === 'Poker' && <Poker game={game} myId={myId} doTurn={doTurn} {...props}/>}
+            {game.module === 'TicTacToe' && <TicTacToe game={game} myId={myId} doTurn={doTurn} {...props}/>}
+            {game.module === 'SeaBattle' && <SeaBattle game={game} myId={myId} doTurn={doTurn} {...props}/>}
             {props.store.authenticatedUser && <div>
-                {game.players.map(g=>g.id).includes(props.store.authenticatedUser.id) || game.waitList.map(g=>g.id).includes(props.store.authenticatedUser.id) ?
+                {game.players.map(g => g.id).includes(props.store.authenticatedUser.id) || game.waitList.map(g => g.id).includes(props.store.authenticatedUser.id) ?
                     <Button variant="warning" onClick={doLeave}>Leave</Button>
                     :
                     <Button onClick={doJoin}>Join</Button>}
