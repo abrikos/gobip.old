@@ -3,7 +3,7 @@ import {Button} from "react-bootstrap";
 
 export default function AdminStart(props) {
     const [treasures,setTreasures] = useState([])
-    const [main,setMain] = useState({})
+    const [main,setMain] = useState()
 
     useEffect(()=>{
         init();
@@ -22,7 +22,7 @@ export default function AdminStart(props) {
     }
 
 
-
+    if(!main) return <div/>
     return <div>
         <Button onClick={balances}>Update balances</Button>
         <h3>Available balance</h3>

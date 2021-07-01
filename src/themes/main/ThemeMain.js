@@ -13,7 +13,7 @@ export default function ThemeMain(props) {
         {path: '/', label: 'Home', icon: faHome},
         {path: '/exchange', label: 'Exchange rates', icon: faExchangeAlt},
         {path: '/swap-routes', label: 'Swap routes', icon: faRecycle},
-        {path: '/games/SeaBattle', label: 'MP Games', icon: faGamepad},
+        {path: '/games/SeaBattle', label: 'P2P Games', icon: faGamepad},
         {path: '/mixer', label: props.store.network.coin + ' Mixer', icon: faBlender},
         {path: '/lottery/winners', label: 'Banner lottery', icon: faImages},
         {path: '/bet', label: 'Crypto bets', icon: faChartLine},

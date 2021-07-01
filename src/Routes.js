@@ -22,6 +22,7 @@ export default function Routes(store) {
         "/": () => <Home store={store}/>,
         "/support": () => <Support store={store}/>,
         "/unbound": () => <UnboundCharts store={store}/>,
+        "/exchange/:from/:to/:amount": (params) => <Exchange store={store} {...params}/>,
         "/exchange": () => <Exchange store={store}/>,
         "/mixer": () => <Mixer store={store}/>,
         "/bet": () => <BetList store={store}/>,

@@ -77,14 +77,15 @@ const obj = {
                         } catch (e2) {
                             error = e.response.data;
                         }
-                        if (![302, 404].includes(error && error.code)) {
-                            console.log('AXIOS ERORR:', error, url);
+                        if (![302, 404, 119].includes(error && error.code)) {
+                            console.log('AXIOS ERORR:', e.response.data , url);
+                            reject(e.response.data)
                         }
-                    }else{
-                        console.log('AXIOS ERROR');
-                    }
 
-                    reject(error)
+                    }else{
+                        console.log('AXIOS SIMPLY ERROR', e.message, url);
+                        reject(e.message)
+                    }
                 })
 
         })
@@ -309,7 +310,6 @@ const obj = {
     },
 
     async sendSignedTx(txParams, seedPhrase) {
-        console.log(txParams.data)
         const tx = prepareSignedTx(txParams, {seedPhrase}).serializeToString();
         //process.env.REACT_APP_LOG_ENABLE === '1' && console.log('TRY send', txParams);
         return new Promise((resolve, reject) => {

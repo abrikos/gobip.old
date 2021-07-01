@@ -9,15 +9,18 @@ module.exports.controller = function (app) {
     });
 
     app.post('/api/exchange/calc', async (req, res) => {
+        if (!req.body.from || !req.body.to || !req.body.amount) return res.status(500).send({message: 'Not enough params'})
         const from = req.body.from.toUpperCase();
         const to = req.body.to.toUpperCase();
         const amount = req.body.amount * 1;
+
         const found = await Mongoose.coin.find({symbol: {$in: [from, to]}})
-        const result = {bip: {value:0,error:''}, direct: {value:0,error:''}, ...req.body}
+        const result = {bip: {value: 0, error: ''}, direct: {value: 0, error: ''}, ...req.body}
         if (found.length < 2) {
             result.bip.error = 'Wrong pair'
             return res.send(result)
         }
+        let error;
         try {
             let calc;
             if (from !== 'BIP' && to !== 'BIP') {
@@ -30,15 +33,15 @@ module.exports.controller = function (app) {
             }
             result.bip.value = MinterApi.fromPip(calc.will_pay) * 1
         } catch (e) {
-            result.bip.error = e.message
+            error = {message: e.error.data.bancor + '. ' + e.error.data.pool};
         }
         try {
             const direct = await MinterApi.estimateSwap(from, to, MinterApi.toPip(amount), 'buy', 'optimal')
             result.direct.value = MinterApi.fromPip(direct.will_pay) * 1;
         } catch (e) {
-            result.direct.error = e.message
+            error = {message: e.error.data.bancor + '. ' + e.error.data.pool}
         }
-        //console.log(result)
-        res.send(result)
+        if(error) return res.status(500).send(error);
+        res.send(result);
     });
 }
