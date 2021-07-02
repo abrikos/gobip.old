@@ -32,7 +32,7 @@ export default function Routes(store) {
         "/games": (params) => <GameList store={store} {...params}/>,
         "/games/:module": (params) => <GameList store={store} {...params}/>,
         "/swap-routes": (params) => <SwapRoutes store={store} {...params}/>,
-        "/game/:module/:id": (params) => <GamePlay store={store} {...params}/>,
+        "/games/:module/:id": (params) => <GamePlay store={store} {...params}/>,
         "/login": () => <Login store={store}/>,
     };
 

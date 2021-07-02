@@ -1,8 +1,9 @@
-import React from "react";
+import React, {useState} from "react";
 import GamePlayer from "../GamePlayer";
 import "./seabattle.sass"
 
 export default function SeaBattle(props) {
+    const [coordinates,setCoordinates] =useState();
     const {game, myId} = props;
     const myFleet = game.data.fields && game.data.fields.my;
     const otherFleet = game.data.fields && game.data.fields.other;
@@ -10,6 +11,7 @@ export default function SeaBattle(props) {
 
     function click(cell) {
         if (!myTurn || cell.pointer || cell.hit || cell.miss || cell.near) return;
+        setCoordinates(`${cell.row},${cell.col}`)
         props.doTurn(cell.id)
     }
 
@@ -37,7 +39,7 @@ export default function SeaBattle(props) {
                 {myFleet && myFleet.map((cell, i) => <DrawCell key={i} {...cell}/>)}
                 </div>
             </div>
-            <div className={`p-2 ${game.activePlayer.id===myId ? 'border border-success':''}`}>
+            <div className={`p-2 ${!game.winners.length && game.activePlayer.id===myId ? 'border border-success bg-success':''}`}>
                 <h3>The enemy fleet</h3>
                 <div className="battle-table">
                 {otherFleet && otherFleet.map((cell, i) => <DrawCell key={i} click {...cell}/>)}

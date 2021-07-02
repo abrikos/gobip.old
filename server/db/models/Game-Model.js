@@ -237,12 +237,13 @@ modelSchema.methods.payToWinners = async function () {
         } else {
             p[`${this.type}Balance`] += toWinner;
         }
-
-        p.parent[`${this.type}Balance`] += toParent;
-        await p.parent.save();
-        if(this.type==='real') {
-            const ref = this.model('referral')({type: 'to games balance', amount: toParent, parent: p.parent, referral: p})
-            await ref.save()
+        if(p.parent) {
+            p.parent[`${this.type}Balance`] += toParent;
+            await p.parent.save();
+            if (this.type === 'real') {
+                const ref = this.model('referral')({type: 'to games balance', amount: toParent, parent: p.parent, referral: p})
+                await ref.save()
+            }
         }
         await p.save()
     }
@@ -410,7 +411,7 @@ modelSchema.virtual('reloadTimer')
 
 modelSchema.virtual('link')
     .get(function () {
-        return `/game/${this.module}/${this.id}`;
+        return `/games/${this.module}/${this.id}`;
     });
 
 
