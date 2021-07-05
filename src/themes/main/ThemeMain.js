@@ -28,9 +28,10 @@ export default function ThemeMain(props) {
 
     function checkPath(p){
         const loc = document.location.pathname.match(/\/\w+/)
+
         const loc2 = p.match(/\/\w+/)
-        if(!loc) return false;
-        return loc2 && loc2[0] === loc[0];
+        if(!loc || !loc2) return false;
+        return loc2[0] === loc[0];
     }
 
     function menuItem(l) {

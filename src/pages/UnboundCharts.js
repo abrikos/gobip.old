@@ -9,7 +9,7 @@ export default function UnboundCharts(props) {
     const [coin, setCoin] = useState('BIP')
 
     function init() {
-        props.store.api(`/unbound/daily/${coin}/${days}`).then(setData)
+        props.store.api(`/unbound/daily/${coin}/${days}`,'',true).then(setData)
 
     }
 
