@@ -119,10 +119,10 @@ const obj = {
                     resolve()
                 })
                 .catch(e => {
-                    const message = e.code === '302' ? `MinToBuy ${MinterApi.fromPip(e.data.maximum_value_to_sell)}. Can buy only ${MinterApi.fromPip(e.data.needed_spend_value)}` : e.message
+                    const message = e.code === '302' ? `MinToBuy set to ${MinterApi.fromPip(e.data.maximum_value_to_sell)}. It is possible to buy only ${MinterApi.fromPip(e.data.needed_spend_value)}` : e.message
                     route.lastError = message;
                     route.save()
-                    reject(e);
+                    reject({message});
                 })
         })
 

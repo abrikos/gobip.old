@@ -79,7 +79,7 @@ const obj = {
                         }
                         if (![302, 404, 119].includes(error && error.code)) {
                             console.log('AXIOS ERORR:', e.response.data , url);
-                            reject(e.response.data)
+                            reject(e.response.data.error)
                         }
 
                     }else{

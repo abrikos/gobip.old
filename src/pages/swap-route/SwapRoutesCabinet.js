@@ -65,9 +65,11 @@ export default function SwapRoutesCabinet(props) {
 
     return <div className="swap-bot-edit">
         <ReferralProgram {...props}/>
-        <h1>My swap routes </h1>
-
-        {/*{!wallet.address && <Button onClick={createWallet}>Create wallet for routes</Button>}*/}
+        <h3>My swap routes </h3>
+        <div className="alert alert-success">
+            <InputButtonLoading label="Add new route" name="newRoute" onFinish={loadRoutes} url={`/swap-route/route/add`} buttonText="Add" required
+                                placeholder="Input ids/symbols of coins separated by space or comma" {...props}/>
+        </div>
 
 
         {!wallet.address ? <div>{/*<Button onClick={createWallet}>Create wallet for routes</Button>*/}<Loader/></div> : <div>
@@ -107,10 +109,8 @@ export default function SwapRoutesCabinet(props) {
                 </ButtonLoading>}
             </div>
             <hr/>
-            <h3>Routes </h3>
 
-            <InputButtonLoading label="New route" name="newRoute" onFinish={loadRoutes} url={`/swap-route/route/add`} buttonText="Add" required
-                                placeholder="Input ids/symbols of coins separated by space or comma" {...props}/>
+
 
             <small>Each route must be activated by paying <MinterValue value={props.store.params.swap.routePay} {...props}/></small>
             <table className="table table-striped">

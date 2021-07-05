@@ -129,6 +129,7 @@ module.exports.controller = function (app) {
     })
     app.post('/api/swap-route/list', passport.isLogged, (req, res) => {
         Mongoose.swaproute.find({user: req.session.userId})
+            .sort({createdAt: -1})
             .populate('wallet', ['address', 'balance'])
             .then(r => res.send(r))
             .catch(e => {
