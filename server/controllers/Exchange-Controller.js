@@ -15,12 +15,11 @@ module.exports.controller = function (app) {
         const amount = req.body.amount * 1;
 
         const found = await Mongoose.coin.find({symbol: {$in: [from, to]}})
-        const result = {bip: {value: 0, error: ''}, direct: {value: 0, error: ''}, ...req.body}
+        const result = {bip: {value: 0, error: ''}, direct: {value: 0, error: ''}, error:'', ...req.body}
         if (found.length < 2) {
-            result.bip.error = 'Wrong pair'
-            return res.send(result)
+            return res.status(500).send({message:'Wrong pair'});
         }
-        let error;
+
         try {
             let calc;
             if (from !== 'BIP' && to !== 'BIP') {
@@ -33,15 +32,16 @@ module.exports.controller = function (app) {
             }
             result.bip.value = MinterApi.fromPip(calc.will_pay) * 1
         } catch (e) {
-            error = {message: e.error.data.bancor + '. ' + e.error.data.pool};
+            result.error = e.data.bancor + '. ' + e.data.pool + '. ';
         }
         try {
             const direct = await MinterApi.estimateSwap(from, to, MinterApi.toPip(amount), 'buy', 'optimal')
             result.direct.value = MinterApi.fromPip(direct.will_pay) * 1;
         } catch (e) {
-            error = {message: e.error.data.bancor + '. ' + e.error.data.pool}
+            result.error += e.data.bancor + '. ' + e.data.pool ;
         }
-        if(error) return res.status(500).send(error);
+        //if(errors.length) return res.status(500).send({message:errors.join('; ')});
+        console.log(req.body)
         res.send(result);
     });
 }

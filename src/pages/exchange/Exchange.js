@@ -2,51 +2,31 @@ import {useEffect, useRef, useState} from "react";
 import Loader from "../../components/Loader";
 import {Button} from "react-bootstrap";
 import {navigate} from "hookrouter";
+import moment from "moment"
 
 export default function Exchange(props) {
     const [result, setResult] = useState();
-    const [error, setError] = useState({});
     const [loading, setLoading] = useState(false)
-    const [coins, setCoins] = useState([])
-    const [found, setFound] = useState({from: [], to: []})
     const [chosen, setChosen] = useState({from: '', to: ''})
     const nameRef = useRef()
     const {from, to, amount} = props;
 
-    function getCoins(e, type) {
-        choose(type, {symbol: e.target.value})
-        if (e.target.value.length < 2) return;
-        const f = {...found};
-        f[type] = coins.filter(c => c.symbol.indexOf(e.target.value.toUpperCase()) === 0);
-        setFound(f);
-
-    }
-
     useEffect(() => {
         init()
-        props.store.api('/exchange/coins').then(setCoins).catch(setError)
-    }, [from,to,amount])
+        //props.store.api('/exchange/coins').then(setCoins).catch(setError)
+    }, [from, to, amount])
 
-    function init() {
+    function init(from, to, amount) {
+        setLoading(true)
         props.store.api('/exchange/calc', {from, to, amount})
             .then(r => {
-                setError({})
                 setResult(r);
                 setLoading(false);
-                setFound({from: [], to: []})
             })
             .catch(e => {
-                setError(e)
                 setResult(null);
                 setLoading(false);
             })
-    }
-
-    function Coin(coin) {
-        return <span className="pointer coin" onClick={coin.onClick}>
-                    <img src={props.store.network.image + coin.symbol}/>
-                    <span>{coin.symbol}</span>
-                </span>
     }
 
     function choose(type, coin) {
@@ -55,21 +35,11 @@ export default function Exchange(props) {
         setChosen(c);
     }
 
-    function Search(type) {
-        return <div>
-            <input className="form-control" onChange={e => getCoins(e, type)} value={chosen[type]} name={type}/>
-            <div className="coin-list">
-                {found[type].map(f => <Coin key={f.id} {...f} onClick={() => {
-                    setFound({from: [], to: []})
-                    choose(type, f)
-                }}/>)}
-            </div>
-        </div>
-    }
 
     function submit(e) {
         e.preventDefault();
         const form = props.store.formToObject(e.target);
+        init(form.from, form.to, form.amount);
         return navigate(`/exchange/${form.from}/${form.to}/${form.amount}`)
     }
 
@@ -80,7 +50,7 @@ export default function Exchange(props) {
 
     return <div className="exchange">
         <h1>Exchange rates</h1>
-        {!coins.length ? <Loader/> : <div>
+        <div>
             <form onSubmit={submit} ref={nameRef}>
                 <table className="table">
                     <thead>
@@ -117,7 +87,7 @@ export default function Exchange(props) {
                     </tbody>
                 </table>}
             </form>
-        </div>}
-        {error.message && <div className="alert alert-danger">{error.message}</div>}
+        </div>
+        {result && result.error && <div className="alert alert-danger">{result.error}</div>}
     </div>
 }
