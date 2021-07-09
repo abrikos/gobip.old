@@ -103,7 +103,7 @@ export default function ThemeMain(props) {
 
         </div>
         <footer className="bg-dark">
-            <div className="footer__container u-container u-container--large"><img src="/logo.svg" alt="Minter" className="footer__logo"/>
+            <div className="footer__container u-container u-container--large"><img src="https://explorer.minter.network/img/minter-logo-circle.svg" alt="Minter" className="footer__logo"/>
                 <div className="footer__menu">
                     <div className="footer__menu-item"><a href="https://www.minter.network/" target="_blank" rel="nofollow noopener" className="text-light">Intro</a></div>
                     <div className="footer__menu-item"><a href="https://about.minter.network/" target="_blank" rel="nofollow noopener" className="text-light">Network</a></div>
