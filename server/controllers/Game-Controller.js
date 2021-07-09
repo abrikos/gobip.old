@@ -33,8 +33,8 @@ module.exports.controller = function (app) {
     const {USER1, USER2, USER3} = process.env;
     const test = false;
     //doTestRoPaSci();
-    //test && doTestPoker();
-    test && Test2();
+    test && doTestPoker();
+    //test && Test2();
 
     async function Test2(){
         async function doBet(game, turn, userId) {

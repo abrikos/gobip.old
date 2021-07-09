@@ -41,7 +41,6 @@ export default function Application() {
                         if(process.env.REACT_APP_LOG_ENABLE * 1 && !noLogs) console.timeEnd(label)
                     })
                     .catch(err => {
-                        console.log(err.response)
                         const error = {
                             path,
                             error: err.response && err.response.status,

@@ -5,7 +5,7 @@ export default function GameBetForm(props) {
     const {userInfo, game, callBet} = props;
 
     const [value, setValue] = useState(callBet || game.minBet)
-    const balance = userInfo[`${game.type}Balance`]
+    const balance = userInfo && userInfo[`${game.type}Balance`]
 
     function doBet(e) {
         e.preventDefault()

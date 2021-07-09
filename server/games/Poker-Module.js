@@ -152,9 +152,6 @@ const PokerModule = {
         }
         if (bet < 0) return this.doFold(game, userId);
 
-        const data = game.data;
-
-
         const maxBet = game.maxBet;
         if (bet >= 0) {
             //if (!beforeBet) this._insertBet(game, req, 0);
@@ -165,6 +162,7 @@ const PokerModule = {
         }
         if (this._isCall(game)) {
             this._newRound(game)
+
         } else if (game.round === 0 && game.activePlayerIdx === 1 && game.players.length === 2) {
             console.log('small blind do bet')
             //game.activePlayerIdx = 0; // will be added +1 in model method
@@ -176,7 +174,6 @@ const PokerModule = {
             game.activePlayerIdx = 0
         }
 
-        game.data = data;
         return {}
     },
 
@@ -215,6 +212,7 @@ const PokerModule = {
         } else {
             newCards = [1, 2, 3, 4, 5, 6].sort(() => Math.random() - 0.5).slice(0, amountOfCards);
         }
+
         data.desk = data.desk.concat(newCards)
         game.data = data;
     },
