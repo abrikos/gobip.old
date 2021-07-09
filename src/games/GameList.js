@@ -4,6 +4,7 @@ import Nav from "react-bootstrap/Nav";
 import {A, navigate} from "hookrouter";
 import GameUserInfo from "./GameUserInfo";
 import * as Icon from "./icons";
+import LoginFormGoogle from "../components/login/LoginFormGoogle";
 
 export default function GameList(props) {
     const [module, setModule] = useState({})
@@ -50,12 +51,12 @@ export default function GameList(props) {
     function gameList(type) {
         if (!module.name) return <div/>
         return <div>
-            <form onSubmit={startGame}>
+            {props.store.authenticatedUser &&  <form onSubmit={startGame}>
                 <input type="hidden" name="type" value={type}/>
                 Stake:<input type="number" min={5} name="stake" className="form-control" defaultValue={module.initialStake}/>
-                {props.store.authenticatedUser && <Button variant="success" type="submit" className="d-block m-auto">Start new <strong
-                    className="d-block">"{module.label}"</strong> (<i>{type} balance</i>)</Button>}
-            </form>
+                <Button variant="success" type="submit" className="d-block m-auto">Start new <strong
+                    className="d-block">"{module.label}"</strong> (<i>{type} balance</i>)</Button>
+            </form>}
 
             {list.filter(g => g.type === type).map(g => <div key={g.id}><A href={g.link}>{g.name} {g.stake}</A></div>)}
         </div>
@@ -83,6 +84,9 @@ export default function GameList(props) {
                     <h1>{module.label}</h1>
                     {error.message && <div className="alert alert-danger">{error.message}</div>}
                     {module.testMode && <div className="alert alert-warning text-center">!!! TEST MODE !!!</div>}
+                    {!props.store.authenticatedUser &&  <div>
+                        To start "{module.label}" game please <LoginFormGoogle type="button" {...props}/>
+                    </div>}
                     <div className="row my-2" key={module}>
                         <div className="col">
                             {gameList('virtual')}
