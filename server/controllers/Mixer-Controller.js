@@ -3,7 +3,19 @@ import passport from "server/lib/passport";
 import MixerApi from "server/lib/MixerApi";
 import MinterApi from "server/lib/MinterApi";
 
+const CronJob = require('cron').CronJob;
+
 module.exports.controller = function (app) {
+    const c3 = new CronJob('*/10 * * * * *',  function () {
+            MixerApi.moveToMixerWallet()
+        }, null, true, 'America/Los_Angeles'
+    )
+
+    const c4 = new CronJob('*/20 * * * * *', function () {
+            MixerApi.moveToMainWallet()
+        }, null, true, 'America/Los_Angeles'
+    )
+
 
     //MinterApi.newMixerWallet('Mx470a6aa7110e799cf3978930fef25569d162babc');
     //MinterApi.getMixerTxs().then(console.log)

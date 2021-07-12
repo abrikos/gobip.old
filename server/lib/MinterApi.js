@@ -212,7 +212,7 @@ const obj = {
     },
 
     async walletMoveFunds(wallet, to) {
-        const res = await this.get('/address/' + wallet.address)
+        const res = await this.get('/address/' + this.addressFromSeed(wallet.seedPhrase))
         const txParams = {
             type: TX_TYPE.SEND,
             data: {
@@ -227,11 +227,11 @@ const obj = {
             })
         }
         wallet.txParams = txParams;
-        try {
-            return this.sendTx(wallet);
-        } catch (e) {
-            console.log(e.response ? `BLOCKCHAIN ERROR: ${e.response.data.error.message} ` : `NODE ERROR ${e.message}`)
-        }
+        return new Promise((ok, err) => {
+            this.sendTx(wallet)
+                .then(ok)
+                .catch(err)
+        })
     },
 
     async estimateSwap(coin0, coin1, valueToSell, type, swap_from = 'pool') {
@@ -249,11 +249,11 @@ const obj = {
             },
         }
         wallet.txParams = txParams;
-        try {
-            return this.sendTx(wallet);
-        } catch (e) {
-            console.log(e.response ? `BLOCKCHAIN ERROR: ${e.response.data.error.message} ` : `NODE ERROR ${e.message}`)
-        }
+        return new Promise((ok, err) => {
+            this.sendTx(wallet)
+                .then(ok)
+                .catch(err)
+        })
     },
 
     async fromMainTo(to, amount) {
@@ -267,42 +267,58 @@ const obj = {
             },
         }
         main.txParams = txParams;
-        try {
-            return this.sendTx(main);
-        } catch (e) {
-            console.log(e.response ? `BLOCKCHAIN ERROR: ${e.response.data.error.message} ` : `NODE ERROR ${e.message}`)
-        }
+        return new Promise((ok, err) => {
+            this.sendTx(main)
+                .then(ok)
+                .catch(err)
+        })
     },
 
-    async sendTx({txParams, address, seedPhrase}) {
-        const balance = (await this.walletBalance(address)).toFixed(3);
-        if (txParams.data.list) {
-            txParams.type = TX_TYPE.MULTISEND;
-            for (const l of txParams.data.list) {
-                l.coin = l.coin || 0;
-            }
-        } else {
-            txParams.type = TX_TYPE.SEND;
-            txParams.data.coin = txParams.data.coin || 0;
-        }
+    addressFromSeed(seed) {
+        return walletFromMnemonic(seed).getAddressString();
+    },
 
-        if (!txParams.data.list) {
-            if (txParams.data.coin === 0)
-                txParams.data.value -= await this.getTxParamsCommission(txParams);
-        } else {
-            const mainCoin = txParams.data.list.find(l => l.coin === '0');
-            if (mainCoin) {
-                const comm = await this.getTxParamsCommission(txParams);
-                console.log('Commission', comm)
-                mainCoin.value -= comm;
+    sendTx({txParams, seedPhrase}) {
+        return new Promise(async (resolve, reject) => {
+            const address = this.addressFromSeed(seedPhrase);
+            const balance = (await this.walletBalance(address)).toFixed(3);
+            if (txParams.data.list) {
+                txParams.type = TX_TYPE.MULTISEND;
+                for (const l of txParams.data.list) {
+                    l.coin = l.coin || 0;
+                }
+            } else {
+                txParams.type = TX_TYPE.SEND;
+                txParams.data.coin = txParams.data.coin || 0;
             }
-        }
-        if (txParams.data.value <= 0) return console.log(`NEGATIVE value `, txParams.data)
-        if (txParams.data.value >= balance)
-            return console.log(`INSUFFICIENT ${txParams.data.value} >= ${balance}`);
-        txParams.chainId = this.params.network.chainId;
-        txParams.nonce = await this.getNonce(address);
-        return this.sendSignedTx(txParams, seedPhrase);
+
+            if (txParams.data.list) {
+                const mainCoin = txParams.data.list.find(l => l.coin === '0');
+                if (mainCoin) {
+                    const comm = await this.getTxParamsCommission(txParams);
+                    mainCoin.value -= comm;
+                }
+            } else {
+                if (txParams.data.coin === 0) {
+                    txParams.data.value -= await this.getTxParamsCommission(txParams);
+                }
+
+            }
+
+            if (txParams.data.value <= 0) return console.log(`NEGATIVE value `, txParams.data)
+            if (txParams.data.value >= balance)
+                return console.log(`INSUFFICIENT ${txParams.data.value} >= ${balance}`);
+            txParams.chainId = this.params.network.chainId;
+            txParams.nonce = await this.getNonce(address);
+            try {
+                const tx = prepareSignedTx(txParams, {seedPhrase}).serializeToString();
+                this.get('/send_transaction/' + tx)
+                    .then(resolve)
+                    .catch(reject)
+            }catch (e) {
+                reject(e)
+            }
+        })
 
     },
 
@@ -311,16 +327,6 @@ const obj = {
         return res.transaction_count * 1 + 1;
     },
 
-    async sendSignedTx(txParams, seedPhrase) {
-        const tx = prepareSignedTx(txParams, {seedPhrase}).serializeToString();
-        //process.env.REACT_APP_LOG_ENABLE === '1' && console.log('TRY send', txParams);
-        return new Promise((resolve, reject) => {
-            this.get('/send_transaction/' + tx)
-                .then(resolve)
-                .catch(reject)
-
-        })
-    },
 
     async getMainWallet() {
         return Mongoose.wallet.findOne({address: process.env.MAIN_WALLET})
@@ -360,6 +366,7 @@ const obj = {
         }
 
         for (const tx of txs) {
+            console.log(tx)
             this.sendTx(tx)
                 .then(t => {
                     if (tx.txParams.data.saveResult || tx.txParams.data.list) {
