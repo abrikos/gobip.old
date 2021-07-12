@@ -87,7 +87,7 @@ export default function ThemeMain(props) {
                     </div>
 
                     <div className="d-sm-block d-none">
-                        <div className="text-center" dangerouslySetInnerHTML={{__html: ym()}}/>
+                        {/*<div className="text-center" dangerouslySetInnerHTML={{__html: ym()}}/>*/}
                     </div>
 
 
