@@ -28,16 +28,25 @@ const obj = {
             to: 'Mx111ac6c88f573a7703fe7f2c3d8d342818e8fb97',
             balance: value
         }, {value})
-        const commission = await MinterApi.getCommission();
+
+        const tx = {
+            from: 'Mxe43ac6c88f573a7703fe7f2c3d8d342818e8fb97',
+            to: 'Mx111ac6c88f573a7703fe7f2c3d8d342818e8fb97',
+        };
+
+        const commission = await MinterApi.getTxParamsCommission(tx);
+        //console.log('zzzzzzzzzzz', txParams.map(t => t.value).reduce((a, b) => a + b, 0), commission)
+        const total = await this.totalAmount();
         const data = {
             balance: txParams.map(t => t.value).reduce((a, b) => a + b, 0) - commission * txParams.length,
             count: txParams.length,
             value: value * 1,
-            commission
+            commission,
+            total
         }
-        const amount = await this.totalAmount();
+        console.log(total , data.value , MinterApi.params.mixerFee , data.commission , data.count)
         return new Promise((resolve, reject) => {
-            if (amount < data.value - data.profit - data.commission * data.count) reject({message: 'Wrong amount'})
+            if (total < data.value - MinterApi.params.mixerFee - data.commission * data.count) reject({message: `Your sum greater than maximum amount ${total} BIP`})
             resolve(data)
         });
 
@@ -83,21 +92,21 @@ const obj = {
 
     async totalAmount() {
         const res = await Mongoose.wallet.find({balanceReal: {$gt: 0}, type: 'mixer'});
-        const main = await MinterApi.walletBalance(process.env.MAIN_WALLET);
-        return res.reduce((n, {balance}) => n + balance, 0) + main;
+        //const main = await MinterApi.walletBalance(process.env.MAIN_WALLET);
+        return res.reduce((n, {balance}) => n + balance, 0);
     },
 
 
     async getProfits() {
         const refunds = []
-        const profitWallets = await Mongoose.wallet.find({type: 'mixer', user: {$ne: null}}).populate({path:'user', populate:'parent'});
+        const profitWallets = await Mongoose.wallet.find({type: 'mixer', user: {$ne: null}}).populate({path: 'user', populate: 'parent'});
         const walletsTotal = profitWallets.map(p => p.balance).reduce((a, b) => a + b, 0);
         for (const p of profitWallets) {
             const amount = (MinterApi.params.mixerFee - 1) * p.balance / walletsTotal;
-            const toUser = amount * (1 - process.env.REFERRAL_PERCENT/100);
+            const toUser = amount * (1 - process.env.REFERRAL_PERCENT / 100);
             const toParent = amount - toUser
             const data = {to: p.user.address, value: toUser}
-            if(p.user.parent) {
+            if (p.user.parent) {
                 const dataParent = {to: p.user.parent.address, value: toParent};
                 refunds.push(dataParent)
                 Mongoose.referral.create({type: 'mixer', amount: toParent, parent: p.user.parent, referral: p.user});
@@ -133,6 +142,7 @@ const obj = {
         const singleSends = [];
         for (const from of wallets.res) {
             let value = (transaction.value - MinterApi.params.mixerFee) * from.balance / wallets.sum;
+            console.log(value)
             if (value > from.balance) value = from.balance;
             console.log(from.balance, from.address)
             //if wallet.to - wallet created for mixing

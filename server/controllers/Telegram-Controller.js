@@ -1,5 +1,3 @@
-import MinterApi from "../lib/MinterApi";
-import MixerApi from "../lib/MixerApi";
 import BotApi from "../lib/BotApi";
 
 const TelegramBot = require('node-telegram-bot-api');

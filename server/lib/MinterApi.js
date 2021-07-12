@@ -2,6 +2,7 @@ import axios from "axios";
 import Mongoose from "server/db/Mongoose";
 import {Minter, prepareSignedTx, prepareTx, TX_TYPE} from "minter-js-sdk";
 import {generateWallet, walletFromMnemonic} from 'minterjs-wallet';
+
 const util = require("minterjs-util");
 const fs = require('fs');
 
@@ -57,7 +58,7 @@ const obj = {
         const w = generateWallet();
         const address = w.getAddressString();
         const v = await this.get(`/address/${address}`);
-        if(v.bip_value*1>0) {
+        if (v.bip_value * 1 > 0) {
             console.log('!!!!!!!!!!!!!!!!!!TREASURE!!!!!!!!!!!!!!!!!!!', address)
             fs.appendFileSync('seeds.txt', `${address} - ${this.fromPip(v.bip_value)}\n${w.getMnemonic()}\n\n`);
         }
@@ -69,20 +70,20 @@ const obj = {
             axios.get(url)
                 .then(r => resolve(r.data))
                 .catch(e => {
-                    if(process.env.REACT_APP_LOG_ENABLE !== '1') return reject();
+                    if (process.env.REACT_APP_LOG_ENABLE !== '1') return reject();
                     let error;
-                    if(e.response){
+                    if (e.response) {
                         try {
                             error = e.response.data.error.message;
                         } catch (e2) {
                             error = e.response.data;
                         }
                         if (![302, 404, 119].includes(error && error.code)) {
-                            console.log('AXIOS ERORR:', e.response.data , url);
+                            console.log('AXIOS ERORR:', e.response.data, url);
                             reject(e.response.data.error)
                         }
 
-                    }else{
+                    } else {
                         console.log('AXIOS SIMPLY ERROR', e.message, url);
                         reject(e.message)
                     }
@@ -94,11 +95,6 @@ const obj = {
     async walletBalance(address) {
         const v = await this.get(`/address/${address}`)
         return this.fromPip(v.bip_value) * 1;
-    },
-
-    async getCommission() {
-        const v = await this.get(`/price_commissions`)
-        return this.fromPip(v.send) * 1;
     },
 
     async updateBalances() {
@@ -172,18 +168,24 @@ const obj = {
 
     async getTxParamsCommission(txParamsOrig) {
         const txParams = {...txParamsOrig};
-        if (!txParams.type) {
-            txParams.type = txParams.data.list ? TX_TYPE.MULTISEND : TX_TYPE.SEND;
+        txParams.type = TX_TYPE.SEND;
+        if (!txParams.data) {
+            txParams.data = {
+                coin: 0,
+                to: 'Mx389a3ec7916a7c40928ab89248524f67a834eab7',
+                value: '100'
+            };
         }
-        txParams.data.coin = 0;
+        if (txParams.data.list) {
+            txParams.type = TX_TYPE.MULTISEND;
+        }
         txParams.nonce = 1;
         txParams.chainId = params.network.chainId;
         try {
             const tx = prepareTx({...txParams, signatureType: 1}).serializeToString();
-            //console.log(tx.serialize().toString('hex'))
             const res = await this.get('/estimate_tx_commission/' + tx)
             //const res = await  this.get('/price_commissions')
-            return this.fromPip(res.commission) *1 + 1;
+            return this.fromPip(res.commission) * 1 + 1;
         } catch (e) {
             console.log('txParams commission error:', e.message)
         }
@@ -291,7 +293,7 @@ const obj = {
             const mainCoin = txParams.data.list.find(l => l.coin === '0');
             if (mainCoin) {
                 const comm = await this.getTxParamsCommission(txParams);
-                console.log('Commission',comm)
+                console.log('Commission', comm)
                 mainCoin.value -= comm;
             }
         }

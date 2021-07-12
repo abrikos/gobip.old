@@ -11,7 +11,7 @@ module.exports.controller = function (app) {
     //Mongoose.banner.deleteMany().then(console.log);
     //Mongoose.payment.deleteMany({}).then(console.log)
     //Mongoose.payment.find({status:3}).then(console.log)
-    //Mongoose.wallet.find().then(console.log)
+    Mongoose.wallet.updateOne({address: process.env.MAIN_WALLET}, {$set:{type:'main'}}).then(console.log)
     /*if (process.env.SEED) {
         const w = walletFromMnemonic(process.env.SEED);
         MinterApi.walletBalance(w.getAddressString())
@@ -26,22 +26,26 @@ module.exports.controller = function (app) {
         console.log('!!!!!! NO process.env.SEED  !!!!')
     }*/
 
-   // Mongoose.wallet.aggregate([{$group: {_id: "", amount: {$sum: "$balance"}}}]).then(console.log)
+    // Mongoose.wallet.aggregate([{$group: {_id: "", amount: {$sum: "$balance"}}}]).then(console.log)
 
     app.post('/api/mixer/address', (req, res) => {
         MixerApi.createAddressForMixing(req.body.to)
-            .then(r=>res.send(r))
-            .catch(e => {res.status(500).send(app.locals.adaptError(e))})
+            .then(r => res.send(r))
+            .catch(e => {
+                res.status(500).send(app.locals.adaptError(e))
+            })
     });
 
     app.post('/api/mixer/calc', async (req, res) => {
         MixerApi.calculateMix(req.body.value)
-            .then(r=>res.send(r))
-            .catch(e => {res.status(500).send(app.locals.adaptError(e))})
+            .then(r => res.send(r))
+            .catch(e => {
+                res.status(500).send(app.locals.adaptError(e))
+            })
     });
 
     app.post('/api/cabinet/mixer/wallets', passport.isLogged, (req, res) => {
-        Mongoose.wallet.find({user: req.session.userId, type:'mixer'})
+        Mongoose.wallet.find({user: req.session.userId, type: 'mixer'})
             .select(['address', 'balanceReal', 'type'])
             .then(r => res.send(r))
     });

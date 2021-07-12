@@ -10,14 +10,22 @@ const BotApi = {
         return messages;
     },
 
-    async doCalculateSum(text) {
-        const calc = await MixerApi.calculateMix(text);
+    doCalculateSum(text) {
+        return new Promise((resolve , reject)=>{
+            MixerApi.calculateMix(text)
+                .then(calc=>{
+                    const messages = []
+                    messages.push(`Maximum amount for mix *${calc.total}* BIP`)
+                    messages.push(`If you send ${calc.value} BIP will be received: *${calc.balance.toFixed(2)} BIP*`)
+                    messages.push(`     mixer commission: ${MinterApi.params.mixerFee} BIP,`)
+                    messages.push(`count of transactions: ${calc.count}`)
+                    resolve(messages)
+                })
+                .catch(e=>{
+                    resolve([e.message])
+                });
+        })
 
-        const messages = []
-        messages.push(`If you send ${calc.value} BIP will be received: *${calc.balance.toFixed(2)} BIP*`)
-        messages.push(`     mixer commission: ${MinterApi.params.mixerFee} BIP,`)
-        messages.push(`count of transactions: ${calc.count}`)
-        return messages
     },
 
     doHelp() {
