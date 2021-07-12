@@ -23,7 +23,7 @@ export default function MixerAddressForm(props) {
                 <li>Press "Go"</li>
                 <li>Copy the received address and send funds to it <small>(Pay attention to the indicated
                     limits)</small></li>
-                <li>After a while, funds <small>(minus all commissions)</small> will be received from several wallets to
+                <li>After a while, funds <small>(minus all commissions)</small> will be sent from several wallets to
                     the address you specified
                 </li>
             </ol>
