@@ -45,7 +45,7 @@ modelSchema.statics.deleteForgottenGames = async function () {
     const games = await this.find({updatedAt: {$lt: moment().utc().add(-6, 'hours').format('YYYY-MM-DD hh:mm')}})
         .populate('players', ['name', 'photo', 'realBalance', 'virtualBalance']);
     for (const game of games) {
-        console.log('Delete game', game.name)
+        console.log('Delete game', game.name, game.updatedAt())
         for (const p of game.players) {
             await game.doModelLeave(p.id, true)
                 .catch(console.log)
