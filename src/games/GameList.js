@@ -57,7 +57,7 @@ export default function GameList(props) {
                 <Button variant="success" type="submit" className="d-block m-auto">Start new <strong
                     className="d-block">"{module.label}"</strong> (<i>{type} balance</i>)</Button>
             </form>}
-            <h4>Active {type} games</h4>
+            {list.length && <h4>Active {type} games</h4>}
             {list.filter(g => g.type === type).map(g => <div key={g.id}><A href={g.link}>{g.name} (Stake: {g.stake})</A></div>)}
         </div>
     }
